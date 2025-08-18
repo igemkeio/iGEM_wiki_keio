@@ -1,3 +1,4 @@
+<!-- filepath: /home/jiku/dev/repos/example/wiki/pages_md/home.md -->
 {% extends "layout.html" %}
 
 {% block title %}Home{% endblock %}
@@ -7,7 +8,7 @@
 
 <div class="row">
   <div class="col">
-    <h2>Jikuhara Keiichi</h2>
+    <h2>Essential First Steps</h2>
     <hr />
     <p>Familiarize yourself with the official iGEM competition rules, policies, and judging criteria:</p>
     <ul>
