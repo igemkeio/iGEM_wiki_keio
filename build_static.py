@@ -20,10 +20,29 @@ app.config['FREEZER_IGNORE_MIMETYPE_WARNINGS'] = True
 
 freezer = Freezer(app)
 
+@freezer.register_generator
+def url_generator():
+    """Generate URLs for all pages"""
+    # Home page
+    yield 'home', {}
+    
+    # All other pages
+    pages = [
+        'attributions', 'contribution', 'description', 'education',
+        'engineering', 'entrepreneurship', 'experiments', 'hardware',
+        'human-practices', 'inclusivity', 'measurement', 'members',
+        'model', 'notebook', 'plant', 'results', 'safety-and-security',
+        'software', 'sustainability'
+    ]
+    
+    for page in pages:
+        yield 'pages', {'page': page}
+
 @app.route('/')
 def home():
     return render_template('pages/home.html')
 
+@app.route('/<page>.html')
 @app.route('/<page>')
 def pages(page):
     return render_template(str(Path('pages')) + '/' + page.lower() + '.html')
