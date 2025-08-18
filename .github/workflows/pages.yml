@@ -1,15 +1,61 @@
-image: python:3.6
+name: Deploy Frozen-Flask site to GitHub Pages
 
-pages:
-  stage: build
-  script:
-    - pip install --no-cache-dir -r dependencies.txt
-    - FLASK_APP=app.py flask freeze
-  artifacts:
-    paths:
-      - public
-  rules:
-    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
-      when: never # No runners will run on branches other than main
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: always
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+      # GitLabの "image: python:3.6" 相当だが、3.6はEOL。基本は3.11を使う。
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          # 初回のキャッシュ警告を避けたければ下2行はコメントアウトのままでOK
+          # cache: 'pip'
+          # cache-dependency-path: 'dependencies.txt'
+
+      - name: Install dependencies
+        run: |
+          pip install --no-cache-dir -r dependencies.txt
+
+      - name: Build static site (flask freeze)
+        env:
+          FLASK_APP: app.py
+        run: |
+          python -m flask freeze
+          test -f public/index.html
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
