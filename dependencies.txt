@@ -1,1 +1,2 @@
-frozen-flask
+Flask>=2.2
+Frozen-Flask>=0.18
