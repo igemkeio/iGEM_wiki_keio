@@ -1,3 +1,7 @@
 conflict
 ---
+<<<<<<< HEAD
 AAA
+=======
+BBB
+>>>>>>> conflict
