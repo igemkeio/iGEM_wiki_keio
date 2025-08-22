@@ -10,25 +10,39 @@ if __name__ == '__main__':
         shutil.rmtree('public')
     if os.path.exists('docs'):
         shutil.rmtree('docs')
-    
+
     print("Building static site...")
-    
+
     with app.app_context():
         try:
             # Configure app for static generation
             app.config['SERVER_NAME'] = None
             app.config['APPLICATION_ROOT'] = '/'
-            
+
+            # Manually add Japanese page URLs to ensure they're frozen
+            japanese_pages = [
+                'description', 'members', 'attributions', 'engineering', 'results', 'contribution',
+                'experiments', 'notebook', 'measurement', 'plant', 'safety-and-security',
+                'model', 'software', 'hardware', 'entrepreneurship', 'human-practices',
+                'education', 'inclusivity', 'sustainability', 'home'
+            ]
+
+            # Add Japanese URLs to freezer
+            @freezer.register_generator
+            def japanese_page_urls():
+                for page in japanese_pages:
+                    yield 'pages_ja', {'page': page}
+
             freezer.freeze()
             print("✅ Static site generated in 'public' directory")
-            
+
             # Rename files to add .html extension (except index.html and static files)
             print("Adding .html extensions to files...")
             for root, dirs, files in os.walk('public'):
                 # Skip static directory
                 if 'static' in root:
                     continue
-                    
+
                 for file in files:
                     if file != 'index.html' and not file.endswith('.html') and not file.endswith('.css') and not file.endswith('.js') and not file.endswith('.png') and not file.endswith('.jpg') and not file.endswith('.gif'):
                         old_path = os.path.join(root, file)
@@ -38,11 +52,11 @@ if __name__ == '__main__':
                             print(f"  Renamed {file} → {file}.html")
                         except OSError as e:
                             print(f"  Warning: Could not rename {file}: {e}")
-            
+
             # Copy to docs
             shutil.copytree('public', 'docs')
             print("✅ Copied to 'docs' directory for GitHub Pages")
-            
+
             # List generated files
             print("\nGenerated files:")
             for root, dirs, files in os.walk('docs'):
@@ -52,7 +66,7 @@ if __name__ == '__main__':
                 subindent = ' ' * 2 * (level + 1)
                 for file in files:
                     print(f"{subindent}{file}")
-                    
+
         except Exception as e:
             print(f"❌ Error: {e}")
             import traceback
