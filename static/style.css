@@ -10,6 +10,59 @@ body { padding-top: 56px; }
   color: #ffffff !important;
   font-weight: 700;
 }
+/* ==== Navbar hover underline ("nyoiiin") ==== */
+:root{
+  /* アクセント色（VRoidの雰囲気なら白でOK。任意で差し替え） */
+  --nav-underline: #ffffff;
+  --nav-underline-thickness: 3px;         /* 線の太さ */
+  --nav-underline-offset: 6px;            /* 文字の下からの距離 */
+  --nav-underline-ease: cubic-bezier(.2,.8,.2,1); /* 伸びる感じ */
+  --nav-underline-duration: .28s;
+}
+
+/* メニュー文字：白＋太字（先に指定） */
+.navbar .nav-link{
+  color: #fff !important;
+  font-weight: 700;
+  position: relative;                      /* 下線の基準にする */
+}
+
+/* 下線の初期状態：幅ゼロ（左→右へ伸びる） */
+.navbar .nav-link::after{
+  content: "";
+  position: absolute;
+  left: .5rem;                             /* 余白はお好みで */
+  right: .5rem;
+  bottom: calc(0px - var(--nav-underline-offset));
+  height: var(--nav-underline-thickness);
+  background: var(--nav-underline);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--nav-underline-duration) var(--nav-underline-ease);
+  border-radius: 999px;                    /* 太線を丸く */
+  pointer-events: none;                    /* クリック干渉防止 */
+}
+
+/* ホバー/フォーカス/アクティブ時に伸ばす */
+.navbar .nav-link:hover::after,
+.navbar .nav-link:focus::after,
+.navbar .nav-link.active::after,
+.navbar .nav-link.show::after{
+  transform: scaleX(1);
+}
+
+/* モーション弱め設定のユーザーにはアニメ短縮/無効化（お好みで） */
+@media (prefers-reduced-motion: reduce){
+  .navbar .nav-link::after{
+    transition-duration: .01ms;
+  }
+}
+
+/* スマホ（折りたたみ時）は下線を無効化（行が折り返すと見た目が崩れるため） */
+@media (max-width: 991.98px){
+  .navbar .nav-link::after{ display: none; }
+}
+
 
 /* CALLOUT */
 .bd-callout { padding:1.25rem; margin-top:1.25rem; margin-bottom:1.25rem; border:1px solid #e9ecef; border-left-width:.25rem; border-radius:.25rem }
