@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-	<div class="container">
+	<div class="container-fluid">
 
 		<!-- TEAM NAME -->
 		<a class="navbar-brand" href="#">iGEM Keio</a>
@@ -15,7 +15,8 @@
 
 				<!-- HOME -->
 				<li class="nav-item">
-					<a class="nav-link" href="{{ url_for('home') }}">Home</a>
+					<a class="nav-link"
+						href="{{ '/ja/' if request.path.startswith('/ja') else url_for('home') }}">Home</a>
 				</li>
 
 				<!-- TEAM -->
@@ -25,8 +26,11 @@
 						Team
 					</a>
 					<ul class="dropdown-menu" aria-labelledby="navbar-team">
-						<li><a class="dropdown-item" href="{{ url_for('pages', page='members') }}">Members</a></li>
-						<li><a class="dropdown-item" href="{{ url_for('pages', page='attributions') }}">Attributions</a>
+						<li><a class="dropdown-item"
+								href="{{ '/ja/members' if request.path.startswith('/ja') else url_for('pages', page='members') }}">Members</a>
+						</li>
+						<li><a class="dropdown-item"
+								href="{{ '/ja/attributions' if request.path.startswith('/ja') else url_for('pages', page='attributions') }}">Attributions</a>
 						</li>
 					</ul>
 				</li>
@@ -38,12 +42,17 @@
 						Project
 					</a>
 					<ul class="dropdown-menu" aria-labelledby="navbar-project">
-						<li><a class="dropdown-item" href="{{ url_for('pages', page='description') }}">Description</a>
+						<li><a class="dropdown-item"
+								href="{{ '/ja/description' if request.path.startswith('/ja') else url_for('pages', page='description') }}">Description</a>
 						</li>
-						<li><a class="dropdown-item" href="{{ url_for('pages', page='engineering') }}">Engineering</a>
+						<li><a class="dropdown-item"
+								href="{{ '/ja/engineering' if request.path.startswith('/ja') else url_for('pages', page='engineering') }}">Engineering</a>
 						</li>
-						<li><a class="dropdown-item" href="{{ url_for('pages', page='results') }}">Results</a></li>
-						<li><a class="dropdown-item" href="{{ url_for('pages', page='contribution') }}">Contribution</a>
+						<li><a class="dropdown-item"
+								href="{{ '/ja/results' if request.path.startswith('/ja') else url_for('pages', page='results') }}">Results</a>
+						</li>
+						<li><a class="dropdown-item"
+								href="{{ '/ja/contribution' if request.path.startswith('/ja') else url_for('pages', page='contribution') }}">Contribution</a>
 						</li>
 					</ul>
 				</li>
@@ -55,13 +64,20 @@
 						Wet Lab
 					</a>
 					<ul class="dropdown-menu" aria-labelledby="navbar-wet-lab">
-						<li><a class="dropdown-item" href="{{ url_for('pages', page='experiments') }}">Experiments</a>
+						<li><a class="dropdown-item"
+								href="{{ '/ja/experiments' if request.path.startswith('/ja') else url_for('pages', page='experiments') }}">Experiments</a>
 						</li>
-						<li><a class="dropdown-item" href="{{ url_for('pages', page='notebook') }}">Notebook</a></li>
-						<li><a class="dropdown-item" href="{{ url_for('pages', page='measurement') }}">Measurement</a>
+						<li><a class="dropdown-item"
+								href="{{ '/ja/notebook' if request.path.startswith('/ja') else url_for('pages', page='notebook') }}">Notebook</a>
 						</li>
-						<li><a class="dropdown-item" href="{{ url_for('pages', page='plant') }}">Plant</a></li>
-						<li><a class="dropdown-item" href="{{ url_for('pages', page='safety-and-security') }}">Safety
+						<li><a class="dropdown-item"
+								href="{{ '/ja/measurement' if request.path.startswith('/ja') else url_for('pages', page='measurement') }}">Measurement</a>
+						</li>
+						<li><a class="dropdown-item"
+								href="{{ '/ja/plant' if request.path.startswith('/ja') else url_for('pages', page='plant') }}">Plant</a>
+						</li>
+						<li><a class="dropdown-item"
+								href="{{ '/ja/safety-and-security' if request.path.startswith('/ja') else url_for('pages', page='safety-and-security') }}">Safety
 								and Security</a></li>
 					</ul>
 				</li>
@@ -73,9 +89,15 @@
 						Dry Lab
 					</a>
 					<ul class="dropdown-menu" aria-labelledby="navbar-dry-lab">
-						<li><a class="dropdown-item" href="{{ url_for('pages', page='model') }}">Model</a></li>
-						<li><a class="dropdown-item" href="{{ url_for('pages', page='software') }}">Software</a></li>
-						<li><a class="dropdown-item" href="{{ url_for('pages', page='hardware') }}">Hardware</a></li>
+						<li><a class="dropdown-item"
+								href="{{ '/ja/model' if request.path.startswith('/ja') else url_for('pages', page='model') }}">Model</a>
+						</li>
+						<li><a class="dropdown-item"
+								href="{{ '/ja/software' if request.path.startswith('/ja') else url_for('pages', page='software') }}">Software</a>
+						</li>
+						<li><a class="dropdown-item"
+								href="{{ '/ja/hardware' if request.path.startswith('/ja') else url_for('pages', page='hardware') }}">Hardware</a>
+						</li>
 					</ul>
 				</li>
 
@@ -87,14 +109,20 @@
 					</a>
 					<ul class="dropdown-menu" aria-labelledby="navbar-engagement">
 						<li><a class="dropdown-item"
-								href="{{ url_for('pages', page='entrepreneurship') }}">Entrepreneurship</a></li>
-						<li><a class="dropdown-item" href="{{ url_for('pages', page='human-practices') }}">Human
-								Practices</a></li>
-						<li><a class="dropdown-item" href="{{ url_for('pages', page='education') }}">Education</a></li>
-						<li><a class="dropdown-item" href="{{ url_for('pages', page='inclusivity') }}">Inclusivity</a>
+								href="{{ '/ja/entrepreneurship' if request.path.startswith('/ja') else url_for('pages', page='entrepreneurship') }}">Entrepreneurship</a>
 						</li>
 						<li><a class="dropdown-item"
-								href="{{ url_for('pages', page='sustainability') }}">Sustainability</a></li>
+								href="{{ '/ja/human-practices' if request.path.startswith('/ja') else url_for('pages', page='human-practices') }}">Human
+								Practices</a></li>
+						<li><a class="dropdown-item"
+								href="{{ '/ja/education' if request.path.startswith('/ja') else url_for('pages', page='education') }}">Education</a>
+						</li>
+						<li><a class="dropdown-item"
+								href="{{ '/ja/inclusivity' if request.path.startswith('/ja') else url_for('pages', page='inclusivity') }}">Inclusivity</a>
+						</li>
+						<li><a class="dropdown-item"
+								href="{{ '/ja/sustainability' if request.path.startswith('/ja') else url_for('pages', page='sustainability') }}">Sustainability</a>
+						</li>
 					</ul>
 				</li>
 
@@ -105,8 +133,12 @@
 						🌐 Language
 					</a>
 					<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbar-lang">
-						<li><a class="dropdown-item js-lang" data-lang="en" href="/en/">English</a></li>
-						<li><a class="dropdown-item js-lang" data-lang="ja" href="/ja/">日本語</a></li>
+						<li><a class="dropdown-item"
+								href="{{ request.path[3:] if request.path.startswith('/ja') else request.path }}">English</a>
+						</li>
+						<li><a class="dropdown-item"
+								href="{{ '/ja' + request.path if not request.path.startswith('/ja') else request.path }}">日本語</a>
+						</li>
 					</ul>
 				</li>
 

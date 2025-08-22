@@ -21,14 +21,25 @@ def freeze():
 @app.cli.command()
 def serve():
     freezer.run()
-
 @app.route('/')
 def home():
     return render_template('pages/home.html')
 
+@app.route('/ja/')
+def home_ja():
+    return render_template('pages/ja/home.html')
+
 @app.route('/<page>')
 def pages(page):
-    return render_template(str(Path('pages')) + '/' + page.lower() + '.html')
+    return render_template(f'pages/{page}.html')
+
+@app.route('/ja/<page>')
+def pages_ja(page):
+    try:
+        return render_template(f'pages/ja/{page}.html')
+    except:
+        # 日本語ページが存在しない場合は英語版にリダイレクト
+        return redirect(url_for('pages', page=page))
 
 # Main Function, Runs at http://0.0.0.0:8080
 if __name__ == "__main__":

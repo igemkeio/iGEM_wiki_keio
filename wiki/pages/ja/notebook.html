@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}ノートブック{% endblock %}
+{% block lead %}これは、シーズンを通じてのチームの進捗の時系列記録として機能します。日々の活動、実験、議論、決定を文書化します。{% endblock %}
+
+{% block page_content %}
+
+<div class="row mt-4">
+	<div class="col-lg-8">
+		<h2>このページに含むべき内容は？</h2>
+		<hr />
+		<ul>
+			<li>すべての活動を時系列順に記録し、各エントリを明確に日付を付けてください。</li>
+			<li>各活動について十分な詳細を提供してください。以下を含む：</li>
+			<ul>
+				<li>活動の目的。</li>
+				<li>使用した方法と手順。</li>
+				<li>得られた結果。</li>
+				<li>観察と注釈。</li>
+			</ul>
+			<li>すべての実験、プロトコル、データ分析、会議、ブレインストーミングセッション、その他のプロジェクト関連活動を文書化してください。</li>
+			<li>進捗を説明するために写真、ビデオ、図を含めてください。</li>
+			<li>各活動にどのチームメンバーが参加したかを示してください。</li>
+		</ul>
+	</div>
+	<div class="col-lg-4">
+		<h2>インスピレーション</h2>
+		<hr />
+		<ul>
+			<li><a href="https://2024.igem.wiki/epfl/notebook">2024 EPFL</a></li>
+			<li><a href="https://2024.igem.wiki/ju-krakow/notebook">2024 JU-Krakow</a></li>
+		</ul>
+	</div>
+</div>
+
+{% endblock %}

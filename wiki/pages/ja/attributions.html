@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+
+{% block title %}貢献者{% endblock %}
+{% block lead
+%}正確な貢献者の記載は、iGEMコンペティションにおいて不可欠です。これにより、審査員はあなたのチームの貢献を適切に評価し、外部協力者から提供されたサポートを認識できます。このページは、審査のための貢献者要件を満たすことに専念しています。{%
+endblock %}
+
+{% block page_content %}
+
+<div class="row mt-4">
+	<div class="col">
+		<div class="bd-callout bd-callout-info">
+			<h4>銅メダル基準 #2</h4>
+			<p>標準化されたプロジェクト貢献者フォームを使用して、チームメンバーが行った作業と他の人々がプロジェクトのために行った作業を説明してください。</p>
+			<hr />
+			<p>詳細については<a href="https://competition.igem.org/judging/medals">メダルページ</a>をご覧ください。</p>
+		</div>
+	</div>
+</div>
+
+<div class="row mt-4">
+	<div class="col">
+		<h2>このページに含むべき内容は？</h2>
+		<hr />
+		<ul>
+			<li>あなたのwikiの標準ナビゲーションメニュー</li>
+			<li>あなたのwikiの標準フッター</li>
+			<li>標準化されたチームのプロジェクト貢献者フォームを含む埋め込みiframe。</li>
+			<li>それ以外は何もなし</li>
+		</ul>
+	</div>
+</div>
+
+<div class="row mt-4">
+	<div class="col">
+		<h2>成功のためのヒント</h2>
+		<hr />
+		<p>チームは公式の貢献者フォームを使用しなければなりません。このフォームは、チームメンバーが行った作業と他者から受けたサポートを明確に区別します。<a
+				href="https://competition.igem.org/deliverables/project-attribution">プロジェクト貢献者ページ</a>でこの成果物の指示と要件を注意深く確認してください。注意点：
+		</p>
+		<ul>
+			<li>チームは標準フォームを使用しなければなりません。独自のフォームを作成しないでください。</li>
+			<li>標準貢献者フォームは完全に、正確に、正直に記入されなければなりません。</li>
+			<li>最良の結果を得るために、チームはシーズン早期に貢献者フォームの記入を開始し、頻繁に更新することをお勧めします。</li>
+		</ul>
+	</div>
+</div>
+
+<!--
+  ======================================================================
+  == 非常に重要                                                        ==
+  ======================================================================
+  以下のIFRAMEコードはそのままにしておいてください。あなたのチームの貢献者フォーム
+  がこのページに表示されます。削除しないでください。そうでなければ銅メダル基準#2を
+  満たさないリスクがあります。
+ -->
+<div class="row mt-4">
+	<script type="text/javascript">
+		// Listen to size change and update form height
+		window.addEventListener("message", function (e) {
+			if (e.origin === "https://teams.igem.org") {
+				const { type, data } = JSON.parse(e.data);
+				if (type === "igem-attribution-form") {
+					const element = document.getElementById("igem-attribution-form");
+					element.style.height = `${data + 100}px`;
+				}
+			}
+		});
+	</script>
+	<iframe style='width: 100%' id="igem-attribution-form" src="https://teams.igem.org/wiki/5539/attributions">
+		>
+	</iframe>
+</div>
+<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->
+
+{% endblock %}
