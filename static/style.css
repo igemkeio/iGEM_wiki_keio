@@ -23,47 +23,53 @@ body {
 	font-weight: 700;
 }
 
-/* ==== Navbar hover underline ("nyoiiin") ==== */
+/* ==== Navbar hover underline (center-grow) ==== */
 :root {
-	/* アクセント色（VRoidの雰囲気なら白でOK。任意で差し替え） */
 	--nav-underline: #ffffff;
-	--nav-underline-thickness: 3px;
-	/* 線の太さ */
-	--nav-underline-offset: 6px;
-	/* 文字の下からの距離 */
+	--nav-underline-thickness: 2px;
+	/* ← 少し細く */
+	--nav-underline-offset: 8px;
+	/* 文字下からの距離を少し下げて見やすく */
 	--nav-underline-ease: cubic-bezier(.2, .8, .2, 1);
-	/* 伸びる感じ */
 	--nav-underline-duration: .28s;
 }
 
-/* メニュー文字：白＋太字（先に指定） */
+/* 基本の文字スタイル：白＋太字 */
 .navbar .nav-link {
 	color: #fff !important;
 	font-weight: 700;
 	position: relative;
-	/* 下線の基準にする */
+	line-height: 1;
+	/* 下線との距離を安定させる */
+	display: inline-flex;
+	align-items: center;
+	/* caret と文字の縦位置をそろえる */
+	padding-bottom: .375rem;
+	/* 下線との余白を確保 */
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
 }
 
-/* 下線の初期状態：幅ゼロ（左→右へ伸びる） */
+/* 中央から左右に伸びる白線 */
 .navbar .nav-link::after {
 	content: "";
 	position: absolute;
-	left: .5rem;
-	/* 余白はお好みで */
-	right: .5rem;
+	left: .75rem;
+	/* 左右は少し内側から */
+	right: .75rem;
 	bottom: calc(0px - var(--nav-underline-offset));
 	height: var(--nav-underline-thickness);
 	background: var(--nav-underline);
 	transform: scaleX(0);
-	transform-origin: left center;
+	transform-origin: center center;
+	/* ★ 中央起点 */
 	transition: transform var(--nav-underline-duration) var(--nav-underline-ease);
 	border-radius: 999px;
-	/* 太線を丸く */
 	pointer-events: none;
-	/* クリック干渉防止 */
+	will-change: transform;
 }
 
-/* ホバー/フォーカス/アクティブ時に伸ばす */
+/* ホバー/フォーカス/アクティブ */
 .navbar .nav-link:hover::after,
 .navbar .nav-link:focus::after,
 .navbar .nav-link.active::after,
@@ -71,14 +77,31 @@ body {
 	transform: scaleX(1);
 }
 
-/* モーション弱め設定のユーザーにはアニメ短縮/無効化（お好みで） */
+/* メニュー間を等間隔に（Bootstrap 5なら gap を使うのが簡単） */
+.navbar .navbar-nav {
+	gap: 14px;
+	/* 等間隔（必要に応じて 10–20px で調整） */
+}
+
+/* ドロップダウンのトグル（caret）を白く・見やすく */
+.navbar .dropdown-toggle::after {
+	margin-left: .35rem;
+	/* 文字と caret の間隔 */
+	vertical-align: .15em;
+	border-top-color: #fff;
+	/* caret を白 */
+	border-right-color: transparent;
+	border-left-color: transparent;
+}
+
+/* モーション弱め */
 @media (prefers-reduced-motion: reduce) {
 	.navbar .nav-link::after {
 		transition-duration: .01ms;
 	}
 }
 
-/* スマホ（折りたたみ時）は下線を無効化（行が折り返すと見た目が崩れるため） */
+/* 折りたたみ時は下線非表示（行折返し対策） */
 @media (max-width: 991.98px) {
 	.navbar .nav-link::after {
 		display: none;
