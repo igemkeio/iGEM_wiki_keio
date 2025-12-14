@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "framework": "nextjs",
+  "installCommand": "cd web && yarn install --immutable",
+  "buildCommand": "cd web && yarn build",
+  "outputDirectory": "web/out"
+}
