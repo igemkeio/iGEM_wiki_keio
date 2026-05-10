@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Next App",
-  description: "Static export site",
+  title: "iGEM Keio",
+  description: "iGEM Keio team wiki",
 };
 
 export default function RootLayout({
@@ -13,7 +13,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">{children}</body>
+      <head>
+        <link
+          rel="shortcut icon"
+          href="https://static.igem.wiki/common/icons/favicons/igem-2022.svg"
+        />
+        <link rel="stylesheet" href="/static/bootstrap.min.css" />
+        <link rel="stylesheet" href="/static/style.css" />
+      </head>
+      <body>
+        {children}
+        <script src="/static/bootstrap.bundle.min.js" defer />
+      </body>
     </html>
   );
 }

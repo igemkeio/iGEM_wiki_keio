@@ -1,11 +1,11 @@
 import PageShell from "@/components/PageShell";
 import { readPage } from "@/lib/wiki";
 
-export default function Home() {
-  const page = readPage("en", "home");
+export default function JaHome() {
+  const page = readPage("ja", "home");
   return (
     <PageShell
-      locale="en"
+      locale="ja"
       slug="home"
       title={page.title}
       lead={page.lead}
