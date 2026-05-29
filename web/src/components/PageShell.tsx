@@ -1,5 +1,7 @@
 import Header from "./Header";
 import Footer from "./Footer";
+import Toc from "./Toc";
+import { buildToc } from "@/lib/toc";
 import type { Locale } from "@/lib/wiki";
 
 export default function PageShell({
@@ -15,6 +17,10 @@ export default function PageShell({
   lead: string;
   contentHtml: string;
 }) {
+  // 本文の見出しから目次を生成し、見出しにはアンカー用idを付与する。
+  const { html, toc } = buildToc(contentHtml);
+  const hasToc = toc.length > 0;
+
   return (
     <>
       <Header locale={locale} currentSlug={slug} />
@@ -31,10 +37,19 @@ export default function PageShell({
           </div>
         </div>
       </header>
-      <div
-        className="container"
-        dangerouslySetInnerHTML={{ __html: contentHtml }}
-      />
+      <div className="container">
+        <div className="row">
+          {hasToc && (
+            <aside className="col-lg-3 d-none d-lg-block">
+              <Toc entries={toc} />
+            </aside>
+          )}
+          <div
+            className={hasToc ? "col-lg-9" : "col-12"}
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        </div>
+      </div>
       <Footer />
     </>
   );
