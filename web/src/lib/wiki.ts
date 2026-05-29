@@ -28,9 +28,7 @@ export function listSlugs(locale: Locale): string[] {
 }
 
 function extractBlock(src: string, name: string): string {
-  const re = new RegExp(
-    `\\{%\\s*block\\s+${name}\\s*%\\}([\\s\\S]*?)\\{%\\s*endblock\\s*%\\}`
-  );
+  const re = new RegExp(`\\{%\\s*block\\s+${name}\\s*%\\}([\\s\\S]*?)\\{%\\s*endblock\\s*%\\}`);
   const m = src.match(re);
   return m ? m[1].trim() : "";
 }
