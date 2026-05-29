@@ -1,1 +1,63 @@
 /* Bootstrap and custom styles are loaded via <link> in layout.tsx */
+
+/* アンカーリンクで見出しに飛んだとき、固定ナビバーに隠れないようにする。 */
+html {
+  scroll-behavior: smooth;
+}
+
+h2[id],
+h3[id] {
+  scroll-margin-top: 90px;
+}
+
+/* 左サイドバーの目次ナビ。スクロールに追従させる。 */
+.wiki-toc {
+  position: sticky;
+  top: 90px;
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  border-left: 2px solid #e9ecef;
+}
+
+.wiki-toc__title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6c757d;
+  padding-left: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.wiki-toc__list,
+.wiki-toc__sublist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wiki-toc__sublist {
+  padding-left: 0.75rem;
+}
+
+.wiki-toc__link {
+  display: block;
+  padding: 0.25rem 0 0.25rem 1rem;
+  margin-left: -2px;
+  border-left: 2px solid transparent;
+  color: #495057;
+  text-decoration: none;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.wiki-toc__link:hover {
+  color: #0d6efd;
+  border-left-color: #0d6efd;
+}
+
+.wiki-toc__link--sub {
+  font-size: 0.825rem;
+  color: #6c757d;
+}
