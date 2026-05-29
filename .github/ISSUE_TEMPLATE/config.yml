@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 開発ガイドライン / Contributing
+    url: https://github.com/jiku0730/iGEM_wiki_keio/blob/main/CONTRIBUTING.md
+    about: コミット・ブランチ・PR・デプロイのルールはこちら

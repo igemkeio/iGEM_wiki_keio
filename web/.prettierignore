@@ -1,0 +1,7 @@
+.next/
+out/
+node_modules/
+.yarn/
+yarn.lock
+next-env.d.ts
+public/
