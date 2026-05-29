@@ -10,8 +10,12 @@ export default function Footer() {
           <div className="col-lg-3 col-xs-12">
             <h4 className="mt-lg-0 mt-sm-3">Links</h4>
             <ul className="m-2 p-2">
-              <li><a href="https://igem.org">iGEM</a></li>
-              <li><a href="https://competition.igem.org/">Competition</a></li>
+              <li>
+                <a href="https://igem.org">iGEM</a>
+              </li>
+              <li>
+                <a href="https://competition.igem.org/">Competition</a>
+              </li>
             </ul>
           </div>
           <div className="col-lg-3 col-xs-12">

@@ -55,13 +55,7 @@ function href(locale: Locale, slug: string): string {
   return locale === "ja" ? `/ja/${slug}/` : `/${slug}/`;
 }
 
-export default function Header({
-  locale,
-  currentSlug,
-}: {
-  locale: Locale;
-  currentSlug: string;
-}) {
+export default function Header({ locale, currentSlug }: { locale: Locale; currentSlug: string }) {
   const otherLangHref =
     locale === "ja"
       ? currentSlug === "home"
@@ -129,18 +123,12 @@ export default function Header({
               </a>
               <ul className="dropdown-menu dropdown-menu-end">
                 <li>
-                  <Link
-                    className="dropdown-item"
-                    href={locale === "en" ? "#" : otherLangHref}
-                  >
+                  <Link className="dropdown-item" href={locale === "en" ? "#" : otherLangHref}>
                     English
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    className="dropdown-item"
-                    href={locale === "ja" ? "#" : otherLangHref}
-                  >
+                  <Link className="dropdown-item" href={locale === "ja" ? "#" : otherLangHref}>
                     日本語
                   </Link>
                 </li>
