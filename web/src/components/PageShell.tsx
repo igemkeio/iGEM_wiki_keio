@@ -29,10 +29,7 @@ export default function PageShell({
           <div className="row h-100 align-items-center">
             <div className="col-lg-12">
               <h1 className="display-4 text-white mt-5 mb-2">{title}</h1>
-              <p
-                className="lead mb-5 text-white-50"
-                dangerouslySetInnerHTML={{ __html: lead }}
-              />
+              <p className="lead mb-5 text-white-50" dangerouslySetInnerHTML={{ __html: lead }} />
             </div>
           </div>
         </div>
