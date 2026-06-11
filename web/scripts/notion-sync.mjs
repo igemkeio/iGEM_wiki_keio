@@ -15,6 +15,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { Client } from "@notionhq/client";
 import { NotionToMarkdown } from "notion-to-md";
@@ -23,6 +24,10 @@ import { marked } from "marked";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const WEB_DIR = path.join(__dirname, "..");
 const PAGES_DIR = path.join(WEB_DIR, "..", "wiki", "pages");
+// Notion 本文の画像を保存する場所（暫定方式）。/notion-images/ で配信される。
+// ※ iGEM 本番では static.igem.wiki へ移す必要あり（Issue #13）。
+const IMAGES_DIR = path.join(WEB_DIR, "public", "notion-images");
+const IMAGES_URL_PREFIX = "/notion-images";
 
 // web/.env.local があれば最小パースで読み込む（dotenv 非依存）。
 function loadEnvLocal() {
@@ -58,6 +63,62 @@ if (!NOTION_TOKEN || !NOTION_DATABASE_ID) {
 
 const notion = new Client({ auth: NOTION_TOKEN });
 const n2m = new NotionToMarkdown({ notionClient: notion });
+
+// content-type / URL から拡張子を推定する。
+function guessExt(contentType, url) {
+  const byType = {
+    "image/png": "png",
+    "image/jpeg": "jpg",
+    "image/jpg": "jpg",
+    "image/gif": "gif",
+    "image/webp": "webp",
+    "image/svg+xml": "svg",
+    "image/avif": "avif",
+  };
+  if (contentType && byType[contentType.split(";")[0].trim()])
+    return byType[contentType.split(";")[0].trim()];
+  const m = new URL(url).pathname.match(/\.([a-zA-Z0-9]+)$/);
+  return m ? m[1].toLowerCase() : "png";
+}
+
+// 画像をダウンロードして web/public/notion-images に保存し、配信用パスを返す。
+// 同じ内容（ハッシュ一致）なら再ダウンロードしない。失敗時は null。
+async function localizeImage(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const buf = Buffer.from(await res.arrayBuffer());
+    const hash = crypto.createHash("sha256").update(buf).digest("hex").slice(0, 16);
+    const ext = guessExt(res.headers.get("content-type"), url);
+    const fileName = `${hash}.${ext}`;
+    const outPath = path.join(IMAGES_DIR, fileName);
+    if (!fs.existsSync(outPath)) {
+      fs.mkdirSync(IMAGES_DIR, { recursive: true });
+      fs.writeFileSync(outPath, buf);
+      console.log(`[notion-sync] image saved ${fileName} (${buf.length} bytes)`);
+    }
+    return `${IMAGES_URL_PREFIX}/${fileName}`;
+  } catch (err) {
+    console.warn(`[notion-sync] 画像取得失敗のためスキップ: ${err.message}`);
+    return null;
+  }
+}
+
+// image ブロックのカスタム変換。Notion アップロード画像（一時URL）は
+// リポジトリに取り込み、外部の恒久URLはそのまま通す。
+n2m.setCustomTransformer("image", async (block) => {
+  const img = block.image;
+  const caption = (img.caption ?? []).map((t) => t.plain_text).join("");
+  const srcUrl = img.type === "external" ? img.external.url : img.file.url;
+
+  // 外部URLで static.igem.wiki 等の恒久URLならそのまま。
+  if (img.type === "external") {
+    return `![${caption}](${srcUrl})`;
+  }
+  // Notion アップロード画像は一時URLなのでリポジトリへ取り込む。
+  const localPath = await localizeImage(srcUrl);
+  return localPath ? `![${caption}](${localPath})` : `<!-- 画像をスキップしました -->`;
+});
 
 // Notion のプロパティ値から素のテキストを取り出すヘルパ。
 function plainText(prop) {
