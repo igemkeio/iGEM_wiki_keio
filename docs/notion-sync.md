@@ -38,6 +38,16 @@ Notion（Markdown 執筆）→ API 取得 → Markdown 化 → HTML 化 → wiki
 
 Database ID は DB の URL に含まれる 32 文字の英数字。
 
+### 画像の扱い（暫定）
+
+Notion 本文に貼った画像は、同期時に `web/public/notion-images/<ハッシュ>.<拡張子>` に
+取り込まれ（内容ハッシュで重複排除）、`/notion-images/...` として Vercel で配信される。
+外部 URL（例: `static.igem.wiki` の画像を「埋め込み」した場合）はそのまま通す。
+
+> ⚠️ これは**プレビュー運用の暫定方式**。iGEM 規定では画像をリポジトリに直接コミットせず
+> `static.igem.wiki` を使う必要があるため、本番提出前に自動アップロードへ移行する
+> （[Issue #13](https://github.com/jiku0730/iGEM_wiki_keio/issues/13)）。
+
 ## 3. ローカルで手動同期
 
 ```bash
