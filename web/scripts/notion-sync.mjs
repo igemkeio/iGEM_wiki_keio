@@ -8,7 +8,8 @@
 // Database に必要なプロパティ:
 //   - slug   (Title)      … ページのスラッグ。例: home, description
 //   - locale (Select)     … "en" または "ja"
-//   - title  (Rich text)  … <title> ブロックに入る文字列
+//   - heading (Rich text) … <title> ブロックに入る文字列
+//       （プロパティ名を "title" にすると Notion の title 型と名前衝突するため heading）
 //   - lead   (Rich text)  … lead ブロック（簡単な HTML 可）
 //   - published (Checkbox) … 任意。存在し false の行はスキップ。
 
@@ -89,7 +90,7 @@ async function buildPageFile(row) {
   const props = row.properties;
   const slug = plainText(props.slug).trim();
   const locale = (plainText(props.locale) || "en").trim();
-  const title = plainText(props.title).trim();
+  const title = plainText(props.heading).trim();
   const lead = plainText(props.lead).trim();
 
   // 本文 Markdown → HTML。

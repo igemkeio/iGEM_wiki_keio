@@ -26,9 +26,12 @@ Notion（Markdown 執筆）→ API 取得 → Markdown 化 → HTML 化 → wiki
 | ----------- | --------- | --------------------------------------- |
 | `slug`      | Title     | ページのスラッグ。例: `home`, `model`   |
 | `locale`    | Select    | `en` または `ja`                        |
-| `title`     | Rich text | `<title>` ブロックの文字列              |
+| `heading`   | Rich text | `<title>` ブロックの文字列              |
 | `lead`      | Rich text | lead ブロック（簡単な HTML 可）         |
 | `published` | Checkbox  | 任意。チェックを外した行は同期しない    |
+
+> `heading` は本来 `title` と呼びたいところだが、Notion では title 型プロパティ
+> （= `slug`）と名前が衝突して壊れるため `heading` にしている。
 
 本文（page_content）は **各ページの中身に Markdown で執筆**する。
 日英はそれぞれ別の行（`locale` で `en` / `ja` を区別、`slug` は共通）。
