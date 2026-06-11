@@ -131,6 +131,11 @@ async function main() {
       skipped++;
       continue;
     }
+    // __ 接頭辞は制御用の行（__build__ など）。ページ生成しない。
+    if (slug.startsWith("__")) {
+      skipped++;
+      continue;
+    }
 
     const outDir = locale === "ja" ? path.join(PAGES_DIR, "ja") : PAGES_DIR;
     fs.mkdirSync(outDir, { recursive: true });
