@@ -1,0 +1,7 @@
+{
+  "name": "notion-trigger",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Notion ボタン → GitHub Actions(workflow_dispatch) を起動する中継エンドポイント",
+  "type": "module"
+}
