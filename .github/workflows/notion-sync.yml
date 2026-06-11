@@ -1,0 +1,48 @@
+name: Notion Sync
+
+# Notion の Database を取得し wiki/pages/*.html を更新する。
+# 差分があればコミットして PR を作成する（main 直 push はしない）。
+
+on:
+  workflow_dispatch: # 手動実行
+  schedule:
+    - cron: "0 0 * * *" # 毎日 00:00 UTC（= 09:00 JST）
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable corepack (yarn)
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Run Notion sync
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+        run: yarn notion:sync
+
+      - name: Create Pull Request on changes
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore: Notion の最新内容を反映するため wiki ページを同期。"
+          branch: chore/notion-sync
+          title: "chore: Notion 同期による wiki ページ更新"
+          body: |
+            Notion Database の内容を `wiki/pages/*.html` に同期しました（自動生成）。
+          delete-branch: true
