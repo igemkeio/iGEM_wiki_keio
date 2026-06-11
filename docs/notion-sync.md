@@ -61,5 +61,27 @@ yarn dev                           # 反映を確認
 
 リポジトリの Settings → Secrets and variables → Actions に登録:
 
-- `NOTION_TOKEN`
-- `NOTION_DATABASE_ID`
+- `NOTION_TOKEN`（Secret）
+- `NOTION_DATABASE_ID`（Secret）
+- `NOTION_BUILD_PAGE_ID`（Secret）… Preview URL 等を書き戻す `__build__` 行のページ ID
+- `VERCEL_PREVIEW_URL`（Variable）… `chore/notion-sync` ブランチの固定 Preview URL
+
+## 5. Notion のボタンで同期を起動する
+
+Notion のボタンを押す → GitHub Actions が起動 → PR 作成 → Vercel Preview ビルド →
+Preview URL を Notion の `__build__` 行に書き戻す、という流れ。
+
+```
+Notion ボタン → notion-trigger（Vercel関数）→ workflow_dispatch
+  → notion-sync.yml（sync → PR）→ Vercel Preview → __build__ 行へ URL 書き戻し
+```
+
+- 中継エンドポイントの実体とデプロイ手順は [`../notion-trigger/README.md`](../notion-trigger/README.md)。
+- `__build__` は DB 内の制御行（`published` を外してあり、ページ生成されない）。
+  `preview_url` / `pr_url` / `last_synced` プロパティに最新の結果が入る。
+
+### Preview URL について
+
+PR 用ブランチは常に `chore/notion-sync` で固定なので、Vercel のブランチ Preview URL も
+一定になる。その URL を `VERCEL_PREVIEW_URL` 変数に入れておくと、毎回 `__build__` 行へ
+書き戻される（PR コメントにも Vercel が自動で URL を出す）。
