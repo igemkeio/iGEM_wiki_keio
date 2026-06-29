@@ -61,8 +61,30 @@ if (!NOTION_TOKEN || !NOTION_DATABASE_ID) {
   process.exit(1);
 }
 
-const notion = new Client({ auth: NOTION_TOKEN });
+// SDK 同梱の node-fetch ではなく Node 標準の fetch（undici）を使わせる。
+// node-fetch はランナー環境によってはレスポンス取得時に "Premature close" を投げ、
+// GitHub Actions 上の同期が失敗していたため。
+const notion = new Client({
+  auth: NOTION_TOKEN,
+  fetch: (url, init) => fetch(url, init),
+});
 const n2m = new NotionToMarkdown({ notionClient: notion });
+
+// 一時的な接続断（Premature close 等）に備えて数回リトライする薄いラッパ。
+async function withRetry(label, fn, retries = 3) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt > retries) throw err;
+      const waitMs = attempt * 1000;
+      console.warn(
+        `[notion-sync] ${label} 失敗(${attempt}/${retries}): ${err.message} — ${waitMs}ms 後に再試行`
+      );
+      await new Promise((r) => setTimeout(r, waitMs));
+    }
+  }
+}
 
 // content-type / URL から拡張子を推定する。
 function guessExt(contentType, url) {
@@ -136,10 +158,12 @@ async function queryAllRows(databaseId) {
   const rows = [];
   let cursor = undefined;
   do {
-    const res = await notion.databases.query({
-      database_id: databaseId,
-      start_cursor: cursor,
-    });
+    const res = await withRetry("databases.query", () =>
+      notion.databases.query({
+        database_id: databaseId,
+        start_cursor: cursor,
+      })
+    );
     rows.push(...res.results);
     cursor = res.has_more ? res.next_cursor : undefined;
   } while (cursor);
@@ -155,7 +179,9 @@ async function buildPageFile(row) {
   const lead = plainText(props.lead).trim();
 
   // 本文 Markdown → HTML。
-  const mdBlocks = await n2m.pageToMarkdown(row.id);
+  const mdBlocks = await withRetry(`pageToMarkdown(${row.id})`, () =>
+    n2m.pageToMarkdown(row.id)
+  );
   const md = n2m.toMarkdownString(mdBlocks).parent ?? "";
   const contentHtml = marked.parse(md, { async: false }).trim();
 
