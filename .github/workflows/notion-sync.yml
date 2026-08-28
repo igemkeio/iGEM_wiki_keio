@@ -37,6 +37,14 @@ jobs:
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
         run: yarn notion:sync
 
+
+      - name: DEBUG PAT check
+        env:
+          PAT: ${{ secrets.NOTION_SYNC_PAT }}
+        run: |
+          if [ -n "$PAT" ]; then echo "NOTION_SYNC_PAT SET len=${#PAT}"; else echo "NOTION_SYNC_PAT EMPTY"; fi
+          curl -s -H "Authorization: Bearer $PAT" https://api.github.com/user | jq -r '.login // .message'
+
       - name: Create Pull Request on changes
         id: cpr
         uses: peter-evans/create-pull-request@v7
