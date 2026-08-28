@@ -45,6 +45,16 @@ jobs:
           if [ -n "$PAT" ]; then echo "NOTION_SYNC_PAT SET len=${#PAT}"; else echo "NOTION_SYNC_PAT EMPTY"; fi
           curl -s -H "Authorization: Bearer $PAT" https://api.github.com/user | jq -r '.login // .message'
 
+      - name: DEBUG direct PR create via curl
+        env:
+          PAT: ${{ secrets.NOTION_SYNC_PAT }}
+        run: |
+          curl -s -X POST \
+            -H "Authorization: Bearer $PAT" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/igemkeio/iGEM_wiki_keio/pulls \
+            -d '{"title":"debug pr (delete me)","head":"debug/check-pat","base":"main","body":"debug test, close me"}'
+
       - name: Create Pull Request on changes
         id: cpr
         uses: peter-evans/create-pull-request@v7
