@@ -41,6 +41,7 @@ jobs:
         id: cpr
         uses: peter-evans/create-pull-request@v7
         with:
+          token: ${{ secrets.NOTION_SYNC_PAT || github.token }}
           commit-message: "chore: Notion の最新内容を反映するため wiki ページを同期。"
           branch: chore/notion-sync
           title: "chore: Notion 同期による wiki ページ更新"
