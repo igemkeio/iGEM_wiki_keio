@@ -5,47 +5,40 @@ type Group = { label: string; items: { slug: string; label: string }[] };
 
 const GROUPS: Group[] = [
   {
-    label: "Team",
-    items: [
-      { slug: "members", label: "Members" },
-      { slug: "attributions", label: "Attributions" },
-    ],
-  },
-  {
     label: "Project",
     items: [
       { slug: "description", label: "Description" },
+      { slug: "application", label: "Application" },
       { slug: "engineering", label: "Engineering" },
-      { slug: "results", label: "Results" },
       { slug: "contribution", label: "Contribution" },
+      { slug: "judging", label: "Judging" },
     ],
   },
   {
     label: "Wet Lab",
     items: [
+      { slug: "design", label: "Design" },
       { slug: "experiments", label: "Experiments" },
-      { slug: "notebook", label: "Notebook" },
       { slug: "measurement", label: "Measurement" },
-      { slug: "plant", label: "Plant" },
-      { slug: "safety-and-security", label: "Safety and Security" },
+      { slug: "results", label: "Results" },
     ],
   },
   {
     label: "Dry Lab",
+    items: [{ slug: "model", label: "Model" }],
+  },
+  {
+    label: "Human Practices",
     items: [
-      { slug: "model", label: "Model" },
-      { slug: "software", label: "Software" },
-      { slug: "hardware", label: "Hardware" },
+      { slug: "human-practices", label: "IHP" },
+      { slug: "education", label: "Education" },
     ],
   },
   {
-    label: "Engagement",
+    label: "Team",
     items: [
-      { slug: "entrepreneurship", label: "Entrepreneurship" },
-      { slug: "human-practices", label: "Human Practices" },
-      { slug: "education", label: "Education" },
-      { slug: "inclusivity", label: "Inclusivity" },
-      { slug: "sustainability", label: "Sustainability" },
+      { slug: "members", label: "Members" },
+      { slug: "attributions", label: "Attributions" },
     ],
   },
 ];
