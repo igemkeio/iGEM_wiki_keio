@@ -170,6 +170,32 @@ async function queryAllRows(databaseId) {
   return rows;
 }
 
+// Notion の本文とは別に、slug ごとに末尾へ固定で差し込む生 HTML。
+// script / iframe は notion-to-md → marked の経路でエスケープされて壊れるため、
+// Notion には置かずここで管理する。
+const FIXED_BLOCKS = {
+  // iGEM の貢献者フォーム。銅メダル基準 #2 に必要なので消さないこと。
+  attributions: `
+<div class="row mt-4">
+	<script type="text/javascript">
+		// フォームの高さ変更を受け取って iframe をリサイズする。
+		window.addEventListener("message", function (e) {
+			if (e.origin === "https://teams.igem.org") {
+				const { type, data } = JSON.parse(e.data);
+				if (type === "igem-attribution-form") {
+					const element = document.getElementById("igem-attribution-form");
+					element.style.height = \`\${data + 100}px\`;
+				}
+			}
+		});
+	</script>
+	<iframe style='width: 100%' id="igem-attribution-form" src="https://teams.igem.org/wiki/5539/attributions">
+		>
+	</iframe>
+</div>
+`,
+};
+
 // 1行ぶんを wiki/pages 形式の HTML 文字列に組み立てる。
 async function buildPageFile(row) {
   const props = row.properties;
@@ -184,6 +210,7 @@ async function buildPageFile(row) {
   );
   const md = n2m.toMarkdownString(mdBlocks).parent ?? "";
   const contentHtml = marked.parse(md, { async: false }).trim();
+  const fixed = FIXED_BLOCKS[slug] ?? "";
 
   const file = `{% extends "layout.html" %}
 
@@ -193,7 +220,7 @@ async function buildPageFile(row) {
 {% block page_content %}
 
 ${contentHtml}
-
+${fixed}
 {% endblock %}
 `;
   return { slug, locale, file };
