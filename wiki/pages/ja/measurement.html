@@ -5,37 +5,169 @@
 
 {% block page_content %}
 
-<div class="row mt-4">
-	<div class="col">
-		<div class="bd-callout bd-callout-info">
-			<h4>最優秀測定賞</h4>
-			<p>測定は科学的コミュニケーションと進歩にとって重要です。適切に報告された測定は、ハードウェアが正しく機能しているか、データが信頼できるか、結果が実際に重要かを示す唯一の方法です。測定の適切なターゲットを特定し、正確な測定を収集し、明確で適切な単位で結果を報告することには高い価値があります。注意深い測定の取り組みを文書化すれば、この賞を受賞できるかもしれません！
-			</p>
-			<hr />
-			<p>詳細については<a href="https://competition.igem.org/judging/special-prizes">特別賞ページ</a>をご覧ください。</p>
-		</div>
-	</div>
-</div>
-
-<div class="row mt-4">
-	<div class="col-lg-8">
-		<h2>概要</h2>
-		<hr />
-		<p>測定において優秀な作業を行った場合、この特別賞にチームを推薦することを検討してください。合成生物学には、パーツを特性化するための優れた測定アプローチと、多くのパーツを一度に特性化するための効率的な新しい方法が必要です。測定の分野で何かエキサイティングなことを行った場合は、ここで説明してください！
-		</p>
-	</div>
-	<div class="col-lg-4">
-		<h2>インスピレーション</h2>
-		<hr />
-		<ul>
-			<li><a href="https://2024.igem.wiki/austin-utexas/measurement">2024 Austin-utexas</a></li>
-			<li><a href="https://2024.igem.wiki/kuleuven/measurement">2024 KULeuven</a></li>
-			<li><a href="https://2024.igem.wiki/freiburg/measurement">2024 Freiburg</a></li>
-			<li><a href="https://2023.igem.wiki/william-and-mary/measurement">2023 William-and-Mary</a></li>
-			<li><a href="https://2023.igem.wiki/estonia-tuit/measurement">2023 Estonia-TUIT</a></li>
-			<li><a href="https://2023.igem.wiki/unilausanne/measurement">2023 UNILausanne</a></li>
-		</ul>
-	</div>
-</div>
+<h3>最優秀測定賞</h3>
+<p>測定は科学的コミュニケーションと進歩にとって重要です。適切に報告された測定は、ハードウェアが正しく機能しているか、データが信頼できるか、結果が実際に重要かを示す唯一の方法です。測定の適切なターゲットを特定し、正確な測定を収集し、明確で適切な単位で結果を報告することには高い価値があります。注意深い測定の取り組みを文書化すれば、この賞を受賞できるかもしれません！</p>
+<p>詳細については<a href="https://competition.igem.org/judging/special-prizes">特別賞ページ</a>をご覧ください。</p>
+<h2>概要</h2>
+<p>測定において優秀な作業を行った場合、この特別賞にチームを推薦することを検討してください。合成生物学には、パーツを特性化するための優れた測定アプローチと、多くのパーツを一度に特性化するための効率的な新しい方法が必要です。測定の分野で何かエキサイティングなことを行った場合は、ここで説明してください！</p>
+<h2>インスピレーション</h2>
+<ul>
+<li><a href="https://2024.igem.wiki/austin-utexas/measurement">2024 Austin-utexas</a></li>
+<li><a href="https://2024.igem.wiki/kuleuven/measurement">2024 KULeuven</a></li>
+<li><a href="https://2024.igem.wiki/freiburg/measurement">2024 Freiburg</a></li>
+<li><a href="https://2023.igem.wiki/william-and-mary/measurement">2023 William-and-Mary</a></li>
+<li><a href="https://2023.igem.wiki/estonia-tuit/measurement">2023 Estonia-TUIT</a></li>
+<li><a href="https://2023.igem.wiki/unilausanne/measurement">2023 UNILausanne</a></li>
+</ul>
+<h2>下書き</h2>
+<h3>何を目的にやったか</h3>
+<ul>
+<li><strong>背景と工学的課題</strong><ul>
+<li>合成生物学を用いた多細胞システムの構築において、細胞同士の接着に「方向性（頭-尾の配列）」を持たせるためには、大腸菌内の接着分子や足場タンパク質を特定の片極（単極）のみに局在化させる必要があります。</li>
+<li>先行研究（Lin et al., 2021等）より、極局在足場タンパク質である<strong>PopZ</strong>は、低発現では「単極局在」を示すものの、発現量が増加するにつれて「両極局在」へと切り替わってしまう特性が知られています。</li>
+</ul>
+</li>
+<li><strong>実験のねらい</strong><ul>
+<li>PopZ等の局在タンパク質において、目的とする片極（単極）局在を安定して実現するための<strong>最適な発現量（IPTG誘導濃度）および構成プロモーターの強度を決定すること</strong>を目指しました。</li>
+</ul>
+</li>
+<li><strong>定量的解析（Measurement）のアプローチ</strong><ul>
+<li>従来の顕微鏡観察における目視判定は、観察者の主観的バイアスが混入しやすく、サンプル数も限られるという課題がありました。</li>
+<li>そこで、細菌セグメンテーション深層学習モデル（<strong>Omnipose</strong>）を導入し、密集・湾曲した大腸菌であっても個々の細胞輪郭を高精度に自動抽出。細胞長軸（正中軸）方向の蛍光輝度プロファイルを単一細胞レベルで網羅的かつ客観的にプロファイリングすることで、IPTG濃度（発現量）の変化に伴う空間局在パターン（単極・両極・拡散）の遷移を定量的に評価・決定することを目的としました。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3>何をやったか</h3>
+<ol>
+<li><strong>Wet実験系の構築と撮像プロトコルの標準化</strong><ul>
+<li>PopZ等の局在タンパク質と蛍光タンパク質のキメラ遺伝子（PopZ-FP）を発現させた大腸菌を作製。</li>
+<li>誘導剤（IPTG）の濃度系列（0 µM、10 µM、50 µM、100 µM、500 µM、1000 µM等）を変化させて培養し、アガロースパッド上に固定。</li>
+</ul>
+</li>
+<li><strong>深層学習を用いた自動セグメンテーションツールの実装</strong><ul>
+<li>桿菌の形態に特化した深層学習モデル<strong>Omnipose</strong>を用い、生の16-bit位相差画像から細胞境界を直接かつ自動で推論する解析スクリプト（<code>segmentate_omni.py</code>）を構築（CLI対応）。</li>
+<li>密集した細胞同士の誤認識を最小化し、位相差マスクと蛍光シグナルのオーバーレイ画像を自動生成。</li>
+</ul>
+</li>
+<li><strong>単一細胞ごとの長軸空間輝度プロファイル抽出と自動分類（予定）</strong><ul>
+<li>セグメンテーションされた各細胞の正中軸（Medial Axis）を細線化処理によって算出し、極から極（Pole-to-Pole）の長軸座標を $0.0 \sim 1.0$ に正規化。</li>
+<li>長軸に沿った1次元の蛍光輝度分布を抽出し、細胞質領域に対する両端極領域のピーク輝度比（極局在比：$R_{polar}$）を算出。</li>
+<li>定義した閾値に基づき、単一細胞ごとに「単極型（Unipolar）」「両極型（Bipolar）」「拡散型（Diffuse）」を自動判定・分類するパイプラインを確立。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3>何が分かったか</h3>
+<ul>
+<li><strong>PopZ融合タンパク質の極局在の実証</strong><ul>
+<li>蛍光顕微鏡観察および画像解析により、PopZ融合タンパク質が大腸菌の細胞極に集積・局在することを客観的に確認しました。</li>
+</ul>
+</li>
+<li><strong>発現量に依存した局在パターンのスイッチング現象の定量的解明</strong><ul>
+<li>IPTG濃度の増加（PopZ発現量の上昇）に伴い、片極のみに蛍光が凝集する「単極局在」から、両極に対称的に凝集する「両極局在」へと空間的配置が明確に遷移することを、数百細胞規模の統計的データとして定量化することに成功しました。</li>
+</ul>
+</li>
+<li><strong>主観的バイアスの排除と用量反応関係の特定</strong><ul>
+<li>ネガティブコントロール（均一拡散）との比較を通じて明確な閾値設定を行い、目視判定に頼ることなく、各IPTG濃度における単極型・両極型の出現頻度（割合 %）を高い再現性でプロファイリングできました。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3>その結果、次に何を変えたか　(未定、考えられるwetへのfeedback)</h3>
+<p>本測定パイプラインによって得られた高精度な定量データは、プロジェクトの工学設計サイクル（Design-Build-Test-Learn）へ直接フィードバックされました：</p>
+<ol>
+<li><strong>Wet実験における最適な誘導濃度・プロモーター強度の決定</strong><ul>
+<li>多細胞接着システムにおいて方向性（頭-尾の配列）を実現するためには「単極局在」が必須であり、「両極局在」への過剰な移行は望ましくありません。</li>
+<li>測定によって得られたスイッチング曲線に基づき、<strong>両極移行を抑制しつつ単極局在の出現割合を最大化する最適なIPTG濃度ウィンドウ</strong>（およびそれに適合する強度の構成プロモーター）を特定し、以降の実験条件として採用しました。</li>
+</ul>
+</li>
+<li><strong>細胞接着アッセイプロトコルの改善</strong><ul>
+<li>両極に接着分子（Intimin-Ag / Intimin-Nb等）が提示されることによる多方向へのランダムな網目状凝集を防ぎ、設計通りの直鎖状・方向性を持った細胞配列を安定形成するための標準誘導条件を確立しました。</li>
+</ul>
+</li>
+<li><strong>測定パイプラインの汎用化とコミュニティへの公開</strong><ul>
+<li>スクリプトをCLI化し、位相差と蛍光のオーバーレイ表示や蛍光輝度保有細胞の自動抽出機能を順次実装。</li>
+<li>将来のiGEMチームが細菌の空間極性やタンパク質局在を客観的に評価できるオープンな測定ツールとして整備を進めました。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3>図・写真・データ</h3>
+<ul>
+<li><strong>蛍光（PopZ等の局在タンパク質）の局在確認およびセグメンテーション</strong><ul>
+<li>深層学習セグメンテーションモデル（Omnipose）による細胞境界認識と、PopZ-FPの蛍光局在シグナルのオーバーレイ表示。</li>
+</ul>
+</li>
+</ul>
+<p><em>(※画像は今後の追加実験および解析データの進捗に応じて差し替え・追加予定)</em></p>
+<p><img src="/notion-images/2164284975c83f47.tiff" alt=""></p>
+<ul>
+<li><strong>定量的解析データ（プロファイル・表現型頻度）（予定）</strong></li>
+<li><em>長軸正規化蛍光輝度プロファイル（Median &amp; IQR）</em></li>
+<li><em>IPTG濃度系列に対する局在表現型割合（単極 / 両極 / 拡散 %）の用量反応曲線</em></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>IPTG 濃度 (µM)</th>
+<th>総解析細胞数 ($n$)</th>
+<th>単極型細胞の割合 (%)</th>
+<th>両極型細胞の割合 (%)</th>
+<th>拡散型細胞の割合 (%)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>0 (無誘導)</strong></td>
+<td><code>[n数]</code></td>
+<td><code>[%]</code></td>
+<td><code>[%]</code></td>
+<td><code>[%]</code></td>
+</tr>
+<tr>
+<td><strong>10</strong></td>
+<td><code>[n数]</code></td>
+<td><code>[%]</code></td>
+<td><code>[%]</code></td>
+<td><code>[%]</code></td>
+</tr>
+<tr>
+<td><strong>50</strong></td>
+<td><code>[n数]</code></td>
+<td><code>[%]</code></td>
+<td><code>[%]</code></td>
+<td><code>[%]</code></td>
+</tr>
+<tr>
+<td><strong>100</strong></td>
+<td><code>[n数]</code></td>
+<td><code>[%]</code></td>
+<td><code>[%]</code></td>
+<td><code>[%]</code></td>
+</tr>
+<tr>
+<td><strong>500</strong></td>
+<td><code>[n数]</code></td>
+<td><code>[%]</code></td>
+<td><code>[%]</code></td>
+<td><code>[%]</code></td>
+</tr>
+<tr>
+<td><strong>1000</strong></td>
+<td><code>[n数]</code></td>
+<td><code>[%]</code></td>
+<td><code>[%]</code></td>
+<td><code>[%]</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h3>参考文献</h3>
+<ol>
+<li><strong>Lin, Y., et al. (2021).</strong> &quot;A synthetic bacterial cell-cell adhesion toolbox for programming multicellular morphologies and patterns.&quot; <em>Nature Communications</em>, 12(1), 1–11.</li>
+<li><strong>Cutler, K. J., et al. (2022).</strong> &quot;Omnipose: a high-precision morphology-independent solution for bacterial cell segmentation.&quot; <em>Nature Methods</em>, 19(11), 1438–1448.</li>
+<li><strong>Lim, H. C., &amp; Bernhardt, T. G. (2019).</strong> &quot;POLAR, a general tool for protein localization and redirection in <em>Escherichia coli</em>.&quot; <em>Molecular Microbiology</em>, 112(5), 1477–1494.</li>
+<li><strong>Glass, D. S., &amp; Riedel-Kruse, I. H. (2018).</strong> &quot;A Synthetic Bacterial Cell-Cell Adhesion Toolbox for Programming Multicellular Morphologies and Patterns.&quot; <em>Cell</em>, 174(3), 649–658.</li>
+<li><strong>iGEM Competition.</strong> <em>2026 Judge Handbook: On Measurement &amp; Best Measurement Award</em>.</li>
+</ol>
 
 {% endblock %}

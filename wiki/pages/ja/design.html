@@ -1,0 +1,598 @@
+{% extends "layout.html" %}
+
+{% block title %}デザイン{% endblock %}
+{% block lead %}{% endblock %}
+
+{% block page_content %}
+
+<h1><strong>1. 課題設定 — なぜ「方向」が必要なのか</strong></h1>
+<h2><strong>1.1 等方的な接着では形をつくれない</strong></h2>
+<p>しかし、この系で提示される接着分子は<strong>菌体全体に一様に分布する</strong>。そのため接着は等方的であり、「細胞のどの面でくっつくか」は制御できない。細胞は任意の向きで結合するので、得られる構造は方向性を持たない塊にとどまる。</p>
+<p><strong>本プロジェクトが立てた問い</strong></p>
+<p>接着分子を細胞の「一方の極」だけに集中させることができれば、接着に方向性を与えられるのではないか。</p>
+<p>細胞が特定の面でのみ結合するようになれば、鎖状・分岐状といった、より高次の多細胞構造を設計できる可能性がある。</p>
+<hr>
+<h2><strong>1.2 立ちはだかる問題 — 極性情報は細胞質にあり、接着分子は外膜にある</strong></h2>
+<p>細菌の極を規定するスキャフォールドとして最もよく研究されているのが PopZ である。PopZ は細胞の極に自己集合し、他のタンパク質を極へ繋ぎ止めるハブとして機能する。極に何かを集めたいなら PopZ を使うのが自然な選択となる。</p>
+<p>ところが、ここに本プロジェクト最大の設計上の障壁がある。<strong>PopZ は細胞質（内膜の内側）に存在するのに対し、接着分子である Intimin は外膜に埋まっている</strong>。両者のあいだには内膜・ペリプラズム・外膜という三層が横たわっており、単に両方を発現させても物理的に出会うことができない。細胞質の「ここが極である」という情報を、どうやって外膜まで伝えるかが問題となる。</p>
+<p><em>図 1-1</em>　<em>目指す状態の模式図。PopZ が規定する極に Ag を、反対極に Nb を配置する。</em></p>
+<h1><strong>2. 設計の中核 — ペリプラズムでの架橋</strong></h1>
+<h2><strong>2.1 なぜ「ペリプラズムで繋ぐ」という解法を選んだか</strong></h2>
+<p>細胞質の極性情報を外膜へ伝えるにあたり、いくつかの方針が考えられる。それぞれの利点と難点を比較したうえで、本プロジェクトはペリプラズムでの架橋を採用した。</p>
+<table>
+<thead>
+<tr>
+<th><strong>方針</strong></th>
+<th><strong>内容</strong></th>
+<th><strong>採用しなかった／した理由</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>外膜タンパク質を直接</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>極に局在させる</td>
+<td>Intimin 自体に極局在シグナルを付与する</td>
+<td>外膜タンパク質を極へ誘導する汎用的な機構が確立されておらず、設計の足がかりがない</td>
+</tr>
+<tr>
+<td>脂質・膜曲率を</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>利用する</td>
+<td>極の負曲率を認識する因子（DivIVA 等）に接着分子を繋ぐ</td>
+<td>DivIVA は内膜側で曲率を認識するため、結局「内膜から外膜へ渡す」同じ問題に突き当たる</td>
+</tr>
+<tr>
+<td>ペリプラズムで</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>架橋する（採用）</td>
+<td>内膜に固定したアンカーと、外膜 Intimin からペリプラズム側に伸ばしたドメインを、ペリプラズム内で結合させる</td>
+<td>ペリプラズム内で機能する相互作用ペアが既に報告されており（POLAR 系）、部品を流用できる。膜を貫通させずに情報を渡せる</td>
+</tr>
+</tbody></table>
+<p>採用した設計では、極の情報は次の順に受け渡される。細胞質の PopZ が極に集合し、そこに H3H4 ドメインを介して内膜アンカーが繋がる。内膜アンカーは膜貫通領域（TM）で内膜に固定され、ペリプラズム側に CoilR を突き出す。一方、外膜の Intimin はペリプラズム側に CoilE を伸ばしている。この CoilR と CoilE がペリプラズム内で結合することで、外膜の Intimin が PopZ 極へと係留される。</p>
+<p><em>図 2-1　PopZ 極の断面模式図。細胞質の PopZ から外膜の Intimin まで、ペリプラズムでの CoilR ‖ CoilE 結合を介して情報が渡される。</em></p>
+<h2><strong>2.2 なぜ CoilR / CoilE を架橋に選んだか</strong></h2>
+<p>ペリプラズムは細胞質とは環境が大きく異なる。酸化的でジスルフィド結合が形成されやすく、多くの蛍光タンパク質や相互作用ドメインは本来の機能を失う。したがって、<strong>ペリプラズムで働くことが実証済みの相互作用ペア</strong>を選ぶ必要があった。</p>
+<p>Lim &amp; Bernhardt (2019) は POLAR（PopZ-linked apical recruitment）法において、ペリプラズム内でのタンパク質間相互作用を検出する系を構築し、そこで coiled-coil ペアである CoilR / CoilE がペリプラズムで機能することを示している。本プロジェクトはこの実績を根拠に CoilR / CoilE を採用した。加えて、POLAR 法自体が「PopZ に繋いで極へ呼び寄せる」という発想であり、本設計の思想とも親和性が高い。</p>
+<p><strong>この設計の****最大の不確実性</strong> <strong>— 架橋の距離</strong></p>
+<p>CoilR は内膜に固定され、CoilE は外膜から伸びている。両者が結合するには、内膜と外膜のあいだ（およそ 20–30 nm）を埋めるだけの長さが必要になる。</p>
+<p>コイルドコイル自体の長さとリンカー長が不足していれば、設計がどれほど正しくても結合は起こらない。この「距離が届くか」は文献からは判断できないため、Intimin を組み込む前に単独で検証することにした（実験④）。</p>
+<hr>
+<h2><strong>2.3 なぜ Intimin を接着分子に選んだか</strong></h2>
+<p>Intimin は腸管病原性大腸菌の外膜に存在するアドヘシンで、Glass &amp; Riedel-Kruse (2018) により合成生物学的な接着ツールとして確立されている。本設計が Intimin を採用した理由は三点ある。</p>
+<ul>
+<li>第一に、passenger 領域に任意の Ag / Nb を提示でき、対応するペアのみが結合する直交性が報告されているため、接着の特異性を設計できる。</li>
+<li>第二に、β-barrel が外膜を貫通する構造であるため、ペリプラズム側にドメインを付加する余地がある。これは本設計の係留機構にとって必須の性質である。</li>
+<li>第三に、ペリプラズム側の LysM ドメインは除去可能であることが Leo et al. (2016) に報告されており、そこを CoilE の付与部位として使える見込みがある。</li>
+</ul>
+<p><em>図 2-2　外膜アドヘシン Intimin の構成。passenger に Ag / Nb を提示し、ペリプラズム側の LysM 近傍に CoilE を付与する。</em></p>
+<h2><strong>2.4 なぜ第2極を能動的に作る必要があるのか</strong></h2>
+<p>方向性のある接着を実現するには、菌体の両端をそれぞれ別の分子で規定する必要がある。片方の極に Ag、反対の極に Nb を配置できてはじめて、細胞は特定の向きで連結する。</p>
+<p>当初は、PopZ と、反対極に局在する DivIVA を両方発現させれば自然に両極が分かれると想定していた。しかし文献調査の結果、<strong>Lin et al. (2021) では PopZ は DivIVA を排除しないと報告されている</strong>ことが判明した。すなわち、両者は同じ極に共存しうる。この場合、Ag と Nb が同じ極に混在してしまい、方向性は失われる。</p>
+<p>そこで設計を変更し、反対側に独立した第2極を能動的に作り出す機構を追加することにした。これを実験③として検証する。</p>
+<h1><strong>3. 作製する融合タンパク質と設計根拠</strong></h1>
+<p>本設計を構成する融合タンパク質は五つである。それぞれについて、なぜその構成にしたのかを以下に述べる。</p>
+<table>
+<thead>
+<tr>
+<th><strong>役割</strong></th>
+<th></th>
+<th><strong>構成</strong></th>
+<th><strong>なぜこの構成にしたか</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>片極マーカー</td>
+<td></td>
+<td>mCherry – PopZ</td>
+<td>極の位置を赤蛍光で可視化する基準点。Lin et al. (2021) が mRFP-PopZ で極を可視化した実績に倣った。他の要素をすべて緑（msfGFP）にすることで、二色観察で共局在を判定できる</td>
+<td></td>
+</tr>
+<tr>
+<td>PopZ 結合</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>アダプター</td>
+<td></td>
+<td>SpmXΔC – msfGFP</td>
+<td>PopZ に結合する部分が実際に PopZ 極へ運ばれるかを確かめる検証用。C 末端を欠失させ、本来の機能を排して局在能のみを見る</td>
+<td></td>
+</tr>
+<tr>
+<td>内膜アダプター</td>
+<td></td>
+<td>H3H4 – msfGFP – TM – CoilR</td>
+<td>本設計の中核。H3H4 で PopZ に繋ぎ、TM で内膜に固定し、CoilR をペリプラズムへ提示する。三つの機能を一本に直列させた構成</td>
+<td></td>
+</tr>
+<tr>
+<td>反対極マーカー</td>
+<td></td>
+<td>DivIVA – msfGFP</td>
+<td>第2極を規定する。DivIVA は膜の負曲率を認識して極に集まる性質を持つ</td>
+<td></td>
+</tr>
+<tr>
+<td>外膜アドヘシン</td>
+<td></td>
+<td>Intimin（β-barrel）– Spacer – Ag / Nb</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>ペリプラズム側に LysM / CoilE</td>
+<td>菌体外で接着し、ペリプラズム側で係留される。Spacer は Ag/Nb を膜から離して接着面に露出させるために置く</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>設計上のトレードオフ</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Intimin のペリプラズム側に CoilE を付与するという設計は、係留機能を得る代わりに、β-barrel の膜挿入を妨げるリスクを負う。外膜タンパク質は折りたたみと膜挿入が密接に結びついており、ペリプラズム側への付加は挿入効率を下げうる。</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>このリスクは設計の是非そのものに関わるため、統合実験の中で一括して確かめるのではなく、独立した実験⑤として切り出して検証する。</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h1><strong>4.</strong> <strong>検証戦略</strong> <strong>— なぜ6つに分割したか</strong></h1>
+<p>本設計は、極局在・膜貫通・ペリプラズム相互作用・表層提示・細胞間接着という、性質の異なる複数の要素が直列に繋がって初めて機能する。したがって統合構成をいきなり作って観察しても、うまくいかなかったときにどの段階が原因なのかを特定できない。</p>
+<p>そこで検証を、<strong>①局在の土台を固める → ②〜⑤で各要素を単独で検証する → ⑥で統合する</strong>、という段階構成に分割した。各段階が独立した判定基準を持つため、失敗した箇所を切り分けられる。</p>
+<p><em>図 4-1　検証の全体構成。①で土台を確認し、②〜⑤で各要素を検証、⑥で統合する。</em></p>
+<table>
+<thead>
+<tr>
+<th><strong>実験</strong></th>
+<th><strong>検証する要素</strong></th>
+<th><strong>この実験が答える問い</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>①</td>
+<td>PopZ の片極局在</td>
+<td>極は「一つ」に作れるか。どの発現量なら単極を保てるか</td>
+</tr>
+<tr>
+<td>②</td>
+<td>Intimin–Ag/Nb の接着と直交性</td>
+<td>接着モジュールは機能するか。混線せず特異的に働くか</td>
+</tr>
+<tr>
+<td>③</td>
+<td>第2極の形成</td>
+<td>反対極を独立に作れるか。PopZ と DivIVA を分離できるか</td>
+</tr>
+<tr>
+<td>④</td>
+<td>CoilR–CoilE の相互作用</td>
+<td>架橋はペリプラズムで働くか。距離は届くか</td>
+</tr>
+<tr>
+<td>⑤</td>
+<td>ΔLysM ＋ CoilE Intimin</td>
+<td>改変した Intimin は膜に出て、接着能を保てるか</td>
+</tr>
+<tr>
+<td>⑥</td>
+<td>係留 Intimin の局在と接着</td>
+<td>係留すると Intimin は極に集まるか。接着はどう変わるか</td>
+</tr>
+</tbody></table>
+<h1><strong>5. 各実験の設計</strong></h1>
+<h2><strong>実験① — PopZ の片極局在の確認</strong></h2>
+<h3><strong>なぜこの実験が必要か</strong></h3>
+<p>後続のすべての実験は「PopZ が片極のみに局在している」ことを前提にしている。両極に PopZ ができてしまえば、Ag と Nb を別々の極に配置するという設計自体が成立しない。</p>
+<p>さらに Lin et al. (2021) は、<strong>PopZ が発現量依存的に単極から両極へ切り替わる</strong>ことを報告している。つまり極性は自動的に得られるものではなく、発現量という制御可能なパラメータで決まる。この実験は、後続実験すべての標準条件を決めるための土台にあたる。</p>
+<p><em>図 5-1　発現量を上げると単極から両極へ切り替わる（Lin 2021）。</em></p>
+<h3><strong>何を検討するか</strong></h3>
+<ul>
+<li>IPTG 濃度を段階的に変えたときの mCherry-PopZ の局在（単極か両極か）</li>
+<li>構成的プロモーター（iGEM kit の J23 シリーズ）の強度と局在の関係</li>
+<li>発現量そのものの定量（SDS-PAGE のゲル内蛍光。菌体量の影響を除くため事前に OD600 を測定して揃える）</li>
+<li>誘導なし（リーク発現）の状態でどこまで発現するか</li>
+</ul>
+<h3><strong>何をもって成功とみなすか（判定基準）</strong></h3>
+<ul>
+<li>1 細胞あたりの蛍光フォーカス数を計数し、単極率（フォーカス 1 個の細胞の割合）が最大となる条件を特定できること</li>
+<li>単極率が発現量に対して単調に変化し、両極化が起こる閾値を示せること</li>
+<li>条件間で OD600 が揃っており、観察された差が菌体量ではなく発現量に由来すると言えること</li>
+</ul>
+<h3><strong>想定される結果と、その場合の設計変更</strong></h3>
+<table>
+<thead>
+<tr>
+<th><strong>想定される結果</strong></th>
+<th><strong>次に何を変えるか</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>低〜中発現で単極、高発現で両極化する</td>
+<td>単極率が最大の条件を②〜⑥の標準条件として固定する</td>
+</tr>
+<tr>
+<td>どの条件でも両極化してしまう</td>
+<td>より弱いプロモーター、または低コピー数ベクターに変更する</td>
+</tr>
+<tr>
+<td>IPTG 濃度と発現量の相関が小さく、濃度で制御できない</td>
+<td>誘導系による連続的制御を諦め、強度既知の構成的プロモーター（J23 シリーズ）で発現量を離散的に振る方針へ切り替える</td>
+</tr>
+<tr>
+<td>誘導なしでも発現してしまう（リークが大きい）</td>
+<td>より厳密な抑制がかかる発現系を検討する。あるいはリーク量そのものを一つの条件として扱う</td>
+</tr>
+</tbody></table>
+<h2><strong>実験② — Intimin–Ag/Nb の共凝集と直交性</strong></h2>
+<h3><strong>なぜこの実験が必要か</strong></h3>
+<p>接着モジュールが機能しなければ、極に局在させる意味がない。まず既報（Glass &amp; Riedel-Kruse, 2018）の再現として、Intimin に提示した Ag / Nb で細胞間接着が起こることを確認する。</p>
+<p>同時に検証すべきなのが<strong>直交性</strong>である。最終的に一方の極に Ag、反対極に Nb を配置する以上、使用する Ag/Nb ペアが互いに混線しないことが前提になる。交差反応があれば、意図しない向きで細胞が結合してしまう。</p>
+<p><em>図 5-2　対応するペアのみが共凝集して沈殿する（Glass 2018）。</em></p>
+<h3><strong>何を検討するか</strong></h3>
+<ul>
+<li>Intimin-Ag 発現株と Intimin-Nb 発現株を混合したときに凝集が起こるか</li>
+<li>対応するペア（Ag1–Nb1 等）のみが凝集し、非対応の組み合わせでは凝集しないか（3×3 マトリクスで評価）</li>
+<li>接着に必要な発現量。IPTG 濃度を振って、接着が成立する下限を探る</li>
+<li>単独培養では凝集しないこと（非特異的な凝集との区別）</li>
+</ul>
+<h3><strong>何をもって成功とみなすか（判定基準）</strong></h3>
+<ul>
+<li>混合したときのみ上清の濁度（OD600）が低下すること。等量混合した上清の OD は本来 2 液の平均になるはずであり、それを明確に下回れば凝集体が沈降したと言える</li>
+<li>一度ボルテックスで再懸濁しても、対応ペアのみ速やかに沈降すること（重力沈殿との区別）</li>
+<li>顕微鏡下で、混合時にのみ細胞が塊を形成すること（マクロな沈降とミクロな凝集の一致）</li>
+<li>直交性マトリクスにおいて、対角成分のみが陽性となること</li>
+</ul>
+<h3><strong>想定される結果と、その場合の設計変更</strong></h3>
+<table>
+<thead>
+<tr>
+<th><strong>想定される結果</strong></th>
+<th><strong>次に何を変えるか</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>対応ペアのみ凝集・沈殿する</td>
+<td>直交性が確認されたペアを、以降の極局在実験（⑥）で使う接着ペアとして採用する</td>
+</tr>
+<tr>
+<td>交差反応が見られる</td>
+<td>交差したペアは除外し、直交性が保たれる組み合わせのみを残す</td>
+</tr>
+<tr>
+<td>どのペアでも凝集しない</td>
+<td>発現量不足、表層提示の失敗、菌体密度不足のいずれかを疑う。菌体密度を上げ、提示そのものを別途確認する</td>
+</tr>
+<tr>
+<td>単独でも沈降する</td>
+<td>非特異的凝集を疑い、培養条件・洗浄条件を見直す</td>
+</tr>
+</tbody></table>
+<h2><strong>実験③ — 同じ極への共存の阻害（第2極づくり）</strong></h2>
+<h3><strong>なぜこの実験が必要か</strong></h3>
+<p>方向性のある接着には両端を別々の分子で規定する必要があるが、<strong>Lin et al. (2021) によれば PopZ は DivIVA を排除しない</strong>。単に両方を発現させただけでは同じ極に共存してしまう恐れがある。</p>
+<p>そこで、反対側に独立した第2極を能動的に作り出す機構が必要になる。ここでは性質の異なる二つの戦略を並行して検討し、より確実に分離できる方を採用する。</p>
+<p><em>図 5-3　PopZ 極から DivIVA を排除する二つの戦略（a: 分解、b: 空間的排除）。</em></p>
+<h3><strong>何を検討するか</strong></h3>
+<ul>
+<li>(a) 分解による排除：PopZ に分解機能（プロテアーゼ／degron リクルート）を付与し、PopZ 極に来た DivIVA を選択的に分解させる</li>
+<li>(b) 空間的排除：PopZ に膜貫通タンパク質を融合し、DivIVA の膜認識（負曲率認識）を物理的に妨げる</li>
+<li>二つの戦略のうち、どちらがより低い共局在率を与えるか</li>
+<li>排除機構の付与が PopZ 自身の極局在を損なわないか</li>
+</ul>
+<h3><strong>何をもって成功とみなすか（判定基準）</strong></h3>
+<ul>
+<li>mCherry-PopZ と DivIVA-msfGFP が、同一細胞内で反対の極に分かれて観察されること</li>
+<li>両者の共局在率（同極出現率）が、排除機構なしの対照に比べて有意に低下すること</li>
+<li>細胞長軸に沿った蛍光強度プロファイルで、赤と緑のピークが別々の位置に現れること</li>
+</ul>
+<h3><strong>想定される結果と、その場合の設計変更</strong></h3>
+<table>
+<thead>
+<tr>
+<th><strong>想定される結果</strong></th>
+<th><strong>次に何を変えるか</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>(a) または (b) で共局在率が低下する</td>
+<td>共局在率が低い方を第2極形成の標準構成として採用する</td>
+</tr>
+<tr>
+<td>どちらも不十分</td>
+<td>DivIVA 側の発現タイミングをずらす（誘導時間の分離）方針に切り替える</td>
+</tr>
+<tr>
+<td>排除機構により PopZ の極局在自体が崩れる</td>
+<td>融合する位置・リンカーを見直す。分解機能の活性が強すぎる場合は発現量を下げる</td>
+</tr>
+</tbody></table>
+<h2><strong>実験④ — ペリプラズムでの CoilR / CoilE 相互作用</strong></h2>
+<h3><strong>なぜこの実験が必要か</strong></h3>
+<p>**本設計の成否を決める中核の検証である。**内膜に固定した CoilR と、ペリプラズムに分泌した CoilE が、ペリプラズムという環境で実際に結合するかを確かめる。</p>
+<p>ここで Intimin を組み込まずに単独で検証する点が重要である。統合構成で失敗した場合、「架橋が届かなかった」のか「Intimin の膜挿入が失敗した」のかを区別できない。架橋の成立だけを切り出して確かめることで、設計の前提そのものを検証できる。</p>
+<p><em>図 5-4　内膜アンカーの CoilR が、ペリプラズムの CoilE–FP を捕捉する。</em></p>
+<h3><strong>何を検討するか</strong></h3>
+<ul>
+<li>内膜アンカー（H3H4 – FP – TM – CoilR）と、ペリプラズム提示体（シグナルペプチド – FP – CoilE）を共発現したとき、ペリプラズム側の蛍光が極に濃縮されるか</li>
+<li>リンカー長を変えたときに捕捉効率がどう変わるか（内膜と外膜のあいだ約 20–30 nm を埋められるか）</li>
+<li>ペリプラズムという酸化的環境で、使用する蛍光タンパク質が正しく発色するか</li>
+</ul>
+<h3><strong>何をもって成功とみなすか（判定基準）</strong></h3>
+<ul>
+<li>ペリプラズム側の蛍光が、内膜アンカーの位置（極）と同一箇所に濃縮して観察されること</li>
+<li>CoilR を欠いた内膜アンカー、または非対応 coil を用いたネガティブコントロールでは、ペリプラズム側蛍光が拡散すること</li>
+<li>二色のラインプロファイルでピーク位置が一致すること</li>
+</ul>
+<h3><strong>想定される結果と、その場合の設計変更</strong></h3>
+<table>
+<thead>
+<tr>
+<th><strong>想定される結果</strong></th>
+<th><strong>次に何を変えるか</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>極への濃縮が観察される</td>
+<td>そのリンカー長を実験⑥の構成に引き継ぐ</td>
+</tr>
+<tr>
+<td>捕捉が見られない</td>
+<td>CoilR と TM の間のリンカーを延長し、内膜↔外膜間の距離を埋められるよう設計変更する</td>
+</tr>
+<tr>
+<td>ペリプラズム側の蛍光自体が見えない</td>
+<td>分泌・フォールディングの失敗を疑う。ペリプラズムで発色する蛍光タンパク質へ変更する</td>
+</tr>
+<tr>
+<td>コントロールでも濃縮する</td>
+<td>coiled-coil 非依存の非特異的な局在を疑い、配置を見直す</td>
+</tr>
+</tbody></table>
+<h2><strong>実験⑤ — Intimin の発現条件の検討（ΔLysM ＋ CoilE）</strong></h2>
+<h3><strong>なぜこの実験が必要か</strong></h3>
+<p>Intimin のペリプラズム側に CoilE を付与するという設計は、<strong>β-barrel の膜挿入を妨げるリスク</strong>を伴う。外膜タンパク質は折りたたみと膜挿入が密接に結びついているため、ペリプラズム側への付加が挿入効率を下げる可能性がある。</p>
+<p>Leo et al. (2016) は Intimin の LysM ドメインが除去可能であることを報告しており、ここを CoilE の付与部位として使える見込みがある。ただし「除去できる」ことと「そこに別のドメインを付けても機能する」ことは別であるため、独立に検証する。</p>
+<p><em>図 5-5　LysM を除いても表示・結合を維持できるか、CoilE の付与部位を検討する。</em></p>
+<h3><strong>何を検討するか</strong></h3>
+<ul>
+<li>野生型 Intimin（LysM 有）と ΔLysM ＋ CoilE 改変体で、外膜への挿入・表層提示に差が出るか</li>
+<li>CoilE の付与部位（LysM 内部／LysM 直後）による違い</li>
+<li>改変体が接着能を保っているか（実験②の沈降アッセイを改変体で再実施し、野生型と比較する）</li>
+<li>リンカーの柔軟性が膜挿入に与える影響</li>
+</ul>
+<h3><strong>何をもって成功とみなすか（判定基準）</strong></h3>
+<ul>
+<li>プロテイナーゼ K 処理により表層露出画分が消失すること（＝菌体外に露出している証拠）</li>
+<li>抗体ラベル／フローサイトメトリーで、無傷細胞の表面に Ag/Nb が検出されること</li>
+<li>改変体を用いた沈降アッセイで、野生型と同程度の凝集が観察されること</li>
+</ul>
+<h3><strong>想定される結果と、その場合の設計変更</strong></h3>
+<table>
+<thead>
+<tr>
+<th><strong>想定される結果</strong></th>
+<th><strong>次に何を変えるか</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>表層提示と接着能を両立する付与部位がある</td>
+<td>その構成を実験⑥の係留 Intimin として採用する</td>
+</tr>
+<tr>
+<td>膜挿入が阻害される</td>
+<td>CoilE を β-barrel からさらに離した位置へ移す。またはリンカーを柔軟な (GGGGS)n に変更する</td>
+</tr>
+<tr>
+<td>提示はされるが接着能が落ちる</td>
+<td>passenger 側の Spacer 長を見直し、Ag/Nb の露出を確保する</td>
+</tr>
+</tbody></table>
+<h2><strong>実験⑥ — 係留 Intimin の局在と接着（統合実験）</strong></h2>
+<h3><strong>なぜこの実験が必要か</strong></h3>
+<p>①〜⑤で確立した要素を統合し、本プロジェクトの主張そのものを検証する最終実験である。</p>
+<p>比較するのは**「CoilR–CoilE で係留した Intimin」と「Intimin を全長発現しただけの場合」**の二条件。前者で接着分子が極に集中し、後者では菌体全体に分布するはずである。この差が観察されて初めて、係留機構が働いたと言える。</p>
+<p><em>図 5-6　係留すると極に集中し、全長発現では菌体全体に分布する（予想）。</em></p>
+<h3><strong>何を検討するか</strong></h3>
+<ul>
+<li>構成 A（係留）：H3H4 – FP – TM – CoilR ＋ Intimin – CoilE – Nb/Ag</li>
+<li>構成 B（対照）：Intimin – Nb/Ag の全長発現のみ</li>
+<li>局在の定量：細胞長軸に沿った蛍光強度分布から、極領域（両端 20%）に含まれる蛍光の割合（polarity index）を算出する</li>
+<li>接着様式の変化：凝集塊のサイズ分布、および接着が起きる細胞面の角度分布（極同士で接着しているか）</li>
+</ul>
+<h3><strong>何をもって成功とみなすか（判定基準）</strong></h3>
+<ul>
+<li>構成 A の polarity index が構成 B より有意に高いこと</li>
+<li>顕微鏡下で、構成 A では蛍光が極に集中し、構成 B では側面を含む全体に分布すること</li>
+<li>構成 A において、細胞が極と極で結合する像が観察されること（方向性のある接着の直接的証拠）</li>
+</ul>
+<h3><strong>想定される結果と、その場合の設計変更</strong></h3>
+<table>
+<thead>
+<tr>
+<th><strong>想定される結果</strong></th>
+<th><strong>次に何を変えるか</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>係留条件で極への集中が見られる</td>
+<td>設計が機能したことになる。次段階として、より高次の多細胞構造の設計へ展開する</td>
+</tr>
+<tr>
+<td>局在の差が出ない</td>
+<td>④⑤に立ち返り、架橋の成立と表層提示のどちらが律速かを切り分ける</td>
+</tr>
+<tr>
+<td>局在はするが接着様式が変わらない</td>
+<td>極に集まった分子の数が接着に足りているかを検討し、発現量を上げる</td>
+</tr>
+</tbody></table>
+<h1><strong>6. 観察系の設計</strong></h1>
+<p>①〜⑥のすべてが<strong>蛍光顕微鏡による極局在の判定</strong>に依存している。したがって観察系そのものの設計が、実験の成否と同じだけ重要になる。ここでは、どのような条件を満たす観察系が必要かを整理する。</p>
+<h2><strong>6.1 満たすべき要件</strong></h2>
+<ul>
+<li><strong>細胞と蛍光シグナルの対応が取れること。</strong>「光っている点がどの細胞のどこにあるか」が分からなければ、極に局在していると主張できない。明視野像と蛍光像を同一視野で取得し、重ね合わせられる必要がある。</li>
+<li>**背景蛍光が十分に低いこと。**培地には自家蛍光があり、特に緑チャネルで背景が上がる。発現量の低いコンストラクトでは、シグナルが背景に埋もれる恐れがある。</li>
+<li>**細胞が動かず、かつ生きていること。**観察中に泳いでしまえば撮影できないが、乾燥固定すると細胞が変形し、極かどうかの判定が不安定になる。</li>
+<li>**夾雑物と菌体を区別できること。**非特異的に光る粒子を目的シグナルと取り違える危険がある。</li>
+</ul>
+<h2><strong>6.2 検討する標本作製法</strong></h2>
+<table>
+<thead>
+<tr>
+<th><strong>方法</strong></th>
+<th><strong>内容</strong></th>
+<th><strong>想定される長所と短所</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>水洗・乾燥法</td>
+<td>MQ 水で複数回洗浄して培地を置換し、スライドガラス上で乾燥させる</td>
+<td>培地由来の自家蛍光と塩の析出を除ける。ただし細胞は死滅し、乾燥に伴う変形が生じる</td>
+</tr>
+<tr>
+<td>アガロース</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>パッド法</td>
+<td>2×LB と低融点アガロースを混合したゲルパッド上に菌液を載せる</td>
+<td>生きたまま単層に保持できる。ただし培地成分を含むため背景蛍光が残る</td>
+</tr>
+</tbody></table>
+<p>あわせて、アガロース濃度（最終 1%／1.5%／2%）を振り、菌体と夾雑物の見分けやすさが最適となる条件を決定する。濃度が高いほどゲルが硬く細胞を保持しやすい一方、夾雑物が目立つ可能性がある。</p>
+<h2><strong>6.3 運用上の取り決め</strong></h2>
+<ul>
+<li>観察前に、対象コンストラクトの蛍光タンパク質（mCherry か msfGFP か）を確認し、対応する励起・検出チャネルを選択する。チャネルを取り違えると、非特異的な蛍光を目的シグナルと誤読する危険がある。</li>
+<li>明視野像と蛍光像は、菌体の位置を変えずに同一視野で撮影する。</li>
+<li>掲載する全画像に、スケールバー・菌株名・発現条件（プロモーター／IPTG 濃度）・対物レンズ倍率・露光時間・チャネルを付記する。</li>
+<li>どの条件で何細胞・何反復のデータを取るかを、データ取得前にチーム内で取り決めてから実験を開始する。</li>
+</ul>
+<h1><strong>7. 対照実験と定量の方針</strong></h1>
+<p>局在や接着は主観的な判断に流れやすいため、各実験にどのような対照を置き、何を数値として取るかをあらかじめ定めた。</p>
+<table>
+<thead>
+<tr>
+<th><strong>実験</strong></th>
+<th></th>
+<th><strong>必須の対照</strong></th>
+<th><strong>定量指標</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>①</td>
+<td></td>
+<td>誘導なし（IPTG 0）</td>
+<td>単極率（%）、SDS-PAGE ゲル内蛍光のバンド強度（OD600 で補正）</td>
+<td></td>
+</tr>
+<tr>
+<td>②</td>
+<td></td>
+<td>Ag 単独、Nb 単独、非対応ペア</td>
+<td>上清 OD600 の経時変化、% remaining（= post/pre × 100）</td>
+<td></td>
+</tr>
+<tr>
+<td>③</td>
+<td></td>
+<td>排除機構なしの PopZ ＋ DivIVA</td>
+<td>共局在率（同極出現率）、極間距離</td>
+<td></td>
+</tr>
+<tr>
+<td>④</td>
+<td></td>
+<td>CoilR 欠損アンカー、非対応 coil</td>
+<td>ラインプロファイルのピーク一致、極/細胞質の蛍光比</td>
+<td></td>
+</tr>
+<tr>
+<td>⑤</td>
+<td></td>
+<td>野生型 Intimin（LysM 有）</td>
+<td>表層露出画分の割合、沈降アッセイの % remaining</td>
+<td></td>
+</tr>
+<tr>
+<td>⑥</td>
+<td></td>
+<td>Intimin 全長発現（構成 B）</td>
+<td>polarity index、凝集塊サイズ分布、接着面の角度分布</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>定量に対する姿勢</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>現時点では局在の判定を目視に頼らざるを得ない場面が多い。しかし「極に光って見える」という記述だけでは、観察者の主観や偶然光った夾雑物と区別できない。</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>そのため、画像解析による蛍光強度プロファイルの取得と、単極率・polarity index といった数値指標の導入を設計段階から組み込んでいる。</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h1><strong>参考文献</strong></h1>
+<ol>
+<li>Lin, L. et al. (2021) Nature Communications. — PopZ の単極性、発現量依存的な単極／両極の切り替え、J23116、PopZ と DivIVA の極局在（PopZ は DivIVA を排除しない）</li>
+<li>Lim, H. C. &amp; Bernhardt, T. G. (2019) A PopZ-linked apical recruitment assay (POLAR) for studying protein–protein interactions in the bacterial cell envelope. Molecular Microbiology. — POLAR 法、ペリプラズムでの CoilE / CoilR 相互作用</li>
+<li>Glass, D. S. &amp; Riedel-Kruse, I. H. (2018) A synthetic bacterial cell-cell adhesion toolbox for programming multicellular morphologies and patterns. Cell 174:649–658. — Intimin による Nb/Ag 表示、直交性、沈降アッセイ</li>
+<li>Leo, J. C. et al. (2016) Journal of Biological Chemistry. — Intimin の LysM ドメインは除去可能</li>
+<li>Oberhettinger, P. et al. (2012) PLoS ONE. — Intimin / Invasin 型自己輸送体の膜挿入と表層提示</li>
+</ol>
+<p><a href="">video</a></p>
+<p><a href="https://prod-files-secure.s3.us-west-2.amazonaws.com/734426bc-4b8a-403f-9954-9af43761c3fd/3f2130f6-2eb6-44e0-93df-2137b294acc5/Wet_Design.docx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB466VAFIORL4%2F20260912%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260912T034334Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEOP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIBYAmw6L0tqqvNUBu1OaIgU9VswQ6nQkKDzf7rzCJRQiAiBbfVl8itrJAoRncM8yMmAbm9OFs8dnV5sfpR3823JJnSqIBAis%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDYzNzQyMzE4MzgwNSIMFdUcE3xbPUB1Cwj3KtwD2%2Fp2rpBXldSFIloBrwfT1gIeHa6rYJoZd46oK7l2ul7n%2BIdypUnO4ebgJpKSLzB1%2Fz8B1VlSZDt99wX1Af4s5OHff3%2FYk6AJ%2B4HnBXKT5nReT1YMXEqscEVU5QocCfjhFxB%2BHXDanfnk%2FUzW1KLOfaz6%2Fj35SpAY6pvNEy9j0KdMyTtv%2FwjsapLEDt67KD3RS3ve2sV5zgn994S1aW3XRsyKdbMDpKrCPuIaGVmLCkZOHn32Evg%2FxFEP7zxJ2aheOctx7sCimC7FRNC7BG8aTyXdmhmlGiFNirw0PZEimWncB4mXXNV732h89miIaBsPjFCjhJ8fFmPiiMS%2FCpuBLKDRc56MXxLoIW6b5PzF%2Bg%2FL67wW2yw2omDQ6ry%2BLtWmGvTd6yx%2Bu2aZihV624q9oPsqj6hX6WfhMq58GcNkZyWBmpjTOK0gEsamOx6b0iZJAjYNt4Hb%2FVgubwUHomutk32xW4Rhn3QItgnIRziN4xnNXv%2Ba2YWT8K9ODbFF7P5zc4qtEsvvFuLKtme%2Bz%2BDRWVRV88tH88X8umY%2FZcr2c%2FisFfet3N7FssVNEnKMQ2OGStYosk%2BPo55LmB7YG0rf4yVHeukd11c2dN4e5NR2GFDBBi8RSliBLc%2F8cNow0O%2BS1QY6pgH2yGV1YweFjbpNl4Y28O9vCYfmQvefM8j7qdnsAbdfYA%2B3LlOHU9mdYzmo%2BxEEj8IugUGd4Jgx7vi5jYjnoZeo1CJ7TU%2FyIvb7W9mrGe9SMM%2FXhZsursvDa%2B9PvS5qSG1v46aNZga4d5QbiAcuUPmNwmV3NOeDhgqwqYxj2559ed40Jy0oGM%2F9nQDX7U6OM7VAHVm1INl05g6w6aL6nw3xL4fje1J4&X-Amz-Signature=229a547a0ef94507314073e4f621763c406359d0359008339e4dc997ed45c407&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject">Wet_Design.docx</a></p>
+
+{% endblock %}

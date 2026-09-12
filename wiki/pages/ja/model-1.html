@@ -1,0 +1,100 @@
+{% extends "layout.html" %}
+
+{% block title %}モデル 1{% endblock %}
+{% block lead %}{% endblock %}
+
+{% block page_content %}
+
+<h2>下書き</h2>
+<h3>何を目的にやったか</h3>
+<p>Wet実験における系の設計の支援</p>
+<h3>何をやったか</h3>
+<p>MDシミュレーションにより以下の解析を行った。
+① 内膜・外膜間の結合にコイルドコイルを用いることが妥当かを評価する
+② コイル同士をどの程度近づければよいかの目安を作る
+③ リンカーの適切な長さと種類を提案する</p>
+<p>それぞれについてより具体的に記述する。</p>
+<p>① コイルドコイル単体について100 nsのMDシミュレーションを行った。(動画1)
+シミュレーション中のコイルドコイルの構造安定性を以下の指標を用いて評価した。
+・RMSD (Root Mean Square Deviation)
+・SASA (Solvent Accessible Surface Area)
+・重心距離
+・Rg (Radius of Gyration)
+・水素結合、塩橋、疎水性相互作用の数</p>
+<p>② アンブレラサンプリング法を用いて、コイルドコイル間の相互作用が維持される距離を推定した。手順は以下の通りである。</p>
+<ol>
+<li>通常MD
+MDシミュレーションを行う (100 ns, 120 ns, etc.)</li>
+<li>Pulling simulation (動画2)
+1.の最終構造について、CoilEとCoilRの間の距離を徐々に変化させ、Umbrella sampling用の各距離における初期構造を作成する</li>
+<li>Umbrella sampling (動画3)
+各距離にコイルドコイルを拘束し、MDシミュレーションを行う (5 ns)</li>
+<li>PMF（Potential of Mean Force）の算出
+WHAM解析を用いてPMFを計算する</li>
+</ol>
+<p>③ CHARMM-GUIにより作成した膜周辺の構造を用いて、3種類のリンカーに関して、適切な長さと種類の推定した。手順は以下の通りである。</p>
+<ol>
+<li>TM-linker-CoilEとCoilR-linker-intiminの構造の作成
+AlphaFoldを使用する</li>
+<li>TM-linker-CoilEとCoilR-linker-intiminの膜との統合
+CHARMM-GUIのMembrane Builder → Bilayer Builderを使用する</li>
+<li>TM-linker-CoilE+内膜とCoilR-linker-intimin+外膜の合体
+CHARMM-GUIのMulticomponent Assemblerを使用する</li>
+<li>通常MD
+MDシミュレーションを行う (10 ns)</li>
+<li>コイル同士の結合状態の確認
+塩橋(Salt bridge)や疎水性相互作用を持つ残基のペア数を数える</li>
+</ol>
+<h3>何が分かったか</h3>
+<p>①</p>
+<p>RMSD (図1)
+コイルドコイルの0 nsの構造 (初期構造)とシミュレーション中の各時刻における構造を比較した。RMSDはおおよそ0.1前後で推移しており、すべての時刻で0.25 nm以内に収まった。コイルドコイルは初期構造と比較し、大きな構造変化が起きなかったことがわかった。</p>
+<p>SASA (図2)
+SASAは平均66.9 nm^2でほぼ一定に推移し、おおよそ60-75 nm^2の範囲で変動した。変動係数(CV)は1.99 %と小さかった。そのため、コイルが大きくほどけて溶液への露出面積が増加するような、顕著な構造変化は起きなかったことが示唆された。</p>
+<p>重心距離 (図3)
+重心間距離は0.4-0.8 nmの範囲に維持された。後述のPMF解析では、約2.5 nmでCoilEとCoilRの相互作用が十分に小さくなると考えられ、シミュレーション中はそれよりも小さい重心距離を維持していた。ゆえに、コイルドコイルが解離する傾向は見られなかった。</p>
+<p>Rg (図4)
+Rgは平均約1.86 nmでほぼ一定に推移し、変動係数(CV)は約0.73 %と小さかった。コイルドコイルの広がりに大きな変化はなく、構造は大きく崩れなかったことがわかった。</p>
+<p>水素結合、塩橋、疎水性相互作用の数 (図5, 図6, 図7)
+水素結合数は2-17本、塩橋の数は1-10本、疎水性相互作用を持つ残基のペア数は18-31本の間で保たれていた。シミュレーション中、水素結合、塩橋、疎水性相互作用が継続的に維持されたことが確認できた。</p>
+<p>これらの7つの解析結果から、コイルドコイルは特徴的な界面相互作用により、安定した結合状態を維持することが示唆された。</p>
+<p>さらに、後述の②で行った解析から、コイルドコイル間の距離が大きくなるにつれてPMF(自由エネルギー)が増加することがわかった。つまり、コイルドコイルが結合している状態でPMFが最も低く、熱力学的に安定な状態であることも示唆された。</p>
+<p>②</p>
+<p><img src="/notion-images/13a0726446f31072.png" alt=""></p>
+<pre><code>                                               (_F_ : コイルドコイルにかかる平均力、_U_ : PMF)
+</code></pre>
+<p>上式より、_U_の値がほぼ一定 (定数)になるとき、</p>
+<p><img src="/notion-images/a0b52749fcae35fb.png" alt=""></p>
+<p>_F_がほぼ０になり、コイル間の距離を変化させる方向に力がほとんど働かなくなる。これは、コイル間の相互作用が十分小さくなり、コイル同士を引き離すためにさらなる力を加えなくて良くなったためと考えられる。</p>
+<p>図8より、CoilEとCoilRの間の距離が約2.3-2.5 nm の地点で、PMFの値がほぼ一定となり始めることが読み取れる。このため、CoilEとCoilRの間の距離が約2.3-2.5 nmのとき、コイル間の相互作用が十分小さくなると結論付けられる。</p>
+<p>③</p>
+<p>(GGGGS)3リンカーが有力な候補であるという結果が得られた。動画4から、シミュレーション中にコイルドコイルが解離することなく、結合状態を維持している様子が確認できた。また、水素結合、塩橋、疎水性相互作用の数を比較した結果（図9, 図10, 図11, 表1）、(GGGGS)3リンカーではこれらの相互作用が十分に形成されており、時間の経過とともに結合数は増加する傾向が見られた。
+一方、剛直リンカーを用いた場合には、リンカーによってコイルが押されて傾いたり、10 nsのMDシミュレーションの間に相互作用数が継続的に0になったりすることが確認された。さらに、アミノ酸Serを多く含む柔軟リンカーの中でも比較的剛直性の高い(GSSGSSGS)リンカーでは、10 nsのMDシミュレーションの間に塩橋の数が継続的に0になるなど、コイルドコイル間の結合状態が不安定であることが確認された。</p>
+<p>このため、コイルドコイルが適切な配向をとるための回転自由度を確保しやすい、Glyを多く含む(GGGGS)3リンカーが最適な候補であると結論づけられる。</p>
+<h3>その結果、次に何を変えたか</h3>
+<p>Wet実験では、コイルドコイルを結合因子として引き続き使用する方針となった。また、コイル同士の相互作用が失われるおおまかな距離の基準を得られたことで、実験がうまくいかなかった場合に原因を切り分けやすくなり、実験条件の検討をより効率的に進められるようになった。さらに、intimin側に用いるリンカーを(GGGGS)3に決定することができた。</p>
+<h3>図・写真・データ</h3>
+<p><img src="/notion-images/ad29eea4d1ada598.png" alt=""></p>
+<p><img src="/notion-images/8588b08a0357c248.png" alt=""></p>
+<p><img src="/notion-images/ce76f368da8f67e3.png" alt=""></p>
+<p><a href="https://prod-files-secure.s3.us-west-2.amazonaws.com/734426bc-4b8a-403f-9954-9af43761c3fd/4744d27c-6407-44af-9950-1309537cecd2/100_ns_MD_Jmeetup.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB466WC2B26QD%2F20260912%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260912T034331Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEOP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBus%2BITnBAuZ3cmRc8fj%2FaYUsqnopSOuCDuEpr8Z9C%2FdAiEA6jROzWGYrc3qjqzuRSEg6Opqwn0CWbB0M3JcOM6zWv0qiAQIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDNHIm71%2Bh3bHIeAyZSrcA%2Bu7XoLiqkpNz8ltuP53q6%2BcIetdMLjhJI8lK3zdhSNtwLKkxSUayGBCGYQF5wk8q5kvX%2BspGCE0CqJNgifa3xEv6JOLUGOaCZaJ5wKu2n6UruqO85AHbsWwElHd8VLslq3m0xLw70Md%2BhTxTF%2BAnK9SXeFOlXEEWQ4ulCgEeefU0aVqc2IEoWF2OwObvL9m0S%2FFYoE01xql2G1Qb%2FRGjccKRF6zdo5G%2BkLr758%2FcNjqq3VgfmCs22lJZGmbMxtpJS1%2B3gNvb3rwLqCxm7wQgt7eWtEFAxV54IWbbctIokvnn8cpMLW8qWuk4fbfJGNQf6SBarDm2ly%2B%2BExTIOyD%2BTNX7VQl05pLnhRqr8zpVyY%2FI3BQ0qNDib0TJddxOOgHSivwRPenZshTZuWMhwZYlm8heUt%2F6%2FteoDf8SHZxrMOkqhUSpEXJ%2FliwXVti2zW4QtWNoIg05%2FJnwnuofIH3aXySWonpvbdtcpqClZfsRaeGZyKFMoEU18okPeQGiyoOGS%2FWgO5jn8iVQRY8oB4FJx5t2Opn4vw9EZQGSdYLKwA%2BJgCeMKdYUWL1zZvRQT3CbpvE6XzVk%2FaiMthMETXdJCFkhdu0BpP6RlYDsWAqScTDPuW3NeWko6iV43cvMKjxktUGOqUBTebkFcFIfrjcShrkbMMxN6Kx97DcVyevFWmmCw0J9EEZYOJ0IG53nUDMv9vTtKbjB95%2B6pd%2FS0rbUQSpefN%2BNxTLVaFW3Cpwk1HCRCrUHCM0sj2fk9Kwpwy7FNmLl0jB4f8mxEejkhcFxCKOiVShyBji2YpMuEsYeMDoWYyCmAAXdfUlaRW7lIFJRvlMkszP2npeH7ZEKzx99bOY0SBAU%2BBwnh%2Bs&X-Amz-Signature=6c50173464334799f8f88725200e597bdda4dadceb8a5028d7737bf4f9cefa22&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject">100_ns_MD_Jmeetup.mp4</a></p>
+<pre><code>                                                   動画1. 100 nsのMDシミュレーションの様子
+</code></pre>
+<p><a href="https://prod-files-secure.s3.us-west-2.amazonaws.com/734426bc-4b8a-403f-9954-9af43761c3fd/9c283ac4-3b68-44b6-99b2-96d1c380450d/pulling_reverse_good.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB466WC2B26QD%2F20260912%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260912T034331Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEOP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBus%2BITnBAuZ3cmRc8fj%2FaYUsqnopSOuCDuEpr8Z9C%2FdAiEA6jROzWGYrc3qjqzuRSEg6Opqwn0CWbB0M3JcOM6zWv0qiAQIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDNHIm71%2Bh3bHIeAyZSrcA%2Bu7XoLiqkpNz8ltuP53q6%2BcIetdMLjhJI8lK3zdhSNtwLKkxSUayGBCGYQF5wk8q5kvX%2BspGCE0CqJNgifa3xEv6JOLUGOaCZaJ5wKu2n6UruqO85AHbsWwElHd8VLslq3m0xLw70Md%2BhTxTF%2BAnK9SXeFOlXEEWQ4ulCgEeefU0aVqc2IEoWF2OwObvL9m0S%2FFYoE01xql2G1Qb%2FRGjccKRF6zdo5G%2BkLr758%2FcNjqq3VgfmCs22lJZGmbMxtpJS1%2B3gNvb3rwLqCxm7wQgt7eWtEFAxV54IWbbctIokvnn8cpMLW8qWuk4fbfJGNQf6SBarDm2ly%2B%2BExTIOyD%2BTNX7VQl05pLnhRqr8zpVyY%2FI3BQ0qNDib0TJddxOOgHSivwRPenZshTZuWMhwZYlm8heUt%2F6%2FteoDf8SHZxrMOkqhUSpEXJ%2FliwXVti2zW4QtWNoIg05%2FJnwnuofIH3aXySWonpvbdtcpqClZfsRaeGZyKFMoEU18okPeQGiyoOGS%2FWgO5jn8iVQRY8oB4FJx5t2Opn4vw9EZQGSdYLKwA%2BJgCeMKdYUWL1zZvRQT3CbpvE6XzVk%2FaiMthMETXdJCFkhdu0BpP6RlYDsWAqScTDPuW3NeWko6iV43cvMKjxktUGOqUBTebkFcFIfrjcShrkbMMxN6Kx97DcVyevFWmmCw0J9EEZYOJ0IG53nUDMv9vTtKbjB95%2B6pd%2FS0rbUQSpefN%2BNxTLVaFW3Cpwk1HCRCrUHCM0sj2fk9Kwpwy7FNmLl0jB4f8mxEejkhcFxCKOiVShyBji2YpMuEsYeMDoWYyCmAAXdfUlaRW7lIFJRvlMkszP2npeH7ZEKzx99bOY0SBAU%2BBwnh%2Bs&X-Amz-Signature=3bb01994d06bf5481e410f26b811671cf68ce9f6f7058c6d93c031276a8aca19&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject">pulling_reverse_good.mp4</a></p>
+<p>  　　　　　　　　　　　　      　　動画2. pulling simulationの様子　　　 　</p>
+<p><a href="https://prod-files-secure.s3.us-west-2.amazonaws.com/734426bc-4b8a-403f-9954-9af43761c3fd/b474e561-f0f8-4cf6-8e3c-1d4e3260b8a2/1.0_nm%E3%81%AEUS.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB466WC2B26QD%2F20260912%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260912T034331Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEOP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBus%2BITnBAuZ3cmRc8fj%2FaYUsqnopSOuCDuEpr8Z9C%2FdAiEA6jROzWGYrc3qjqzuRSEg6Opqwn0CWbB0M3JcOM6zWv0qiAQIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDNHIm71%2Bh3bHIeAyZSrcA%2Bu7XoLiqkpNz8ltuP53q6%2BcIetdMLjhJI8lK3zdhSNtwLKkxSUayGBCGYQF5wk8q5kvX%2BspGCE0CqJNgifa3xEv6JOLUGOaCZaJ5wKu2n6UruqO85AHbsWwElHd8VLslq3m0xLw70Md%2BhTxTF%2BAnK9SXeFOlXEEWQ4ulCgEeefU0aVqc2IEoWF2OwObvL9m0S%2FFYoE01xql2G1Qb%2FRGjccKRF6zdo5G%2BkLr758%2FcNjqq3VgfmCs22lJZGmbMxtpJS1%2B3gNvb3rwLqCxm7wQgt7eWtEFAxV54IWbbctIokvnn8cpMLW8qWuk4fbfJGNQf6SBarDm2ly%2B%2BExTIOyD%2BTNX7VQl05pLnhRqr8zpVyY%2FI3BQ0qNDib0TJddxOOgHSivwRPenZshTZuWMhwZYlm8heUt%2F6%2FteoDf8SHZxrMOkqhUSpEXJ%2FliwXVti2zW4QtWNoIg05%2FJnwnuofIH3aXySWonpvbdtcpqClZfsRaeGZyKFMoEU18okPeQGiyoOGS%2FWgO5jn8iVQRY8oB4FJx5t2Opn4vw9EZQGSdYLKwA%2BJgCeMKdYUWL1zZvRQT3CbpvE6XzVk%2FaiMthMETXdJCFkhdu0BpP6RlYDsWAqScTDPuW3NeWko6iV43cvMKjxktUGOqUBTebkFcFIfrjcShrkbMMxN6Kx97DcVyevFWmmCw0J9EEZYOJ0IG53nUDMv9vTtKbjB95%2B6pd%2FS0rbUQSpefN%2BNxTLVaFW3Cpwk1HCRCrUHCM0sj2fk9Kwpwy7FNmLl0jB4f8mxEejkhcFxCKOiVShyBji2YpMuEsYeMDoWYyCmAAXdfUlaRW7lIFJRvlMkszP2npeH7ZEKzx99bOY0SBAU%2BBwnh%2Bs&X-Amz-Signature=dfeb93b9418c754b14f9d0a3e3533d9677b6078ada2a75b0c1157fcc2ca9471f&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject">1.0_nm%E3%81%AEUS.mp4</a></p>
+<pre><code>                                          動画3. 1.0 nm離した位置でのumbrella samplingの様子
+</code></pre>
+<p><a href="https://prod-files-secure.s3.us-west-2.amazonaws.com/734426bc-4b8a-403f-9954-9af43761c3fd/a152e3b1-b4c2-4b14-8853-d5639291eec3/G3.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB466WC2B26QD%2F20260912%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260912T034331Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEOP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBus%2BITnBAuZ3cmRc8fj%2FaYUsqnopSOuCDuEpr8Z9C%2FdAiEA6jROzWGYrc3qjqzuRSEg6Opqwn0CWbB0M3JcOM6zWv0qiAQIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDNHIm71%2Bh3bHIeAyZSrcA%2Bu7XoLiqkpNz8ltuP53q6%2BcIetdMLjhJI8lK3zdhSNtwLKkxSUayGBCGYQF5wk8q5kvX%2BspGCE0CqJNgifa3xEv6JOLUGOaCZaJ5wKu2n6UruqO85AHbsWwElHd8VLslq3m0xLw70Md%2BhTxTF%2BAnK9SXeFOlXEEWQ4ulCgEeefU0aVqc2IEoWF2OwObvL9m0S%2FFYoE01xql2G1Qb%2FRGjccKRF6zdo5G%2BkLr758%2FcNjqq3VgfmCs22lJZGmbMxtpJS1%2B3gNvb3rwLqCxm7wQgt7eWtEFAxV54IWbbctIokvnn8cpMLW8qWuk4fbfJGNQf6SBarDm2ly%2B%2BExTIOyD%2BTNX7VQl05pLnhRqr8zpVyY%2FI3BQ0qNDib0TJddxOOgHSivwRPenZshTZuWMhwZYlm8heUt%2F6%2FteoDf8SHZxrMOkqhUSpEXJ%2FliwXVti2zW4QtWNoIg05%2FJnwnuofIH3aXySWonpvbdtcpqClZfsRaeGZyKFMoEU18okPeQGiyoOGS%2FWgO5jn8iVQRY8oB4FJx5t2Opn4vw9EZQGSdYLKwA%2BJgCeMKdYUWL1zZvRQT3CbpvE6XzVk%2FaiMthMETXdJCFkhdu0BpP6RlYDsWAqScTDPuW3NeWko6iV43cvMKjxktUGOqUBTebkFcFIfrjcShrkbMMxN6Kx97DcVyevFWmmCw0J9EEZYOJ0IG53nUDMv9vTtKbjB95%2B6pd%2FS0rbUQSpefN%2BNxTLVaFW3Cpwk1HCRCrUHCM0sj2fk9Kwpwy7FNmLl0jB4f8mxEejkhcFxCKOiVShyBji2YpMuEsYeMDoWYyCmAAXdfUlaRW7lIFJRvlMkszP2npeH7ZEKzx99bOY0SBAU%2BBwnh%2Bs&X-Amz-Signature=df7aaddccc8e5260b1236d353b9088f42b8b09a6f8bc7cd03c5d1779894b0562&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject">G3.mp4</a></p>
+<pre><code>                          動画4. (GGGGS)3リンカーを用いたときのMDシミュレーションの様子
+</code></pre>
+<p><img src="/notion-images/530fc7efd1f2371e.png" alt=""></p>
+<p><img src="/notion-images/e95ecc2d55a0d120.png" alt=""></p>
+<h3>参考文献</h3>
+<p>Smith, I. P. S., Pedebos, C., &amp; Khalid, S. (2024). Molecular crowding alters the interactions of polymyxin lipopeptides within the periplasm of E. coli: Insights from molecular dynamics. The Journal of Physical Chemistry B, 128(11), 2717–2733. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10961723/">https://pmc.ncbi.nlm.nih.gov/articles/PMC10961723/#sec2</a></p>
+<p>Kalli, A. C., Sansom, M. S. P., &amp; Reithmeier, R. A. F. (2015). Molecular dynamics simulations of the bacterial UraA H+-uracil symporter in lipid bilayers reveal a closed state and a selective interaction with cardiolipin. PLoS Computational Biology, 11(3), e1004123. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4346270/?utm_source=">https://pmc.ncbi.nlm.nih.gov/articles/PMC4346270/?utm_source</a></p>
+<p>Krylov, D., Barchi, J., &amp; Vinson, C. (1998). Inter-helical interactions in the leucine zipper coiled coil dimer: pH and salt dependence of coupling energy between charged amino acids. Journal of Molecular Biology, 279(4), 959–972. <a href="https://www.sciencedirect.com/science/article/abs/pii/S0022283698917624?utm_source=">https://www.sciencedirect.com/science/article/abs/pii/S0022283698917624?utm_source</a></p>
+<p>Doh, J. K., Tobin, S. J., &amp; Beatty, K. E. (2019). Generation of CoilR probe peptides for VIPER-labeling of cellular proteins. Bio-protocol, 9(21), e3412. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7853930/?utm_source=">https://pmc.ncbi.nlm.nih.gov/articles/PMC7853930/?utm_source</a></p>
+<p>van Rosmalen, M., Krom, M., &amp; Merkx, M. (2017). Tuning the flexibility of glycine-serine linkers to allow rational design of multidomain proteins. Biochemistry, 56(50), 6565–6574. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6150656/?utm_source=">https://pmc.ncbi.nlm.nih.gov/articles/PMC6150656/?utm_source</a></p>
+
+{% endblock %}
