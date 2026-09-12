@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}Application{% endblock %}
+{% block lead %}{% endblock %}
+
+{% block page_content %}
+
+<h1><strong>共培養への応用可能性の検討</strong></h1>
+<h2><strong>目的</strong></h2>
+<p>本プロジェクトで開発する大腸菌の空間配置制御技術の応用可能性を検討するため、2種類の大腸菌を用いた共培養系への応用を考案した。</p>
+<h2><strong>検討</strong></h2>
+<p>代謝経路を分担する大腸菌株AおよびBをABAB…のように交互に配置することで、菌株間の距離を縮め、中間代謝産物の受け渡しを効率化できるのではないかと仮説を立てた。</p>
+<p>この応用案の実現可能性や意義を検討するため、国立研究開発法人情報通信研究機構, 未来ICT研究所脳情報通信融合研究センターの細田一史研究員へのインタビューを実施した。特に、直鎖状に配向した細胞を共培養した場合の細胞分裂後の配置や、A・B両菌株間の相互作用、共培養系における空間構造の意義について議論した。</p>
+<h2><strong>分かったこと</strong></h2>
+<p>インタビューを通して、ABAB…という交互配置を維持することには大きな課題があることが分かった。細胞分裂後に結合構造が維持されなければ、ABAB…の配置がAABB…のように崩れ、期待する物質受け渡し効率を維持できない可能性がある。また、A・B菌株の増殖速度や栄養消費の違いによって一方の菌株が優勢になることや、人工的な共培養環境における適応進化によって系の再現性が低下する可能性も指摘された。</p>
+<p>さらに、仮に細胞の増殖を停止させて配置を維持したとしても、「細胞を直鎖状に配置することが共培養にどのような付加価値をもたらすのか」という根本的な課題が残ることが分かった。一方で、細胞同士の空間的な近接が細胞間相互作用に影響を与える可能性については示唆を得た。</p>
+<h2><strong>方針の変更</strong></h2>
+<p>以上の検討から、二種共培養への応用は、直鎖状配置技術の実現難易度に加えて、共培養系自体にも多くの不確定要素が存在するため、現段階では実現性の高い応用案として成立させることが難しいと判断した。そのため、二種共培養に関する調査を終了した。</p>
+<p>今後は、まず大腸菌の直鎖状配向そのものを実現することを第一目標とし、その技術を実現する価値を明確に示せる、より大きなインパクトを持つ応用可能性について検討することとした。</p>
+<h2>図　細田研究員とのインタビューの様子(撮影および掲載許可は得ています)</h2>
+<p><img src="/notion-images/503e5370ba71d407.png" alt=""></p>
+<h2>参考文献</h2>
+<ul>
+<li><a href="https://www.pnas.org/doi/abs/10.1073/pnas.1506781112">https://www.pnas.org/doi/abs/10.1073/pnas.1506781112</a></li>
+<li><a href="https://par.nsf.gov/servlets/purl/10026449">https://par.nsf.gov/servlets/purl/10026449</a></li>
+<li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5461408/">https://pmc.ncbi.nlm.nih.gov/articles/PMC5461408/</a></li>
+<li><a href="https://scispace.com/pdf/distributing-a-metabolic-pathway-among-a-microbial-4rn0thmwa2.pdf">https://scispace.com/pdf/distributing-a-metabolic-pathway-among-a-microbial-4rn0thmwa2.pdf</a></li>
+<li><a href="https://www.nature.com/articles/s41396-022-01352-2">https://www.nature.com/articles/s41396-022-01352-2</a></li>
+<li><a href="https://www.nature.com/articles/s41467-020-16200-0">https://www.nature.com/articles/s41467-020-16200-0</a></li>
+<li><a href="https://academic.oup.com/ismej/article/10/6/1413/7538204">https://academic.oup.com/ismej/article/10/6/1413/7538204</a></li>
+<li><a href="https://elifesciences.org/articles/00960">https://elifesciences.org/articles/00960</a></li>
+<li><a href="https://www.nature.com/articles/s42003-020-01409-y">https://www.nature.com/articles/s42003-020-01409-y</a></li>
+</ul>
+
+{% endblock %}
