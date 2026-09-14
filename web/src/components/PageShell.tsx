@@ -10,12 +10,15 @@ export default function PageShell({
   title,
   lead,
   contentHtml,
+  children,
 }: {
   locale: Locale;
   slug: string;
   title: string;
   lead: string;
   contentHtml: string;
+  // Notion 本文の下に差し込む React の中身（メンバー一覧など）。
+  children?: React.ReactNode;
 }) {
   // 本文の見出しから目次を生成し、見出しにはアンカー用idを付与する。
   const { html, toc } = buildToc(contentHtml);
@@ -41,10 +44,10 @@ export default function PageShell({
               <Toc entries={toc} />
             </aside>
           )}
-          <div
-            className={hasToc ? "col-lg-9" : "col-12"}
-            dangerouslySetInnerHTML={{ __html: html }}
-          />
+          <div className={hasToc ? "col-lg-9" : "col-12"}>
+            <div dangerouslySetInnerHTML={{ __html: html }} />
+            {children}
+          </div>
         </div>
       </div>
       <Footer />

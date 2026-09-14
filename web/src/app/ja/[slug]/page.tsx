@@ -1,4 +1,5 @@
 import PageShell from "@/components/PageShell";
+import MemberList from "@/components/MemberList";
 import { listSlugs, readPage } from "@/lib/wiki";
 
 export function generateStaticParams() {
@@ -18,6 +19,8 @@ export default function JaPage({ params }: { params: { slug: string } }) {
       title={page.title}
       lead={page.lead}
       contentHtml={page.content}
-    />
+    >
+      {params.slug === "members" && <MemberList locale="ja" />}
+    </PageShell>
   );
 }

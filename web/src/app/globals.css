@@ -61,3 +61,211 @@ h3[id] {
   font-size: 0.825rem;
   color: #6c757d;
 }
+
+/* メンバー一覧。iGEM_Homepage の about-us から移植。 */
+.member-section {
+  --member-border: #dce3f1;
+  --member-text-main: #1b1c20;
+  --member-text-sub: #4b4f59;
+  --member-accent: #2f5fa7;
+  margin-top: 2rem;
+}
+
+.member-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 22px;
+  margin-top: 22px;
+}
+
+.member-card {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 16px;
+  padding: 20px 20px 18px;
+  border: 1px solid var(--member-border);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 10px 26px rgba(0, 64, 128, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+  text-align: left;
+}
+
+.member-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
+  border-color: #c3d4f2;
+}
+
+.member-card__avatar {
+  position: relative;
+  height: 96px;
+  width: 96px;
+  border-radius: 20px;
+  background-color: #0f203f;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 155%;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+}
+
+.member-modal__header .member-card__avatar {
+  height: 120px;
+  width: 120px;
+  border-radius: 32px;
+  background-size: 165%;
+}
+
+.member-card__name {
+  margin: 2px 0 4px;
+  font-size: 18px;
+}
+
+.member-card__role {
+  margin: 0;
+  color: #1f2f55;
+  font-weight: 700;
+}
+
+.member-card__focus {
+  margin: 0 0 6px;
+  color: var(--member-text-sub);
+  line-height: 1.5;
+}
+
+.member-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.member-card__tag {
+  background: #eef3fb;
+  border: 1px solid #c3d4f2;
+  color: #1f2f55;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.member-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.member-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.member-modal__content {
+  position: relative;
+  z-index: 1;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 28px;
+  width: 95%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.2);
+}
+
+.member-modal__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--member-text-main);
+}
+
+.member-modal__header {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 22px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.member-modal__name {
+  margin: 4px 0;
+  font-size: 22px;
+}
+
+.member-modal__layout {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.member-modal__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.member-modal__details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin: 0;
+}
+
+.member-modal__details dt {
+  margin: 0 0 6px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--member-accent);
+}
+
+.member-modal__details dd {
+  margin: 0;
+  font-weight: 700;
+  color: var(--member-text-main);
+  line-height: 1.5;
+}
+
+.member-modal__photo {
+  align-self: center;
+  display: flex;
+  justify-content: center;
+}
+
+.member-modal__photo img {
+  width: 100%;
+  height: auto;
+  max-height: 80vh;
+  object-fit: contain;
+  display: block;
+  border-radius: 18px;
+  box-shadow: 0 18px 36px rgba(23, 44, 92, 0.18);
+}
+
+.member-modal__bio {
+  margin: 0 0 10px;
+  color: var(--member-text-sub);
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+@media (max-width: 720px) {
+  .member-modal__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .member-modal__photo {
+    margin-top: 12px;
+  }
+}

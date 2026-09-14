@@ -1,0 +1,237 @@
+[
+	{
+		"id": "taguchi-rintaro",
+		"name": {
+			"ja": "田口 凜太郎",
+			"en": "Rintaro Taguchi"
+		},
+		"role": "Team Leader",
+		"department": {
+			"ja": "物理情報工学科",
+			"en": "Department of Applied Physics and Physico-Informatics"
+		},
+		"year": 3,
+		"tags": [
+			"Team Lead",
+			"Strategy"
+		],
+		"bio": {
+			"ja": "こんにちは！\niGEM Keioのチームリーダーをしています、田口凜太郎です！\n趣味は旅行で国内も海外も好きです✈️\n漫画とアニメもすごく好きで、海外の人と仲良くなるきっかけはだいたいこれです笑\n実は僕がこのチームの言い出しっぺです✨\n生物専攻ではない自分が、iGEMを慶應でやろうと思った理由は次の二つ！\n①生物学と物理学の異分野融合に興味があったから🧬🍎\n②新しいことにチャレンジするのが好きだから🧗\nでも今は、そんな僕の突拍子もないアイディアに賛同し、自分自身の挑戦としてがんばっている仲間たちと一緒にこのプロジェクトを成功させたい、というのが一番のモチベーションです！🔥\n大学生活の集大成！応援よろしくお願いします！",
+			"en": "Hi! I'm Rintaro Taguchi, the team leader of iGEM Keio!\nI love traveling, both internationally and within Japan. ✈️ I'm also a big fan of anime and manga! (It has always been a great icebreaker for making friends from all over the world!🤣)\nActually, I'm the one who started this team, even though I'm not a biology major. ✨ There are two main reasons I decided to do it:\n1. I am interested in the intersection of biology and physics.🧬🍎\n2. I simply love taking on new challenges.🧗\nBut now, my biggest motivation is the team itself. They believed in my wild idea and have made this challenge their own. My goal is to make this project a success together with these incredible teammates!🔥\nThis journey is the culmination of my university life. Thank you so much for your support!"
+		}
+	},
+	{
+		"id": "smets-seki-mylena",
+		"name": {
+			"ja": "関 美玲菜",
+			"en": "Myléna Smets Seki"
+		},
+		"role": "Dry Lab",
+		"department": {
+			"ja": "生命情報学科",
+			"en": "Department of Biosciences and Informatics"
+		},
+		"year": 3,
+		"tags": [
+			"Bioscience",
+			"International"
+		],
+		"bio": {
+			"ja": "こんにちは！ iGEM Keio のメンバー、美玲菜です✨️\n自己紹介はよく聞かれる質問に勝手に答えていくスタイルでいきます\n1. 将来はインターナショナルな研究者になりたい！好きな数学と物理を生かして、バイオの研究に挑戦したい！\n2. パリ出身のハーフ🇲🇫🇯🇵 Smets は父方、Seki は母方の名字。3年前に日本にやってきました✈️\n3. 人見知り/内向的/好奇心旺盛/精神年齢80歳と2歳が共存する勉強大好きギャル😂\n4. バイオ系って言うと「牛とかスケッチするの？」って聞かれるけど、しません🙅‍♀️ ラボ配属はまだだけど、過去にフランスで6週間バイオフォトニクスのインターンを経験、今はiGEMを楽しんでます！\n5. たまにおかしい人。最近のマイブームは「秘密の○○」🤫\n質問なんでも答えます！ぜひコメントしてね💌🍀フォローもよろしく👍",
+			"en": "Hi everyone! I'm Myléna, member of iGEM Keio!!!\nI really wanted to make an introduction that feels true to who I am, so I'll answer some of the questions I always get:\n1. My dream is to become an international researcher! I want to use my love for math and physics to explore biology.\n2. I'm half French, half Japanese 🇫🇷🇯🇵 I moved to Japan 3 years ago.\n3. I'm shy / introverted / super curious / a study-loving “gal” with the soul of both an 80-year-old and a 2-year-old X)\n4. Even though I study biosciences, I don't sketch cows 🐄🙅‍♀️ I once did a 6-week internship in biophotonics in France, and right now I'm having fun with iGEM!\n5. Sometimes I get these random silly obsessions haha… right now it's the concept of \"HIMITSU\".\nAsk me anything! Drop a comment 🙂\n---\nFR/ Salut ! Je m’appelle Myléna et je fais partie d’iGEM Keio ✨\nJ’avais envie d’une présentation qui me ressemble, donc je vais répondre à certaines questions qu’on me pose souvent :\n1. Mon rêve, c’est de devenir une chercheuse internationale ! J’aimerais utiliser les maths et la physique dans la recherche en biologie.\n2. Franco-japonaise 🇫🇷🇯🇵 je suis arrivée au Japon il y a 3 ans.\n3. Timide / introvertie / curieuse / une “gal” qui adore étudier mais qui a à la fois une âme de mamie et d’enfant.\n4. Étudier la biologie ≠ faire des croquis de vaches 🐄🙅‍♀️ J’ai déjà fait un stage de 6 semaines en biophotonique en France, et en ce moment je profite à fond d’iGEM !\n5. Parfois j’ai des délires chelous haha… en ce moment c’est le concept du « HIMITSU » 🤫 (plus confidentiel qu’un simple secret).\nPosez-moi toutes vos questions, j’y répondrai ! 💬"
+		}
+	},
+	{
+		"id": "watanabe-yuta",
+		"name": {
+			"ja": "渡部 裕太",
+			"en": "Yuta Watanabe"
+		},
+		"role": "Wet Lab",
+		"department": {
+			"ja": "生命情報学科",
+			"en": "Department of Biosciences and Informatics"
+		},
+		"year": 3,
+		"tags": [
+			"Bioinformatics",
+			"Project"
+		],
+		"bio": {
+			"ja": "こんにちは！iGEM Keioのメンバーの渡部裕太です！\n趣味は散歩で、知らない街を探検するのが好きです!\nアニメも好きで、面白い作品を見始めるとついつい止まらなくなります💦\niGEMに参加したきっかけは、高校の同期・凜太郎君に誘われ、その面白さに惹かれたからです！\n理由は他にもあって…\n①自分たちで考えてプロジェクトを進められること⭐\n②生物学の知識や技術を幅広く身につけられること！\n最初は不安もありましたが、最近は現実味が増してきて、毎日がとても楽しいです。\n仲間と一緒にこれからも頑張っていくので、少しでも興味を持っていただけたら嬉しいです！",
+			"en": "I'm Yuta Watanabe, a 3rd-year student in the Department of Biosciences and Informatics, and a member of iGEM Keio!\nMy hobby is taking walks—I love exploring unfamiliar towns and discovering new things.\nI'm also into anime, and once I start watching a good series, I can't stop 💦\nI decided to join iGEM because my high school friend, Rintaro, invited me—and I was instantly fascinated by how fun it sounded!\nThere are also two more reasons:\n① We get to design and push forward a project on our own ⭐\n② I can learn a wide range of biological knowledge and techniques!\nAt first, I wasn't sure if I could really keep up, but lately it has started to feel more real, and every day has been so exciting.\nWith the support of my teammates, I'll keep working hard—so I'd be happy if you took even a little interest in our project!\n#igem #igem_keio #keio"
+		}
+	},
+	{
+		"id": "kim-hanseo",
+		"name": {
+			"ja": "金 翰緒",
+			"en": "Hanseo Kim"
+		},
+		"role": "Dry Lab",
+		"department": {
+			"ja": "生命情報学科",
+			"en": "Department of Biosciences and Informatics"
+		},
+		"year": 3,
+		"tags": [
+			"Systems",
+			"Bass"
+		],
+		"bio": {
+			"ja": "こんにちは！iGEM keio メンバー 金翰緒（きむはんそ）です。\n両親ともに韓国人で、ちっちゃいころに日本に来ました。\n趣味は音楽で、高校からベースを弾いています。suchmos、ずとまよがすきです。\niGEMは友達の渡部くんとミレナがiGEMの話をしているのを聞いて興味を持ち参加しました。\n生物のもつミクロなシステムを機械のように、また機械の一部としてデザイン、活用するというこの大会。すでにいろんなアイディアが出ていてとてもたのしみです。ぜひ一緒に盛り上げていきましょう。",
+			"en": "Hey everyone! I'm Hanseo Kim from iGEM Keio.\nMy parents are both Korean, and I came to Japan when I was a kid.\nI love music and have been playing bass since my high school days. I'm a big fan of Suchmos and Zutomayo.\nI decided to join iGEM because I got curious after hearing my friends Watanabe and Myléna talking about it.\nThe whole concept of this competition—designing and using tiny biological systems like they're machines—is fascinating. I'm really excited about all the ideas that are already popping up.\nLet's have a great time and make this awesome together!"
+		}
+	},
+	{
+		"id": "mino-koharu",
+		"name": {
+			"ja": "三野 心暖",
+			"en": "Koharu Mino"
+		},
+		"role": "Wet Lab",
+		"department": {
+			"ja": "機械工学科",
+			"en": "Department of Mechanical Engineering"
+		},
+		"year": 2,
+		"tags": [
+			"Mechanical",
+			"Medical"
+		],
+		"bio": {
+			"ja": "こんにちは！\niGEM Keioの三野心暖（こはる）です🍅\n私は、機械工学科に所属していて、名前の通り物理感の強い分野ですが、バイオ寄りの研究を行っています🧬✨\n大学1年生までは生物が大っ嫌いでしたが、今ではすっかりバイオの沼にハマって大好きになりました❤︎\nまだ学部2年生なので研究室配属は先ですが、JREPプログラムを通して研究をしています🧪\n将来はアメリカで、人工心臓や心疾患の画像診断システムなど、医療機器の開発に携わりたいと思っています🇺🇸🥼\nおしゃべり好きでまだまだ話したいことはありますが、この辺にします😇\n応援よろしくお願いします！☺️",
+			"en": "Hello!\nI'm Koharu Mino 🍅 from iGEM Keio.\nI belong to the Department of Mechanical Engineering, which sounds physics-oriented, but I'm currently working on bio-related study🧬✨ Until my first year at university, I actually hated biology, but now I've fallen in love with it ❤︎\nSince I'm still a sophomore, I haven't been assigned to a lab yet, but I'm conducting research through the JREP program🧪\nIn the future, I want to work in the U.S. on developing medical devices, such as artificial hearts and imaging diagnostic systems for heart diseases 🇺🇸🥼\nI love chatting with people and could talk much more, but I'll stop here now😇\nThank you for your support☺️\n#igem #keio #igem_keio"
+		}
+	},
+	{
+		"id": "jikuhara-keiichi",
+		"name": {
+			"ja": "竺原 圭市",
+			"en": "Keiichi Jikuhara"
+		},
+		"role": "Wiki",
+		"department": {
+			"ja": "物理情報工学科",
+			"en": "Department of Applied Physics and Physico-Informatics"
+		},
+		"year": 3,
+		"status": {
+			"ja": "休学中",
+			"en": "On leave"
+		},
+		"tags": [
+			"Wiki",
+			"CS"
+		],
+		"bio": {
+			"ja": "こんにちは！\niGEM Keioでwikiを担当している、竺原圭市です！✨\n物理とコンピュータサイエンスを専門にしています💻📐\niGEMに参加したきっかけは、リーダーの凜太郎君に「wiki」というホームページ作成をやってくれないかと誘われたことです🌍\n趣味は競技かるたという日本の伝統スポーツです！🎴\nチーム全体のやる気と雰囲気がビタビタに自分の肌に合っています。\niGEM Keioチームとして一緒にいてとても心地よいです！🤝\nこのチームで良い結果を残す。そのために自分のできる限りのことをやり尽くそうと思います！🚀✨",
+			"en": "I'm Keiichi Jikuhara, a 3rd-year student (currently on a leave of absence) in the Department of Applied Physics and Physico-Informatics, and a member of iGEM Keio! 🌟\nMy academic focus is on physics and computer science 💻⚛️\nI decided to join iGEM when our team leader, Rintaro, invited me to take charge of building the \"wiki\" website for the team 🌍\nMy hobby is competitive karuta, a traditional Japanese sport 🎴\nThe team's drive 🔥 and atmosphere ✨ really fit me perfectly, and it feels so comfortable to be part of iGEM Keio 🤝\nI'm determined to give everything I've got 💪 to help this team achieve great results 🚀🌟"
+		}
+	},
+	{
+		"id": "takagi-kou",
+		"name": {
+			"ja": "高木 鴻",
+			"en": "Kou Takagi"
+		},
+		"role": "Wiki",
+		"department": {
+			"ja": "物理学科",
+			"en": "Department of Physics"
+		},
+		"year": 3,
+		"tags": [
+			"Wiki",
+			"Physics"
+		],
+		"bio": {
+			"ja": "名前：高木鴻（たかぎこう）\n学年：3年\n学科：物理学科\nこんにちは！iGEM Keioでwikiを担当している、高木鴻です！\n物理学を専攻しています。物理の理論計算をしたり、専門書を読むのが好きです。\n趣味は物理学の勉強、手品、webゲーム作りです。iGEMにはミレナに誘ってもらいました！プログラミングに興味があったので、挑戦してみようと思いました！\niGEM Keioには優しい人が多くて楽しいです！いいwikiができるように尽力します！",
+			"en": "Hello! My name is Kou Takagi, and I'm in charge of the wiki for iGEM Keio.\nI'm majoring in physics, and I enjoy doing theoretical calculations and reading specialized books. My hobbies include studying physics, performing magic tricks, and creating web games.\nI was invited to join iGEM by Myléna. Since I was interested in programming, I thought I would give it a try!\nEveryone at iGEM Keio is very kind, and I'm having a lot of fun. I will do my best to create a great wiki!"
+		}
+	},
+	{
+		"id": "koide-kano",
+		"name": {
+			"ja": "小出 華乃",
+			"en": "Kano Koide"
+		},
+		"role": "Dry Lab",
+		"department": {
+			"ja": "物理情報工学科",
+			"en": "Department of Applied Physics and Physico-Informatics"
+		},
+		"year": 2,
+		"tags": [
+			"Dry Lab",
+			"Simulation"
+		],
+		"bio": {
+			"ja": "はじめまして！小出華乃です。シミュレーションや計算をやります。趣味は読書、テニス、アニメ鑑賞、音楽鑑賞です。ドライメンバーとしての活動頑張ります✊✊",
+			"en": "Hi! I'm Kano Koide. I run simulations and calculations in iGEM. I love reading books, playing tennis, watching anime and listening to music! I'll do my best as a dry member!✊✊"
+		}
+	},
+	{
+		"id": "osamura-rua",
+		"name": {
+			"ja": "長村 留愛",
+			"en": "Rua Osamura"
+		},
+		"role": "Wet Lab",
+		"department": {
+			"ja": "生命情報学科",
+			"en": "Department of Biosciences and Informatics"
+		},
+		"year": 2,
+		"tags": [
+			"Dry Lab",
+			"Bio"
+		],
+		"bio": {
+			"ja": "こんにちは！iGEM Keioのメンバーの長村留愛です！\n\n趣味は洋服を見たり、K-popを聴くことです🎵ドラマや映画、アニメも大好きで、よく見ています！\n\niGEM Keioに参加した理由は学科の先輩である美玲菜さんがこの活動について紹介してくださり、私もメンバーに加わりたいと思ったからです！\n\n将来は生命現象の謎を解明して、人々の役に立つような研究をしたいです！\n\n素晴らしいメンバーに囲まれて、とても充実しています！これから自分自身ももっと頑張りつつ、楽しんで活動していきたいです☺️",
+			"en": "Hi! I'm Rua Osamura, a member of iGEM Keio!\n\nI love fashion and listening to K-pop 🎵 I'm also really into dramas, movies, and anime—I watch them all the time!\n\nI joined iGEM Keio because Myléna, who's a year above me in university, introduced me to the team and it sounded super interesting. I immediately wanted to be a part of it!\n\nIn the future, I want to uncover the mysteries of life and do research that helps people.\n\nI feel so lucky to be surrounded by such amazing team members, and I’m really enjoying the experience! I’ll keep doing my best and make sure to enjoy every step of this journey☺️"
+		}
+	},
+	{
+		"id": "sato-aoi",
+		"name": {
+			"ja": "佐藤 葵",
+			"en": "Aoi Sato"
+		},
+		"role": "Wet Lab",
+		"department": {
+			"ja": "生命情報学科",
+			"en": "Department of Biosciences and Informatics"
+		},
+		"year": 2,
+		"tags": [
+			"Bioscience",
+			"Project"
+		],
+		"bio": {
+			"ja": "こんにちは😊\niGEM Keioの佐藤葵です！生命科学に興味があり、現在勉強しております📚\n学科の先輩にiGEMを紹介していただいたことがきっかけで、このプロジェクトに参加いたしました！\n\n趣味はK-POPで、特にTXTが大好きです🌟コンサートによく行きます🎶\nまたアートに関心があり、特に書道は約15年間続けていて、今も作品づくりを続けています🖌\n\niGEM Keioではみんなの面白いアイデアを形にしていけるよう、プロジェクトメンバーの一員として楽しみながら活動していきたいです！",
+			"en": "Hello! I’m Aoi Sato from iGEM Keio!\nI’m very interested in life sciences and am currently studying in this field📚 I joined this project after a senior in my department introduced me to iGEM.\nMy hobby is listening to K-POP—especially TXT, who I absolutely love💛 I often go to their concerts🎶 I also enjoy art, and I’ve been practicing calligraphy for about 15 years. I still create pieces regularly🖌\nAt iGEM Keio, I hope to help bring everyone’s creative ideas to life. I’m excited to work as part of the project team and enjoy this experience together🧬"
+		}
+	},
+	{
+		"id": "kobayashi-takumi",
+		"name": {
+			"ja": "小林 拓未",
+			"en": "Takumi Kobayashi"
+		},
+		"role": "Funding",
+		"department": {
+			"ja": "生命情報学科",
+			"en": "Department of Biosciences and Informatics"
+		},
+		"year": 3,
+		"tags": [
+			"Funding",
+			"Music"
+		],
+		"bio": {
+			"ja": "こんにちは！iGEM Keioのfundingを担当している小林拓未です！\n趣味は、音楽を聴いたり奏でたりすることです🎵\n基本的に藤井風やBUMP OF CHICKENなどのJ POPが大好きですが、大学に入ってからはクラッシックやジャズにもハマっています！同好の士が居れば是非声をかけて頂きたい！\nまだ技術は欠片もないですが、いつかピアノで好きな曲を弾けるようになるのが夢です🎹\niGEMに参加したモチベーションとしては、自分が今まで身につけた知識やスキルを実践してアウトプットをする経験をしたかったからです。また、リーダーである凜太郎のiGEMへの熱い想いに共鳴させられたという部分も大きいです😊\n自分にできることを精一杯やっていこうと思います！よろしくお願いします！！",
+			"en": "Hello! I'm Takumi Kobayashi, and I'm in charge of funding for iGEM Keio!\nMy hobbies are listening to and playing music! 🎵 I generally love J-POP artists like Fujii Kaze and BUMP OF CHICKEN, but since entering university, I've also gotten really into classical and jazz music! If you share these interests, please feel free to come talk to me!\nI don't have the technique yet, but my dream is to be able to play my favorite songs on the piano someday🎹\nMy motivation for joining iGEM was that I wanted to experience putting the knowledge and skills I've acquired so far into practice. Also, a huge factor was that I deeply resonated with our leader, Rintaro's, passion for iGEM!\nI’m going to give it my all and do what I can! I look forward to working with you☺️"
+		}
+	}
+]
