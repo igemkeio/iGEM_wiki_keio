@@ -70,18 +70,36 @@ const notion = new Client({
 });
 const n2m = new NotionToMarkdown({ notionClient: notion });
 
-// 一時的な接続断（Premature close 等）に備えて数回リトライする薄いラッパ。
-async function withRetry(label, fn, retries = 3) {
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Notion の上限は平均 3 req/秒。notion-to-md はブロックごとに叩くので
+// 呼び出しの間隔を空けて平均レートを抑える。
+const MIN_INTERVAL_MS = 350;
+let lastCallAt = 0;
+async function throttle() {
+  const wait = lastCallAt + MIN_INTERVAL_MS - Date.now();
+  if (wait > 0) await sleep(wait);
+  lastCallAt = Date.now();
+}
+
+// 一時的な接続断（Premature close 等）と rate limit に備えてリトライする薄いラッパ。
+// rate limit のときは Notion が返す Retry-After に従い、無ければ指数バックオフで待つ。
+async function withRetry(label, fn, retries = 5) {
   for (let attempt = 1; ; attempt++) {
     try {
+      await throttle();
       return await fn();
     } catch (err) {
       if (attempt > retries) throw err;
-      const waitMs = attempt * 1000;
+      const limited = err.code === "rate_limited" || err.status === 429;
+      const retryAfterSec = Number(err.headers?.["retry-after"]);
+      const waitMs = limited
+        ? (Number.isFinite(retryAfterSec) ? retryAfterSec * 1000 : 2000 * 2 ** (attempt - 1))
+        : attempt * 1000;
       console.warn(
         `[notion-sync] ${label} 失敗(${attempt}/${retries}): ${err.message} — ${waitMs}ms 後に再試行`
       );
-      await new Promise((r) => setTimeout(r, waitMs));
+      await sleep(waitMs);
     }
   }
 }
