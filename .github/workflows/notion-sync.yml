@@ -12,6 +12,12 @@ permissions:
   contents: write
   pull-requests: write
 
+# 同じトークンで並走すると Notion の rate limit に当たるため直列化する。
+# 走行中のものは止めず、後から来たものを待たせる。
+concurrency:
+  group: notion-sync
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
