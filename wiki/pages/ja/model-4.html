@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block title %}モデル 4{% endblock %}
+{% block lead %}{% endblock %}
+
+{% block page_content %}
+
+<h2>下書き</h2>
+<h3>何を目的にやったか</h3>
+<p>発現量・極局在をパラメータとして、どのような設計にすれば方向のある鎖状の接着ができるかを予測する．</p>
+<p>接着の過程を可視化する．</p>
+<h3>何をやったか</h3>
+<p>幾何モデルで、発現量・局在から極接触・側面接触の結合数を計算し、鎖・束・二量体のどれになるかを予測した。</p>
+<p>あわせて時間発展シミュレーションを構築し、多数の細胞が実際に出会い結合し、鎖・束へ育っていく過程を動画で可視化した。</p>
+<h3>何が分かったか</h3>
+<p>実測されている一様局在では束になる（極での接触8対:側面での接触100対）。鎖状の接着には両極への局在が必須で、極に集めるだけでなく先端への集中も必要。</p>
+<p>発現量は接合の強さのみを決め、形は決めない。</p>
+<p>大腸菌自身の運動性（run-and-tumble）を検証した結果、受動拡散だけで実際の凝集速度（OD600 0.1–1で半減時間4〜40分）を説明でき、能動運動は結合の形成には不要と判明した。
+遊泳の推進力（~0.4 pN）は結合の破断力（16.1 pN）より弱く結合を壊せない。</p>
+<h3>その結果、次に何を変えたか</h3>
+<h3>図・写真・データ</h3>
+<p><img src="/notion-images/48b7340716660fa8.gif" alt=""></p>
+<p>接着タンパク質を大腸菌に一様に分布させた場合</p>
+<p><img src="/notion-images/609eb2ee49caa706.gif" alt=""></p>
+<p>接着タンパク質を大腸菌の極に局在させた場合</p>
+<p><img src="/notion-images/fa4c5b9beced29a0.gif" alt=""></p>
+<p>接着タンパク質を大腸菌の極に局在させ，震盪培養した場合</p>
+<p><img src="/notion-images/63cf25fe0485783c.gif" alt=""></p>
+<p>凝集したのち沈澱する（同じ大きさのクラスターとしか接着しない）と仮定した場合</p>
+<p><img src="/notion-images/392928560136ac19.gif" alt=""></p>
+<p>大腸菌の運動を考慮した場合</p>
+<h3>参考文献</h3>
+<p><strong>Costan SA, Ryan PM, Kim H, Wolgemuth CW and Riedel-Kruse IH</strong> (2024) Biophysical characterization of synthetic adhesins for predicting and tuning engineered living material properties. <em>Matter</em> <strong>7</strong>, 2125–2143. <a href="https://doi.org/10.1016/j.matt.2024.03.019">https://doi.org/10.1016/j.matt.2024.03.019</a></p>
+<p><strong>Glass DS and Riedel-Kruse IH</strong> (2018) A synthetic bacterial cell–cell adhesion toolbox for programming multicellular morphologies and patterns. <em>Cell</em> <strong>174</strong>, 649–658. <a href="https://doi.org/10.1016/j.cell.2018.06.041">https://doi.org/10.1016/j.cell.2018.06.041</a></p>
+<p><strong>Berg HC and Brown DA</strong> (1972) Chemotaxis in <em>Escherichia coli</em> analysed by three-dimensional tracking. <em>Nature</em> <strong>239</strong>, 500–504. <a href="https://doi.org/10.1038/239500a0">https://doi.org/10.1038/239500a0</a></p>
+
+{% endblock %}
