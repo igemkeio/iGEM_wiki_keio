@@ -1,0 +1,111 @@
+{% extends "layout.html" %}
+
+{% block title %}デザイン{% endblock %}
+{% block lead %}{% endblock %}
+
+{% block page_content %}
+
+<p><strong>Design</strong></p>
+<h1><strong>Introduction</strong></h1>
+<p>細胞間接着は多細胞システムの根幹をなし、細胞同士の協調と空間的な組織化を支えている。近年、ナノボディ－抗原ペアを外膜に提示することで、大腸菌に高度にモジュラーで特異的な人工接着を与えられることが示された [1]。この手法は多細胞工学を前進させたが、ひとつの本質的な制約を残している。<strong>接着分子が菌体表面に等方的に分布するため、細胞が「どの面で」隣の細胞と接着するかを制御できない</strong>という点である。</p>
+<p>天然の多細胞生物では、接着は方向性をもって起こる。上皮細胞が極性をもち、頂端側と基底側で異なる分子を提示することで、シートや管といった高次構造が生まれる。等方的な接着からは、無秩序な凝集塊しか得られない。</p>
+<p>我々のプロジェクトは、<strong>接着に「方向」を与えること</strong>を目的とする。具体的には次の3つの目標を設定した。</p>
+<ol>
+<li>細菌の片方の極に接着分子を集中させ、接着の異方性を実現する</li>
+<li>菌体の両端をそれぞれ異なる分子で規定し、方向性のある連結を可能にする</li>
+<li>既存の直交接着ペアと組み合わせ、機能を与えた菌株を定義された順序と長さで配列する</li>
+</ol>
+<h1><strong>Directing Adhesion to a Single Pole</strong></h1>
+<p>タンパク質を細胞の特定の極に集中させる天然の機構として、<em>Caulobacter crescentus</em> の <strong>PopZ</strong> を採用した。PopZ は細胞質内で自己集合して極にマトリクスを形成し、多様なタンパク質を極へリクルートするスキャフォールドである。異種宿主である大腸菌でも極に局在することが報告されており、足場として扱いやすい [2]。</p>
+<p>ただし PopZ の局在は発現量に依存し、発現量が上がると単極から両極へ移行する [2]。接着に方向性を与えるには単極性が前提となるため、発現量とプロモーター強度は慎重に選ぶ必要がある。</p>
+<p>方向性のある連結には、菌体の両端をそれぞれ別の分子で規定する必要がある。反対極のマーカーには、負の膜曲率を認識して極に局在する <strong>DivIVA</strong> を用いる。ただし PopZ は DivIVA を排除しないと報告されているため [2]、単純な共発現では同一極に共存してしまう。そこで PopZ 側に、分解タグまたは膜貫通ドメインによる能動的な排除機構を付与し、独立した第2極を形成する設計とした。</p>
+<p>この第2極の形成は、実験に入る前に <strong>Dry で条件を検討</strong>する。第一に、PopZ と DivIVA が別々の極に分離するための<strong>発現量の比とプロモーター強度</strong>を、極局在の発現量依存性 [2] を踏まえて見積もる。第二に、PopZ に付与する<strong>分解タグの位置</strong>を、それが PopZ の自己集合や極局在の機能を損なわない箇所となるよう構造予測に基づいて決定する。これらの検討を経てから、実際の構築と観察に進む。</p>
+<h1><strong>Programming Order and Length</strong></h1>
+<p>極を2つ独立に確立できると、<strong>1つの細胞に、互いに<strong><strong>結合しない</strong></strong>2種類の接着分子を空間的に分離して提示できる</strong>ようになる。これは既存のツールボックスにはない2つの能力を生む。</p>
+<h2><strong>機能を持った菌株を順に並べる</strong></h2>
+<p>Glass らは、直交性（各接着分子が設計された相手とのみ結合する）と組み合わせ可能性（複数の接着分子を1細胞で機能させる）をもつ3組の Ag–Nb ペアを確立している [1]。等方的なディスプレイでは、この直交性で決められるのは「どの細胞種とどの細胞種が結合するか」までで、並ぶ順序は規定されない。</p>
+<p>極性ディスプレイと直交ペアを組み合わせると、1つの細胞が片極に Ag、反対極に別のペアの Nb を提示できる。このとき各細胞の両隣が一意に決まり、<strong>定義された順序をもつ****鎖</strong>を構成できる。</p>
+<p><img src="/notion-images/4cf2ee0360b23b83.png" alt=""></p>
+<p>図1. 直交する接着ペアを両極に振り分けることで各細胞の両隣が一意に決まり、X ─ Y ─ Z の順序をもつ鎖が構成される。</p>
+<p>これは、機能を与えた菌株を任意の順序で並べる操作にあたる。多段階の代謝経路を菌株に分割し、経路の順序どおりに隣接させれば中間体の拡散距離が最短になるなど、応用が期待できる。既存のツールボックスは「どの菌株が接触するか」を制御できるが、<strong>接触の順序</strong>は制御できない。極性の導入がこれを可能にする。</p>
+<h2><strong>鎖の終端を定義する</strong></h2>
+<p>連結を止める仕組みがなければ、鎖は資源が尽きるまで伸び続け、長さは制御できない。**片極にのみ接着分子を提示し、反対の極を空けた「キャップ株」**を用いれば、鎖はそこで終端する。キャップ株の混合比が平均鎖長を決めるため、連鎖停止剤と同じ原理で長さを定量的に制御できる。この空極には、Glass らが対照として用いた接着ドメインをもたない構築物をそのまま転用できる [1]。</p>
+<p><img src="/notion-images/2634678aa2e47cb9.png" alt=""></p>
+<p>図2. 片極にのみ接着分子を提示したキャップ株が鎖の両端を終端させ、長さの定まった有限の構造が得られる。</p>
+<h1><strong>Choosing an Outer Membrane Anchor</strong></h1>
+<p>接着分子を菌体外に提示するには外膜ディスプレイ系が必要となる。<strong>AIDA-I</strong> や <strong>EhaA</strong> といった古典的オートトランスポーター（Type Va）は幅広い passenger の提示に用いられてきたが [11, 12]、これらは passenger が N末端側・β-barrel が C末端側という構成をとる。</p>
+<p>我々のプロジェクトでは、接着分子そのものではなく<strong>アンカーのペリプラズム側に機能ドメインを追加する</strong>必要がある。この点で <strong>inverse autotransporter（Type Ve）である Intimin</strong> が決定的に有利であった。Intimin はドメインの順序が逆転しており、β-barrel が N末端側・passenger が C末端側に位置するため [3, 4]、<strong>ペリプラズム側に自由な N末端が存在する</strong>。ここが、架橋のための付加点となる。加えて Intimin は既存の接着ツールボックスで実績があり [1]、互換性の面でも適している。</p>
+<p>出発点には、Glass らが用いた <strong>Neae</strong>（EHEC O157:H7 intimin の N末端 1–654）を用いた [1]。</p>
+<h1><strong>Bridging the Periplasm</strong></h1>
+<p>極性の情報は<strong>細胞質</strong>にあり（PopZ）、接着分子は<strong>外膜</strong>にある（Intimin）。両者は内膜とペリプラズムを隔てて直接出会えない。これが設計上の最大の課題であった。</p>
+<p>我々はこの隔たりを、<strong>ペリプラズム内での特異的なタンパク質間相互作用によって架橋する</strong>。内膜に固定したアダプターがペリプラズムに CoilE を提示し、外膜 Intimin からペリプラズム側に伸ばした CoilR がこれと結合する。これにより、PopZ の極性情報が外膜の Intimin へと伝えられる。</p>
+<p><img src="/notion-images/d219c228f2b7be5b.png" alt=""></p>
+<p>図3. PopZ 極の断面（内膜 – ペリプラズム – 外膜）。細胞質の PopZ に結合した内膜アダプターが CoilE を提示し、外膜 Intimin から伸びる CoilR と結合することで、Intimin が PopZ 極へ係留される。</p>
+<p>架橋を担うコイルドコイルペアには、<strong>CoilE / CoilR</strong> を採用した。このペアは Lim &amp; Bernhardt (2019) の POLAR 系において、ペリプラズム内で機能することが実証されている [5]。ペリプラズムは DsbA/DsbB によりジスルフィド結合が形成される酸化的な環境であり、細胞質とは条件が異なるため [6]、細胞質で機能するコイルが同様に働く保証はない。そこで独自に設計するのではなく、ペリプラズムでの機能が実証済みの配列をそのまま採用した。採用した CoilR にはシステインが含まれず、Intimin のアンカー部分にもシステインが存在しないため、酸化環境における誤ったジスルフィド形成のリスクも回避される。</p>
+<h1><strong>Engineering the Intimin Anchor</strong></h1>
+<p>CoilR を Intimin の<strong>N末端（K46 の直後）に配置</strong>する設計を主案とした。理由は三点ある。第一に、シグナルペプチド切断後の N末端は自由端となるため、CoilR が相手の CoilE に対して自由に配向でき、幾何学的な制約を受けない。第二に、N末端（ペリプラズム側）への異種配列の付加は先行研究で表層露出が確認されている [7, 8]。第三に、折り畳まれた菌体外ドメインへの内部挿入は分泌を停止させることが報告されており [7]、末端への付加はこのリスクを避けられる。なお、シグナルペプチド切断効率を保つため、切断部位直後の数残基は天然配列のまま残した。</p>
+<p>これと並行して、<strong>LysM ドメインを CoilR で置換した版</strong>も構築する。LysM は酸性条件下でペプチドグリカンに結合するため [9]、Intimin がサッキュラスに繋留されて極への移動が妨げられる可能性がある。LysM を欠く Invasin が正常に表層提示することから [9]、その除去は許容されると判断した。この2案は代替ではなく、それぞれ「CoilR を安全に付加できるか」と「PG 結合の除去が極局在を改善するか」という異なる問いに答える。</p>
+<p>CoilR と Intimin 本体をつなぐリンカーには、柔軟な GS リンカーを用いた [10]。融合体の設計は、実験に入る前に <strong>Dry のシミュレーションで検証</strong>した。構造予測（AlphaFold）に加えて分子動力学（MD）シミュレーションを行い、CoilR がヘリックスとして正しく折り畳まれるか、リンカーが柔軟なヒンジとして機能するか、CoilR–CoilE の結合が保たれるかといった配列と機能の妥当性を確認したうえで、リンカー長 (GGGGS)×3 を採用した。</p>
+<h1><strong>Construct Design</strong></h1>
+<p>主要な構築物と、その役割を以下に示す。接着分子（Intimin 融合体）には蛍光タンパク質を融合していない。菌体外 passenger への異種ドメインの融合は分泌を阻害しうるため [7]、細胞の識別は細胞質に発現させた蛍光タンパク質に委ねる。これは Glass らと同じ方針である [1]。</p>
+<table>
+<thead>
+<tr>
+<th><strong>構築物</strong></th>
+<th><strong>構成</strong></th>
+<th><strong>役割</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>片極マーカー</td>
+<td>mCherry – PopZ</td>
+<td>極の可視化</td>
+</tr>
+<tr>
+<td>内膜アダプター</td>
+<td>H3H4 – TM – CoilE</td>
+<td>極性情報をペリプラズムへ伝達</td>
+</tr>
+<tr>
+<td>反対極マーカー</td>
+<td>DivIVA – msfGFP</td>
+<td>第2極の規定</td>
+</tr>
+<tr>
+<td>係留 Intimin（Ag / Nb）</td>
+<td>CoilR – Neae – Ag2 / Nb2</td>
+<td>接着分子の極局在</td>
+</tr>
+<tr>
+<td>係留 Intimin（ΔLysM 版）</td>
+<td>LysM を CoilR に置換</td>
+<td>PG 結合の除去</td>
+</tr>
+<tr>
+<td>細胞質マーカー</td>
+<td>msfGFP / mCherry</td>
+<td>混合培養での株の識別</td>
+</tr>
+</tbody></table>
+<p>構築物は2系統に分け、複製起点と選択マーカーが競合しないようにした。Intimin 融合構築物は <strong>pTac（IPTG 誘導）／AmpR</strong> に、PopZ・極性系構築物は <strong>p15A（中コピー）／KmR</strong> に搭載する。Intimin 側に誘導系を用いるのは、外膜タンパク質の過剰発現が膜ストレスを招くため、発現量を調整できる必要があるからである [1]。PopZ 側に中コピーを用いるのは、単極性が発現量に依存するためである [2]。</p>
+<p>構築には制限酵素を用いない <em>in vivo</em> クローニング（iVEC）を採用し、すべての設計は合成 DNA の発注前に配列レベルで確定した。詳細なプロトコルは Experiments を参照。</p>
+<h1><strong>Validation</strong></h1>
+<p>設計が意図どおり機能するかを、次の3点について検証する。評価はすべて凝集アッセイと蛍光顕微鏡観察で行う。接着分子（Intimin 融合体）は無標識であるため、細胞質マーカーで株を識別し、mCherry–PopZ で極の位置を追う。詳細な手順と結果は Proof of Concept に示す。</p>
+<p><strong>接着能の保持。</strong> CoilR を付加しても Intimin の接着機能が保たれることを確認する。Ag 株と Nb 株を混合して凝集アッセイ（OD600）を行い、野生型 Neae と比較する。接着分子は無標識のため、凝集そのものが表層提示と機能の直接の指標となる。IPTG 濃度を振り、各構築物の最適発現量を決定する。</p>
+<p><strong>第2極の形成。</strong> PopZ と DivIVA が反対の極に分離しているかを、mCherry–PopZ と DivIVA–msfGFP の二色観察で確認する。両者が同一極に共存していれば、排除機構が機能していないことになる。まずこれはDryにおける解析で、両極局在が可能になる条件を明らかにする。そうした後にDryから得た結果を基に設計を行い、両極局在するかを顕微鏡観察により確認する。</p>
+<p><strong>方向性と選択性。</strong> Ag 株と Nb 株を混合し、二色共焦点観察で接着の様式を評価する。接着分子は無標識のため、その極局在は「接着が細胞のどの位置で起きるか」という機能的な帰結として読み出す。極同士の接着が起こり鎖状構造が形成されれば、接着分子が極に局在していることの証拠となる。あわせて、対応する直交ペアのみが接着すること（選択性）、およびキャップ株の混合比によって鎖長が制御できること（終端）を確認する。</p>
+<h1><strong>References</strong></h1>
+<p>[1] Glass, D. S. &amp; Riedel-Kruse, I. H. (2018) A synthetic bacterial cell-cell adhesion toolbox for programming multicellular morphologies and patterns. <em>Cell</em> 174, 649–658.</p>
+<p>[2] Lin, D. W. <em>et al.</em> (2021) Construction of intracellular asymmetry and asymmetric division in <em>Escherichia coli</em>. <em>Nature Communications</em> 12, 888. — 大腸菌での人工細胞極性、mRFP-PopZ を J23116 で発現、発現量依存の極局在</p>
+<p>[3] Leo, J. C., Grin, I. &amp; Linke, D. (2012) Type V secretion: mechanism(s) of autotransport through the bacterial outer membrane. <em>Phil. Trans. R. Soc. B</em> 367, 1088–1101.</p>
+<p>[4] Oberhettinger, P. <em>et al.</em> (2012) Intimin and invasin export their C-terminus to the bacterial cell surface using an inverse mechanism compared to classical autotransport. <em>PLoS ONE</em> 7, e47069.</p>
+<p>[5] Lim, H. C. &amp; Bernhardt, T. G. (2019) A PopZ-linked apical recruitment assay (POLAR) for studying protein–protein interactions in the bacterial cell envelope. <em>Molecular Microbiology</em> 112, 1757–1768. — H3H4 ペプチドと PopZ による極への標的化、ペリプラズムを含む区画横断の相互作用検出</p>
+<p>[6] Kadokura, H. &amp; Beckwith, J. (2010) Mechanisms of oxidative protein folding in the bacterial cell envelope. <em>Antioxidants &amp; Redox Signaling</em> 13, 1231–1246.</p>
+<p>[7] Leo, J. C. <em>et al.</em> (2016) Secretion of the intimin passenger domain is driven by protein folding. <em>Journal of Biological Chemistry</em>.</p>
+<p>[8] Fairman, J. W. <em>et al.</em> (2012) Crystal structures of the outer membrane domain of intimin and invasin. <em>Structure</em> 20, 1233–1243.</p>
+<p>[9] Leo, J. C. <em>et al.</em> (2015) The intimin periplasmic domain mediates dimerisation and binding to peptidoglycan. <em>Molecular Microbiology</em> 95, 80–100.</p>
+<p>[10] Chen, X. <em>et al.</em> (2013) Fusion protein linkers: property, design and functionality. <em>Advanced Drug Delivery Reviews</em> 65, 1357–1369.</p>
+<p>[11] Wells, T. J. <em>et al.</em> (2008) EhaA is a novel autotransporter protein of enterohemorrhagic <em>E. coli</em> O157:H7. <em>Environmental Microbiology</em> 10, 589–604.</p>
+<p>[12] Jose, J. &amp; Meyer, T. F. (2007) The autodisplay story. <em>Microbiology and Molecular Biology Reviews</em> 71, 600–619.</p>
+
+{% endblock %}
