@@ -5,40 +5,175 @@
 
 {% block page_content %}
 
-<div class="row mt-4">
-	<div class="col-lg-8">
-		<h2>このページに含むべき内容は？</h2>
-		<hr />
-		<ul>
-			<li>実験と研究の結果を明確かつ客観的に説明する。</li>
-			<li>データを視覚化するために表、グラフ、画像を使用する。</li>
-			<li>プロジェクトの目標の文脈で発見の意味を議論する。</li>
-			<li>傾向、パターン、または重要な観察を強調する。</li>
-			<li>発見を統合し、その全体的な意義を議論するための分析要約セクションを含める。</li>
-			<li>潜在的な応用、さらなる研究、開発を含む、プロジェクトの将来計画を概説する。</li>
-			<li>何が間違っていたか、これらの経験から何を学んだかを説明する。</li>
-			<li>潜在的な改善または代替アプローチを議論する。</li>
-			<li>科学的誠実性と透明性の重要性を強調する。</li>
-		</ul>
-	</div>
-
-	<div class="col-lg-4">
-		<h2>インスピレーション</h2>
-		<hr />
-		<ul>
-			<li><a href="https://2024.igem.wiki/heidelberg/results">2024 Heidelberg</a></li>
-			<li><a href="https://2024.igem.wiki/marburg/results">2024 Marburg</a></li>
-			<li><a href="https://2024.igem.wiki/epfl/results">2024 EPFL</a></li>
-			<li><a href="https://2024.igem.wiki/utoronto/results">2024 UToronto</a></li>
-			<li><a href="https://2024.igem.wiki/marburg/results">2024 Marburg</a></li>
-			<li><a href="https://2024.igem.wiki/sydney-australia/results">2024 Sydney-Australia</a></li>
-			<li><a href="https://2024.igem.wiki/toulouse-insa-ups/results">2024 Toulouse-INSA-UPS</a></li>
-			<li><a href="https://2024.igem.wiki/bnds-china/results">2024 BNDS-China</a></li>
-			<li><a href="https://2024.igem.wiki/vilnius-lithuania/results">2024 Vilnius-Lithuania</a></li>
-			<li><a href="https://2024.igem.wiki/xmu-china/results">2024 XMU-China</a></li>
-			<li><a href="https://2023.igem.wiki/estonia-tuit/results">2023 Estonia-TUIT</a></li>
-		</ul>
-	</div>
-</div>
+<h1>ツールボックスの設計</h1>
+<p>局在マーカーのクローニング成功</p>
+<p><strong>pTac-mCherry-PopZ</strong>：pTac-mCherry 骨格に、相補的末端をもつ合成 PopZ 断片を iVEC3 法で導入した。</p>
+<p><strong>pTac-DivIVA-msfGFP</strong>：同様に、線状化した pTac-msfGFP 骨格に、相補的末端を持つ合成DivlVA断片をiVEC3法で導入した。</p>
+<p><strong>pTac-SpmXΔC-msfGFP</strong>：DivIVA と同様に、pTac-msfGFP 骨格へ合成 SpmXΔC 断片（471 bp）を iVEC3 法で導入した。</p>
+<p>いずれも以降の IPTG 依存的な発現量解析と局在観察（PopZ：片極マーカー、DivIVA：両極マーカー　SpmXΔC：PopZ輸送因子）に用いた。</p>
+<p>Intimin-Ag/Nb （Ag2 / Nb2 / Ag1 / Nb1）コンストラクトのクローニング成功</p>
+<p><strong>pTac-Intimin-Ag2</strong>：pTac-mCherry 骨格と人工合成遺伝子をiVEC3法で導入し，プラスミドを得た．</p>
+<p>pTac-Intimin-Nb2：上記で作成したpTac-Intimin-Ag2のAg2の部分を除くように設計したプライマーによるベクター側断片と人工合成遺伝子したNb2断片をiVEC3法によって導入しプラスミドを得た．</p>
+<p><strong>pTac-Intimin-Ag1 / Nb1</strong>：Twist 社の合成プラスミドを鋳型にインサート（各約 2 kbp）を、pTac-mCherry 骨格にiVEC3法によって導入し，プラスミドを得た．</p>
+<p>pTac-Ag2–Nb2 および Ag1–Nb1 の接着特異性を検証する沈降アッセイに用いた</p>
+<p>蛍光タンパク質との共発現コンストラクトのクローニングの成功（Intimin-Ag2, msfGFP / Intimin-Nb2, mCherry）：接着を見やすくするため</p>
+<p>pTac-Intimin-Ag2, msfGFP：上記で作成したpTac-Intimin-Ag2において，Intimin-Ag2とmsfGFPが共発現できるようなプラスミドを得た．今日発現する系において、二つのタンパク質の間には，互いの翻訳を阻害しないためのスペーサーとRBSを含んだ設計をした．</p>
+<p>pTac-Intimin-Nb2, mCherry：上記で作成したpTac-Intimin-Nb2において，Intimin-Nb2とmCherryが共発現できるようなプラスミドを得た．今日発現する系において、二つのタンパク質の間には，互いの翻訳を阻害しないためのスペーサーとRBSを含んだ設計をした．</p>
+<p>CoilR–CoilE 相互作用系のコンストラクトのクローニング成功</p>
+<p><strong>Intimin-CoilR（2 種類）</strong>：pTac-Intimin-Ag2-msfGFP と pTac-Intimin-Nb2-mCherry をそれぞれ鋳型にベクター断片を、Twist社の人工合成遺伝子サービスによって得たDsbA-CoilR-mScarlet を鋳型に (GGGGS)×3 リンカー付き CoilR インサートを PCR で増幅した．</p>
+<p><strong>Intimin（CoilR–Linker–LysM–βバレル）</strong>：IntiminのLysM領域を除去したベクターにLinker-CoilR-Linker を導入した。CoilR がペリプラズム側で CoilE と接触できるよう設計したプラスミドを得た．</p>
+<p><strong>Intimin（CoilR–Linker–LysM領域βバレル）</strong>：N 末端 7 アミノ酸を残して線状化したベクターに CoilR を導入した。CoilR がペリプラズム側で CoilE と接触できるよう設計したプラスミドを得た．</p>
+<p><strong>p15A-J23113-PopZ, msfGFP-TM-CoilE</strong>：Twist 社の J23113-popZ, GFP-H3H4-TM-coilE プラスミドから得た目的断片を、Twist社の人工合成遺伝子クローニングサービスによって得たp15Aoriのプラスミドから増幅したベクターに導入した。これによりこの遺伝子が含まれるプラスミドの複製起点をp15A oriとし，Km耐性のプラスミドを得た。</p>
+<h3>プラスミド一覧</h3>
+<table>
+<thead>
+<tr>
+<th>No.</th>
+<th>プラスミド</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>pTac-mCherry-PopZ</td>
+<td>発現量解析・極局在観察</td>
+</tr>
+<tr>
+<td>2</td>
+<td>pTac-DivIVA-msfGFP</td>
+<td>発現量解析・両極マーカー</td>
+</tr>
+<tr>
+<td>3</td>
+<td>pTac-SpmXΔC-msfGFP</td>
+<td>発現量解析・局在観察</td>
+</tr>
+<tr>
+<td>4</td>
+<td>pTac-Intimin-Ag2</td>
+<td>沈降アッセイ</td>
+</tr>
+<tr>
+<td>5</td>
+<td>pTac-Intimin-Nb2</td>
+<td>沈降アッセイ</td>
+</tr>
+<tr>
+<td>6</td>
+<td>pTac-Intimin-Ag1</td>
+<td>沈降アッセイ</td>
+</tr>
+<tr>
+<td>7</td>
+<td>pTac-Intimin-Nb1</td>
+<td>沈降アッセイ</td>
+</tr>
+<tr>
+<td>8</td>
+<td>pTac-Intimin-Ag2, msfGFP</td>
+<td>共発現・下流実験</td>
+</tr>
+<tr>
+<td>9</td>
+<td>pTac-Intimin-Nb2, mCherry</td>
+<td>共発現・下流実験</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Intimin（CoilR–Linker–LysM–βバレル）-Ag2, msfGFP</td>
+<td>CoilR–CoilE 系</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Intimin（CoilR–Linker–LysM–βバレル）-Nb2, mCherry</td>
+<td>CoilR–CoilE 系</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Intimin（ペリプラズム領域–Linker–CoilR–Linker–βバレル）-Ag2, msfGFP</td>
+<td>CoilR–CoilE 系</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Intimin（ペリプラズム領域–Linker–CoilR–Linker–βバレル）-Nb2, mCherry</td>
+<td>CoilR–CoilE 系</td>
+</tr>
+<tr>
+<td>14</td>
+<td>p15A-J23113-PopZ.msfGFP-H3H4--TM-CoilE</td>
+<td>CoilE 側の提示・局在</td>
+</tr>
+</tbody></table>
+<h2>Intiminの結合確認</h2>
+<p>第1段階：IPTG濃度別の吸光度定量</p>
+<p>Intimin-Ag2とIntimin-Nb2が接着するかどうかを測定するために，それぞれ形質転換したある大腸菌に様々な濃度のIPTGを加えて、一晩培養したものを翌日混合した．その目視による沈降の変化，また溶液中の大腸菌量を測定するためにODを測り、その変化を確認した。</p>
+<p><img src="/notion-images/4b1512d2df598de2.png" alt=""></p>
+<p>図1：IPTG 0 nM における吸光度の減少の確認</p>
+<p><img src="/notion-images/610837d2f559f8e8.png" alt=""></p>
+<p>図2：IPTG 1 nM における吸光度の減少の確認</p>
+<p><img src="/notion-images/311333a64fdca946.png" alt=""></p>
+<p>図3：IPTG 10 nM における吸光度の減少の確認</p>
+<p><img src="/notion-images/f3c6146ffa977fd7.png" alt=""></p>
+<p>図4：IPTG 100 nM における吸光度の減少の確認</p>
+<p><img src="/notion-images/739789c76b8eaa29.png" alt=""></p>
+<p>図5：IPTG 1 µM における吸光度の減少の確認</p>
+<p><img src="/notion-images/01346ab3065ef95d.png" alt=""></p>
+<p>図6：IPTG 10 µM における吸光度の減少の確認</p>
+<p>この上記の結果より、Intimin-Ag2、Intimin-Nb2を形質転換した大腸菌を混合することで、大腸菌が沈殿する（結合している）ことが論文通りに再現された。結合にはIPTG濃度における発現量の違いが少なく、少ない濃度、または漏れ出しでも結合することがわかった。今後は確認用途に合わせて、IPTG濃度は変更する。しかしこの結果において、顕微鏡で大腸菌同士の結合を確認したが、目視で判断することができなかったので、いかに異なる蛍光タンパクを大腸菌で発現させることでその結合を観察した。</p>
+<p>第6段階：定量的な特異性検証（9/11）</p>
+<p>Ag1・Nb1・Ag2・Nb2 の4種を IPTG 100 nM および 1 µM で誘導培養し、対応ペア（Ag1+Nb1、Ag2+Nb2）と非対応ペア（Ag1+Nb2、Ag2+Nb1）で培養液の吸光度（溶液中の大腸菌量）に違いが出るか観察した。これは対応するペアでのみ、特異的な結合が起こっているかを確認するための実験である。</p>
+<p><img src="/notion-images/5e241b9b64ce9ab3.png" alt=""></p>
+<p>図1：IPTG 100 nM における混合後の吸光度変化（4ペア比較）</p>
+<p><img src="/notion-images/2543b0e736162bd0.png" alt=""></p>
+<p>図2：IPTG 1 µM における混合後の吸光度変化（4ペア比較）</p>
+<p>上記の結果より、対応ペア（Ag1+Nb1、Ag2+Nb2）は終点で吸光度が <strong>54〜68%まで低下</strong>したのに対し、非対応ペア（Ag1+Nb2、Ag2+Nb1）は <strong>94〜99%とほぼ横ばい</strong>であり、対応する Ag–Nb の組み合わせにのみ特異的な凝集・沈降が生じることが定量的に確認された。吸光度の低下は混合直後ではなく40〜50分頃から明確になり、その後は緩やかになる傾向が見られた。顕微鏡観察では菌体同士が結合し塊を形成していることを確認し、さらに Ag2–Nb2 ペアの二色蛍光観察により、凝集塊の内部で緑色細胞（Ag2）と赤色細胞（Nb2）が混在していることを直接示した。</p>
+<p><img src="/notion-images/6be75e751d1c19e2.png" alt=""></p>
+<ul>
+<li>図 3：IPTG 100 nMにおけるAg2－Nb2の120分後の顕微鏡像</li>
+</ul>
+<p><img src="/notion-images/aed3fcd1890be4bc.png" alt=""></p>
+<ul>
+<li>図 4：IPTG 1 μMにおけるAg2-Nb2の120分後の顕微鏡像</li>
+</ul>
+<p>これは、観察された沈降が単なる同種細胞の自己凝集ではなく、<strong>Ag2細胞とNb2細胞が特異的に結合するヘテロ接着によるものであることを示している</strong>。ただしIntimin-Ag1 は単独培養の段階から沈殿傾向が見られており、Ag1 を含むペアの吸光度低下には自己凝集の寄与が一部混在している可能性がある。</p>
+<p>極在とIPTG濃度の関係の結果</p>
+<p>画像解析が終わり次第添付</p>
+<p>IntiminにCoilを融合して機能が阻害されないかの確認の結果</p>
+<p>実験が終わり次第添付</p>
+<p>I</p>
+<h2>下書き</h2>
+<h2>このページに含むべき内容は？</h2>
+<ul>
+<li>実験と研究の結果を明確かつ客観的に説明する。</li>
+<li>データを視覚化するために表、グラフ、画像を使用する。</li>
+<li>プロジェクトの目標の文脈で発見の意味を議論する。</li>
+<li>傾向、パターン、または重要な観察を強調する。</li>
+<li>発見を統合し、その全体的な意義を議論するための分析要約セクションを含める。</li>
+<li>潜在的な応用、さらなる研究、開発を含む、プロジェクトの将来計画を概説する。</li>
+<li>何が間違っていたか、これらの経験から何を学んだかを説明する。</li>
+<li>潜在的な改善または代替アプローチを議論する。</li>
+<li>科学的誠実性と透明性の重要性を強調する。</li>
+</ul>
+<h2>インスピレーション</h2>
+<ul>
+<li><a href="https://2024.igem.wiki/heidelberg/results">2024 Heidelberg</a></li>
+<li><a href="https://2024.igem.wiki/marburg/results">2024 Marburg</a></li>
+<li><a href="https://2024.igem.wiki/epfl/results">2024 EPFL</a></li>
+<li><a href="https://2024.igem.wiki/utoronto/results">2024 UToronto</a></li>
+<li><a href="https://2024.igem.wiki/marburg/results">2024 Marburg</a></li>
+<li><a href="https://2024.igem.wiki/sydney-australia/results">2024 Sydney-Australia</a></li>
+<li><a href="https://2024.igem.wiki/toulouse-insa-ups/results">2024 Toulouse-INSA-UPS</a></li>
+<li><a href="https://2024.igem.wiki/bnds-china/results">2024 BNDS-China</a></li>
+<li><a href="https://2024.igem.wiki/vilnius-lithuania/results">2024 Vilnius-Lithuania</a></li>
+<li><a href="https://2024.igem.wiki/xmu-china/results">2024 XMU-China</a></li>
+<li><a href="https://2023.igem.wiki/estonia-tuit/results">2023 Estonia-TUIT</a></li>
+</ul>
+<h2>下書き</h2>
+<h3>何を目的にやったか</h3>
+<h3>何をやったか</h3>
+<h3>何が分かったか</h3>
+<h3>その結果、次に何を変えたか</h3>
+<h3>図・写真・データ</h3>
+<h3>参考文献</h3>
 
 {% endblock %}
