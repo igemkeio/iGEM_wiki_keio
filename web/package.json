@@ -11,6 +11,8 @@
     "build": "vite build && node scripts/prerender.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
+    "check": "node scripts/check.mjs",
+    "test:check": "node --test \"scripts/lib/check/*.test.mjs\"",
     "notion:sync": "node scripts/notion-sync.mjs",
     "notion:import": "node scripts/notion-import.mjs"
   },
