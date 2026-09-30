@@ -23,6 +23,9 @@ function watchContent(): Plugin {
 
 export default defineConfig({
   base: process.env.WIKI_BASE ?? "/",
+  define: {
+    __WIKI_FONT_BASE__: JSON.stringify(process.env.WIKI_FONT_BASE ?? ""),
+  },
   plugins: [react(), watchContent()],
   build: {
     manifest: true,
