@@ -1,7 +1,10 @@
 import { withBase } from "../base";
 import type { Locale, WikiPage } from "../content";
-import { pagePath, type Route } from "../routes";
+import type { Route } from "../routes";
 import styles from "./Sidebar.module.css";
+
+// routes.tsを値としてimportすると原稿の実データが入るので、homeのURLパスはここで組む。
+const homePath = (locale: Locale): string => (locale === "en" ? "/" : "/ja/");
 
 const otherLocale = (locale: Locale): Locale => (locale === "en" ? "ja" : "en");
 
@@ -9,7 +12,7 @@ const otherLocale = (locale: Locale): Locale => (locale === "en" ? "ja" : "en");
 export function alternatePath(page: Pick<WikiPage, "locale" | "slug">, routes: Route[]): string {
   const locale = otherLocale(page.locale);
   const same = routes.find((r) => r.page.locale === locale && r.page.slug === page.slug);
-  return same ? same.path : pagePath({ locale, slug: "home" });
+  return same ? same.path : homePath(locale);
 }
 
 const labels = {
@@ -24,7 +27,7 @@ export function Sidebar({ page, routes }: { page: WikiPage; routes: Route[] }) {
   const locales: Locale[] = ["en", "ja"];
   return (
     <header className={styles.root}>
-      <a className={styles.logo} href={withBase(pagePath({ locale: page.locale, slug: "home" }))}>
+      <a className={styles.logo} href={withBase(homePath(page.locale))}>
         <span>iGEM</span>
         <span className={styles.logoSub}>Keio 2026</span>
       </a>
