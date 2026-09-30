@@ -1,4 +1,5 @@
 import { Marked } from "marked";
+import { mathExtensions } from "./katex.mjs";
 
 const ENTITIES = { amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'" };
 
@@ -32,7 +33,7 @@ export function addHeadingIds(html) {
 
 // Markdown を本文 HTML に変換する。拡張は marked の拡張として順に足していく。
 export function createRenderer() {
-  return new Marked({ async: false });
+  return new Marked({ async: false, extensions: mathExtensions });
 }
 
 export function renderMarkdown(md) {
