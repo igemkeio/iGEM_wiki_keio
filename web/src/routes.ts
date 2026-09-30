@@ -7,7 +7,7 @@ const modules = import.meta.glob<unknown>("../../content/*/*.json", {
 
 export type Route = {
   page: WikiPage;
-  // base を含まない URL パス。"/" や "/ja/model/" のように "/" で終わる。
+  // baseを含まないURLパス。"/"や"/ja/model/"のように"/"で終わる。
   path: string;
 };
 

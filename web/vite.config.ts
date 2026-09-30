@@ -5,7 +5,7 @@ import { defineConfig, type Plugin } from "vite";
 
 const contentDir = resolve(import.meta.dirname, "../content");
 
-// content/ はブラウザ側のバンドルに入らないので、watch モードで再ビルドが走るよう監視対象に足す。
+// content/はブラウザ側のバンドルに入らないので、watchモードで再ビルドが走るよう監視対象に足す。
 function watchContent(): Plugin {
   return {
     name: "watch-content",

@@ -1,5 +1,5 @@
-// vite build の後に実行し、content/ の published なページを dist/<path>/index.html に書き出す。
-// routes.ts と Page.tsx は Node から直接読めないので、Vite の SSR ビルドで .vite/ssr/ に束ねてから読み込む。
+// vite buildの後に実行し、content/のpublishedなページをdist/<path>/index.htmlに書き出す。
+// routes.tsとPage.tsxはNodeから直接読めないので、ViteのSSRビルドで.vite/ssr/に束ねてから読み込む。
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";

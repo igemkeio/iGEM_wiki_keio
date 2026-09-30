@@ -3,7 +3,7 @@ import type { WikiPage } from "./content";
 
 export type Assets = {
   css: string[];
-  // 島を使うページに読み込むブラウザ側の JS。
+  // 島を使うページに読み込むブラウザ側のJS。
   js: string;
 };
 

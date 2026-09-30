@@ -1,4 +1,4 @@
-// 開発用。vite build --watch でビルドし、完了ごとに prerender を走らせ、vite preview で配信する。
+// 開発用。vite build --watchでビルドし、完了ごとにprerenderを走らせ、vite previewで配信する。
 import { build, preview } from "vite";
 import { prerender } from "./prerender.mjs";
 
