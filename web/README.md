@@ -15,6 +15,8 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 | `npm run build` | `vite build`のあとに`scripts/prerender.mjs`を実行し、`dist/`に全ページのHTMLを書く |
 | `npm run preview` | `dist/`を配信する |
 | `npm run typecheck` | `tsc --noEmit` |
+| `npm test` | Vitestを1回流す |
+| `npm run test:watch` | Vitestをwatchモードで流す |
 | `npm run notion:sync` | Notionの原稿を書き出す(#27で`content/`向けに更新予定) |
 | `npm run notion:import` | 既存の`wiki/pages/*.html`をNotionへ取り込む(初期移行用) |
 
@@ -30,3 +32,17 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 - `Page`は`renderToStaticMarkup`でHTMLにして`dist/<path>/index.html`に書く。`islands`が空のページには`<script>`を入れない。
 - 最後に、書き出したページ数と`content/`の`published`なJSONの数を突き合わせ、一致しなければ非ゼロで終了する。
 - ビルド時にNodeで動く`src/`のコードでは`window`と`document`を参照しない。
+
+## テスト
+
+- Vitestは`src/**/*.test.{ts,tsx}`を対象にする。環境はhappy-domで、`src/test/setup.ts`でjest-domのmatcherを登録している。
+- `vitest.config.ts`は`vite.config.ts`を`mergeConfig`で継承する。`import.meta.glob`と`base`の設定がテストでも同じように効く。
+- `routes.ts`のテストは、`import.meta.glob`の結果を受け取る`buildRoutes`に入力を渡して書く。
+- `Page.test.tsx`はプリレンダーのHTMLをスナップショットで固定する。スナップショットは`src/__snapshots__/`に置く。
+- `Page`やマークアップを意図して変えたときは、差分を確認してからスナップショットを更新する。
+
+```sh
+npx vitest run -u
+```
+
+- `scripts/lib/*.test.mjs`は`node:test`で書かれており、Vitestの対象外。
