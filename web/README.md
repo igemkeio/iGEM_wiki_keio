@@ -1,36 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# web
 
-## Getting Started
+iGEM Keio の wiki を生成する Vite と React のプロジェクト。`content/` の原稿 JSON から、ページごとの静的 HTML を `dist/` に書き出す。全体の構成は `docs/architecture.md` を参照。
 
-First, run the development server:
+Node は 24 系(リポジトリ直下の `.node-version`)、パッケージマネージャーは npm。
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## コマンド
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| コマンド | 内容 |
+| --- | --- |
+| `npm ci` | 依存を入れる |
+| `npm run dev` | `vite build --watch` と `vite preview` を並走させる。`web/src/` と `content/` の保存ごとに再ビルドし、prerender をやり直す。URL は起動時に表示される |
+| `npm run build` | `vite build` のあとに `scripts/prerender.mjs` を実行し、`dist/` に全ページの HTML を書く |
+| `npm run preview` | `dist/` を配信する |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run notion:sync` | Notion から原稿を取り込む |
+| `npm run notion:import` | Notion へ原稿を取り込む |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 配信パス
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`WIKI_BASE` で配信パスを切り替える。既定は `/`。GitLab Pages では `WIKI_BASE=/keio/ npm run build` とすると、CSS、JS、リンクがすべて `/keio/` から始まる。
 
-## Learn More
+## プリレンダーの仕組み
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `src/routes.ts` が `content/<locale>/*.json` を読み、`published` なページの一覧を作る。
+- `scripts/prerender.mjs` が `vite build` の SSR モードで `src/routes.ts` と `src/Page.tsx` を `.vite/ssr/` に束ね、Node から読み込む。`.tsx` を直接実行する `tsx` などの依存は増やさない。
+- `dist/.vite/manifest.json` から CSS と JS のハッシュ付きファイル名を取り、`Page` に渡す。
+- `Page` は `renderToStaticMarkup` で HTML にして `dist/<path>/index.html` に書く。`islands` が空のページには `<script>` を入れない。
+- ビルド時に Node で動く `src/` のコードでは `window` と `document` を参照しない。
