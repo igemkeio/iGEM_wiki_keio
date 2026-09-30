@@ -1,0 +1,38 @@
+@layer reset, tokens, prose, components;
+
+@import "./tokens.css" layer(tokens);
+
+@view-transition {
+  navigation: auto;
+}
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  * {
+    margin: 0;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  body {
+    background: var(--color-page);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: var(--size-body);
+    line-height: var(--size-body-leading);
+  }
+
+  a {
+    color: inherit;
+  }
+}
+
+@layer prose {
+}
