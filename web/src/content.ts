@@ -1,22 +1,24 @@
 export type Locale = "en" | "ja";
 
-export type WikiPage = {
+export type RawWikiPage = {
   slug: string;
   locale: Locale;
   title: string;
+  html: string;
   subtitle?: string;
   lead?: string;
-  html: string;
   order?: number;
   islands?: string[];
   published?: boolean;
 };
 
+export type WikiPage = Required<RawWikiPage>;
+
 const isString = (v: unknown): v is string => typeof v === "string";
 
-// JSONを読んで必須フィールドだけ確認する。未知のフィールドは落とさずそのまま通す。
-export function readPage(raw: unknown): WikiPage {
-  const page = raw as Partial<WikiPage> | null;
+// 必須フィールドだけ確認し、任意フィールドの既定値を埋めて返す。未知のフィールドは落とさない。
+export function readPage(raw: unknown, source?: string): WikiPage {
+  const page = raw as Partial<RawWikiPage> | null;
   if (
     !page ||
     !isString(page.slug) ||
@@ -24,7 +26,20 @@ export function readPage(raw: unknown): WikiPage {
     !isString(page.title) ||
     !isString(page.html)
   ) {
-    throw new Error("原稿JSONの必須フィールド(slug, locale, title, html)が不正です");
+    throw new Error(
+      `原稿JSONの必須フィールド(slug, locale, title, html)が不正です${source ? `: ${source}` : ""}`
+    );
   }
-  return page as WikiPage;
+  return {
+    ...page,
+    slug: page.slug,
+    locale: page.locale,
+    title: page.title,
+    html: page.html,
+    subtitle: page.subtitle ?? "",
+    lead: page.lead ?? "",
+    order: page.order ?? Number.MAX_SAFE_INTEGER,
+    islands: page.islands ?? [],
+    published: page.published ?? true,
+  };
 }
