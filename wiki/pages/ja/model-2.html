@@ -1,0 +1,130 @@
+{% extends "layout.html" %}
+
+{% block title %}モデル 2{% endblock %}
+{% block lead %}{% endblock %}
+
+{% block page_content %}
+
+<h2>下書き</h2>
+<h3>model-2自体の目的</h3>
+<p>DivIVAの二極局在化を能動的に破る方法として先に発現させたPopZによる①空間占有、②局所的なDivIVAの分解、の二種類の機構が考えられているが、両戦略とも、PopZ 濃度、DivIVA 濃度、誘導タイミング、切断速度など変数が多く、すべてを Wet で振るのは時間的に不可能である。</p>
+<ul>
+<li>このモデルの役割は、有効な戦略と濃度域を事前に絞り込み、Wet が試すべき条件を限定することにある。</li>
+<li>また、今後応用に応じて誘導タイミングや濃度制限などの制約が増える場合各手法がどのような条件で安定かを比較することができるかもしれない</li>
+</ul>
+<h2>cycle 1　簡単なDivIVAモデルの作成</h2>
+<pre><code>### 何を目的にやったか
+
+- DivIVA単体のモデルを構築する
+- 出来るだけシンプルに、DivIVAの性質である曲率認識(曲率によって結合強度が変化する)のパラメータのみで文献の極/非極の濃縮率を再現できるかを確かめる
+
+### 何をやったか
+
+- DivIVA単体での単純な結合拡散のモデルを作成
+    - 大腸菌ジオメトリは文献から取得、定義
+    - _Bacillus subtilisでの_DivIVAの拡散速度や結合定数などのパラメータを論文から取得、定義
+        - 細胞質拡散 D_c は大腸菌の値（Elowitz 1999）
+    - 未知のパラメータは結合強度比ρ（曲率認識にかかわる項)のみ
+- 以下の式でモデルを定義
+    - cytosol(細胞質)での濃度変化
+
+        $$
+        \frac{\partial C}{\partial t} = D_c \nabla^2 C - \frac{A}{V}\left(k_{on}(z),C - k_{off}M\right)
+        $$
+
+    - Membrane(膜)での濃度変化
+
+        $$
+        \frac{\partial M}{\partial t} = D_m \nabla^2 M + \left(k_{on}(z),C - k_{off}M\right)
+        $$
+
+- 
+
+### 何が分かったか（今回のモデルでは
+
+1. 極形成は均等に分布した状態から**1秒で形成**され、そのあとずっと維持される
+    - 局在は、発現・成長・PopZ 誘導に対して準静的に扱っていいといえる
+2. 結合強度比は膜曲率に対して大きすぎる
+    1. スキャンにより、極、非極での結合強度比が文献のようになるにはρ = 6.0でなければならない。しかし、極、非極での膜曲率は2倍しか変わらない。
+    2. DivIVA 単量体（長さ約 30 nm）が半径 400 nm の曲面に沿うときのたわみはわずか 0.28 nm（水分子より小さい）で、worm-like chain モデルで見積もったエネルギー差は0.0094 kBTにすぎない。→**極と側壁の曲率差を熱ゆらぎの中から拾えない**
+3. 拡散速度の速さ
+    1. 交換速度は文献FRAPに比べて1000倍以上速い
+4. DivIVAの発現量は局在に影響しない
+    1. このパラメータは局在に影響しないため、PopZ導入後の分解能などに応じて変化させてもよい？(図３Nexpression levelは局在に影響を与えない）
+
+### その結果、次に何を変えたか
+
+- 拡散速度の速さ、要求される結合強度比は
+
+### 図・写真・データ
+
+1. 大腸菌ジオメトリの定義
+
+    ![](/notion-images/2445891a21ca6fcd.png)
+
+2. 単純modelの結果
+
+    ![](/notion-images/29a2108cb0033708.png)
+
+3. パラメータスキャンの結果　→ どのパラメータが局在に影響を与えているか
+
+    ![](/notion-images/d9633c702ef3d525.png)
+
+4. 現在の場
+
+    ![](/notion-images/b5344d31b2df5736.jpg)
+
+
+### 参考文献
+
+- **Giacomelli G, Feddersen H, Peng F, et al.** Subcellular Dynamics of a Conserved
+Bacterial Polar Scaffold Protein. _Genes_ 2022;13(2):278. doi:10.3390/genes13020278
+- **Feddersen H, Würthner L, Frey E, Bramkamp M.** Dynamics of the _Bacillus subtilis_
+Min System. _mBio_ 2021;12(2):e00296-21. doi:10.1128/mBio.00296-21
+- **Lenarcic R, Halbedel S, Visser L, et al.** Localisation of DivIVA by targeting to
+negatively curved membranes. _EMBO J_ 2009;28:2272–2282
+- **Ramamurthi KS, Losick R.** Negative membrane curvature as a cue for subcellular
+localization of a bacterial protein. _PNAS_ 2009;106:13541–13545
+- **Oliva MA, Halbedel S, Freund SM, et al.** Features critical for membrane binding
+revealed by DivIVA crystal structure. _EMBO J_ 2010;29:1988–2001
+- **Elowitz MB, Surette MG, Wolf PE, Stock JB, Leibler S.** Protein mobility in the
+cytoplasm of _Escherichia coli_. _J Bacteriol_ 1999;181:197–203
+</code></pre>
+<details>
+<summary>**用いたプログラム**</summary></details><h2>cycle 2　DivIVAモデルの改善</h2>
+<pre><code>目的
+
+
+生じたDivIVA単純モデルの2つの問題:: 結合強度比が大きすぎる、FRAPがはやすぎるを解決し、より実測のデータに近づけるようにする
+
+
+手法
+
+- クラスター場を定義する
+
+結果
+
+
+考察
+
+
+次のサイクル
+
+- 実際のデータの整理、照合、修正
+</code></pre>
+<h2>cycle 3　実験データによる改善</h2>
+<pre><code>目的
+
+- 実際のデータの整理
+- 値の照合、修正
+- wetへのfeedback（現状の設計方針は以下
+    - PopZ濃度は両極いかない最大くらいがいい。
+    - DivIVAは局在見える最低ラインがいいが、分解案、占有案で総量が変化するのでdry検証の余地
+
+次のステッ
+
+- PopZの定義、手法の比較
+</code></pre>
+<h2>cycle 4　PopZの導入、手法の比較</h2>
+
+{% endblock %}

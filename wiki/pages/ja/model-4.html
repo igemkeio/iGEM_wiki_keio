@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+
+{% block title %}モデル 4{% endblock %}
+{% block lead %}{% endblock %}
+
+{% block page_content %}
+
+<p>目的</p>
+<p>接着タンパク質の局在状態が細胞同士の接着状態に与える影響を予測することで，実験時の局在発現の基準を示す．また，接着形状を分析することで技術の応用先の検討に貢献する，</p>
+<p>実施したこと</p>
+<ul>
+<li><p>幾何モデルを用いて局在状態によって大腸菌が鎖状，束状のどちらになるのか調べる．</p>
+</li>
+<li><p>時間発展シミュレーションを構築し、多数の細胞が実際に結合し、鎖・束へ状態が変化していく過程を動画で可視化した。</p>
+<p>  具体的なアルゴリズム</p>
+<pre><code>  - 局在パラメータ（極局在度など）から「極どうし接触時」「側面どうし接触時」それぞれで何本の結合ができるかという定数を求める。
+  - 細胞をz=0平面上にランダム配置し、重なりを避けながら初期状態を作る。
+  - 各時間ステップの冒頭で、全細胞を独立にブラウン運動させる（並進・回転とも熱ゆらぎによる拡散、Stokes–Einstein由来の拡散係数を使用）。
+  - 遊泳モードが有効なら、まだ結合していない細胞にrun-and-tumble運動（直進と方向転換をポアソン過程で切り替え）を追加で与える。
+  - 震盪モードが有効なら、水流による回転を上乗せする。
+  - 結合（柔軟なジョイント：距離拘束＋曲げ拘束）と貫入禁止と壁の拘束を、位置ベースの反復緩和法で満たし、力学的に矛盾のない配置に補正する。
+  - 近接した細胞ペアについて、接触部位が極か側面かを幾何学的に判定し、結合数に比例した確率（ベルヌーイ試行）で新規結合が成立するかを決め、成立すればその時の接触配置をそのまま固定して記録する。
+  - 震盪モードではせん断荷重が破断力を超えた極結合を切断し、`k_off_per_s`が正なら全結合を確率的に解離させる。
+</code></pre>
+</li>
+</ul>
+<h3>何が分かったか</h3>
+<p>実測されている一様局在では束になる（極での接触8対:側面での接触100対）。鎖状の接着には両極への局在が必須で、極に集めるだけでなく先端への集中も必要である．</p>
+<p>大腸菌自身の運動性（run-and-tumble）を検証した結果、受動拡散だけで実際の凝集速度（OD600 0.1–1で半減時間4〜40分）を説明でき、能動運動は結合の形成には不要と判明した。
+遊泳の推進力（~0.4 pN）は結合の破断力（16.1 pN）より弱く結合を壊せない。</p>
+<p>浸透培養した場合の方が一列に細胞がきれいに並ぶ．</p>
+<h3>その結果、次に何を変えたか</h3>
+<p>接着タンパク質が一様に分布した場合は束になる．鎖状の接着には両極への局在が必須で、極に集めるだけでなく先端への集中も必要。
+つまり実際の実験でも局在化が成功することが鎖状の結合を作る上での必要条件となると今回のシミュレーションから言える．</p>
+<p>また，時間発展モデルのビジュアライズから，鎖状(極同士の結合)になっていても一つの大腸菌の極に複数の別の大腸菌の極が結合するケースなど，本来の狙いとは異なる結合も生じうることが分かった，綺麗な一本さが必要となる応用先ではこの問題を解決する必要がある．</p>
+<p>液体培地で培養する場合は浸透培養をすることによって1列に大腸菌を整列させることができる可能性がある．</p>
+<h3>図・写真・データ</h3>
+<p><img src="/notion-images/48b7340716660fa8.gif" alt=""></p>
+<p>接着タンパク質を大腸菌に一様に分布させた場合</p>
+<p><img src="/notion-images/609eb2ee49caa706.gif" alt=""></p>
+<p>接着タンパク質を大腸菌の極に局在させた場合</p>
+<p><img src="/notion-images/fa4c5b9beced29a0.gif" alt=""></p>
+<p>接着タンパク質を大腸菌の極に局在させ，震盪培養した場合</p>
+<p><img src="/notion-images/392928560136ac19.gif" alt=""></p>
+<p>大腸菌の運動を考慮した場合</p>
+<h3>参考文献</h3>
+<p><strong>Costan SA, Ryan PM, Kim H, Wolgemuth CW and Riedel-Kruse IH</strong> (2024) Biophysical characterization of synthetic adhesins for predicting and tuning engineered living material properties. <em>Matter</em> <strong>7</strong>, 2125–2143. <a href="https://doi.org/10.1016/j.matt.2024.03.019">https://doi.org/10.1016/j.matt.2024.03.019</a></p>
+<p><strong>Glass DS and Riedel-Kruse IH</strong> (2018) A synthetic bacterial cell–cell adhesion toolbox for programming multicellular morphologies and patterns. <em>Cell</em> <strong>174</strong>, 649–658. <a href="https://doi.org/10.1016/j.cell.2018.06.041">https://doi.org/10.1016/j.cell.2018.06.041</a></p>
+<p><strong>Berg HC and Brown DA</strong> (1972) Chemotaxis in <em>Escherichia coli</em> analysed by three-dimensional tracking. <em>Nature</em> <strong>239</strong>, 500–504. <a href="https://doi.org/10.1038/239500a0">https://doi.org/10.1038/239500a0</a></p>
+<h2>下書き</h2>
+<h3>何を目的にやったか</h3>
+<p>発現量・極局在をパラメータとして、どのような設計にすれば方向のある鎖状の接着ができるかを予測する．</p>
+<p>接着の過程を可視化する．</p>
+<h3>何をやったか</h3>
+<p>幾何モデルで、発現量・局在から極接触・側面接触の結合数を計算し、鎖・束・二量体のどれになるかを予測した。</p>
+<p>あわせて時間発展シミュレーションを構築し、多数の細胞が実際に出会い結合し、鎖・束へ育っていく過程を動画で可視化した。</p>
+<h3>何が分かったか</h3>
+<p>実測されている一様局在では束になる（極での接触8対:側面での接触100対）。鎖状の接着には両極への局在が必須で、極に集めるだけでなく先端への集中も必要。</p>
+<p>発現量は接合の強さのみを決め、形は決めない。</p>
+<p>大腸菌自身の運動性（run-and-tumble）を検証した結果、受動拡散だけで実際の凝集速度（OD600 0.1–1で半減時間4〜40分）を説明でき、能動運動は結合の形成には不要と判明した。
+遊泳の推進力（~0.4 pN）は結合の破断力（16.1 pN）より弱く結合を壊せない。</p>
+<h3>その結果、次に何を変えたか</h3>
+<h3>図・写真・データ</h3>
+<p><img src="/notion-images/48b7340716660fa8.gif" alt=""></p>
+<p>接着タンパク質を大腸菌に一様に分布させた場合</p>
+<p><img src="/notion-images/609eb2ee49caa706.gif" alt=""></p>
+<p>接着タンパク質を大腸菌の極に局在させた場合</p>
+<p><img src="/notion-images/fa4c5b9beced29a0.gif" alt=""></p>
+<p>接着タンパク質を大腸菌の極に局在させ，震盪培養した場合</p>
+<p><img src="/notion-images/63cf25fe0485783c.gif" alt=""></p>
+<p>凝集したのち沈澱する（同じ大きさのクラスターとしか接着しない）と仮定した場合</p>
+<p><img src="/notion-images/392928560136ac19.gif" alt=""></p>
+<p>大腸菌の運動を考慮した場合</p>
+<h3>参考文献</h3>
+<p><strong>Costan SA, Ryan PM, Kim H, Wolgemuth CW and Riedel-Kruse IH</strong> (2024) Biophysical characterization of synthetic adhesins for predicting and tuning engineered living material properties. <em>Matter</em> <strong>7</strong>, 2125–2143. <a href="https://doi.org/10.1016/j.matt.2024.03.019">https://doi.org/10.1016/j.matt.2024.03.019</a></p>
+<p><strong>Glass DS and Riedel-Kruse IH</strong> (2018) A synthetic bacterial cell–cell adhesion toolbox for programming multicellular morphologies and patterns. <em>Cell</em> <strong>174</strong>, 649–658. <a href="https://doi.org/10.1016/j.cell.2018.06.041">https://doi.org/10.1016/j.cell.2018.06.041</a></p>
+<p><strong>Berg HC and Brown DA</strong> (1972) Chemotaxis in <em>Escherichia coli</em> analysed by three-dimensional tracking. <em>Nature</em> <strong>239</strong>, 500–504. <a href="https://doi.org/10.1038/239500a0">https://doi.org/10.1038/239500a0</a></p>
+
+{% endblock %}
