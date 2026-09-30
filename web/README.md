@@ -37,11 +37,11 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 
 `npm run check`は`dist/`を走査し、違反を`ファイル: 理由`の1行ずつ出す。1件でもあれば終了コード1。`WIKI_BASE`を読むので、`WIKI_BASE=/keio/ npm run build`で作った`dist/`は`WIKI_BASE=/keio/ npm run check`で検査する。
 
-- ページ数: `content/`の`published`なJSONの数と、`dist/**/index.html`の数が一致する。
-- 外部URL: `<link>`、`<script>`、`<img>`、`<source>`、`<video>`、`<iframe>`の`src`と`href`、およびCSSの`url(...)`は、`http://`、`https://`、`//`で始まる場合にホストが`static.igem.wiki`、`video.igem.org`、`igem.org`と`igem.wiki`(サブドメインを含む)のどれかであること。`<a href>`の外部リンクは対象外。
+- ページの対応: `content/`の`published`なJSONから決まるパスの集合と、`dist/**/index.html`の集合が一致する。対応のない`index.html`と、`index.html`のない原稿を、それぞれ違反として出す。`content/`が読めないときと、JSONが壊れているときは、ファイル名付きで終了コード1にする。
+- 外部URL: `<a>`と`<area>`の`href`を除くすべてのタグの`src`、`href`、`data`、`poster`、`srcset`、`imagesrcset`(候補ごと)、SVGの`xlink:href`、`<meta>`の`content`と、`style`属性、`<style>`、CSSの`url(...)`と`@import`は、ブラウザと同じ規則でURLを解釈して外部ホストを指す場合に、ホストが`static.igem.wiki`、`video.igem.org`、`igem.org`と`igem.wiki`(サブドメインを含む)のどれかであること。`<a href>`の外部リンクは対象外。
 - 内部リンク: `/`で始まる`href`と`src`(`<a>`を含む)は、`base`を除いたパスが`dist/`のファイルか、`index.html`を持つディレクトリを指すこと。`base`の外を指すリンクも違反。`#`だけの`href`と`mailto:`は見ない。
-- 構造: 各HTMLに`<title>`と`<h1>`が1つずつあり、`<img>`に`alt`属性がある(空文字は可)。
+- 構造: 各HTMLに`<title>`(SVGの中は数えない)と`<h1>`が1つずつあり、`<img>`に`alt`属性がある(空文字は可)。
 - `<html lang>`が`en`か`ja`。
 - `islands`が空のページに`<script>`がない。
 
-検査するのは`dist/`のHTMLと`dist/assets/`のCSSだけ。`web/public/`由来のディレクトリ(`static/`、`people/`、`notion-images/`)は読まない。`dist/static/bootstrap.min.css`などの外部URLは#34で取り除くまで検査しない。HTMLの解析は正規表現で行い、依存は増やさない。検査の関数は`scripts/lib/check/`にあり、`npm run test:check`でテストする。
+検査するのは`dist/`のHTMLと、`dist/assets/`配下のCSSだけ。`web/public/`由来のディレクトリ(`static/`、`people/`、`notion-images/`)のHTMLとCSSは読まない。HTMLの解析は正規表現で行い、依存は増やさない。検査の関数は`scripts/lib/check/`にあり、`npm run test:check`でテストする。
