@@ -3,8 +3,10 @@ import { mathExtensions } from "./katex.mjs";
 
 const ENTITIES = { amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'" };
 
+// 見出しのHTMLから表示される文字だけを取り出す。KaTeXのMathML部分は描画テキストと二重になるので除く。
 function stripTags(html) {
   return html
+    .replace(/<span class="katex-mathml">[\s\S]*?<\/span>/g, "")
     .replace(/<[^>]*>/g, "")
     .replace(/&(amp|lt|gt|quot|#39);/g, (_, name) => ENTITIES[name]);
 }
@@ -21,17 +23,17 @@ export function slugifyHeading(text) {
 
 // 属性のないh2とh3にidを付ける。重複は2つ目以降に-2、-3を付ける。
 export function addHeadingIds(html) {
-  const used = new Map();
+  const used = new Set();
   return html.replace(/<(h[23])>([\s\S]*?)<\/\1>/g, (_, tag, inner) => {
     const base = slugifyHeading(stripTags(inner));
-    const count = (used.get(base) ?? 0) + 1;
-    used.set(base, count);
-    const id = count === 1 ? base : `${base}-${count}`;
+    let id = base;
+    for (let n = 2; used.has(id); n++) id = `${base}-${n}`;
+    used.add(id);
     return `<${tag} id="${id}">${inner}</${tag}>`;
   });
 }
 
-// Markdown を本文 HTML に変換する。拡張は marked の拡張として順に足していく。
+// 数式の拡張を入れた marked を返す。
 export function createRenderer() {
   return new Marked({ async: false, extensions: mathExtensions });
 }
@@ -41,14 +43,24 @@ function renderFragment(md) {
   return createRenderer().parse(md).trim();
 }
 
+// <pre> の中の空行は、外側のHTMLブロックが途切れないよう印に置き換えて運び、最後に空行へ戻す。
+const BLANK_MARK = "<!--blank-->";
+
 export function renderMarkdown(md) {
-  return addHeadingIds(renderFragment(md));
+  return addHeadingIds(renderFragment(md)).replaceAll(BLANK_MARK, "");
 }
 
 // Notionのcalloutの本文(Markdown)を Note の HTML にする。
 // 外側のmarkedがHTMLブロックとして素通しするよう、内側の空行は詰める。
 export function renderNote(bodyMarkdown) {
-  const body = renderFragment(bodyMarkdown).replace(/\n{2,}/g, "\n");
+  const body = renderFragment(bodyMarkdown)
+    .split(/(<pre[\s\S]*?<\/pre>)/)
+    .map((part, i) =>
+      i % 2 === 1
+        ? part.replace(/\n(?=\n)/g, `\n${BLANK_MARK}`)
+        : part.replace(/\n{2,}/g, "\n")
+    )
+    .join("");
   return `<aside class="note">\n<p class="note__label">Note</p>\n${body}\n</aside>`;
 }
 

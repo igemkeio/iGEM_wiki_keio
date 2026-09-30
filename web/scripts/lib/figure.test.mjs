@@ -6,22 +6,32 @@ import {
   parseCaption,
   renderImage,
 } from "./figure.mjs";
-import { renderMarkdown, renderNote, richTextToMarkdown } from "./markdown.mjs";
+import { renderMarkdown } from "./markdown.mjs";
 
 test("Fig. N で始まるキャプションをラベルとタイトルに分ける", () => {
   assert.deepEqual(parseCaption("Fig. 1 培養の様子"), {
     label: "Fig. 1",
     title: "培養の様子",
+    description: [],
   });
   assert.deepEqual(parseCaption("Fig.12: Growth curve"), {
     label: "Fig.12",
     title: "Growth curve",
+    description: [],
   });
-  assert.deepEqual(parseCaption("Fig. 2"), { label: "Fig. 2", title: "" });
+  assert.deepEqual(parseCaption("Fig. 2"), {
+    label: "Fig. 2",
+    title: "",
+    description: [],
+  });
 });
 
 test("Fig. N で始まらないキャプションは全体をタイトルにする", () => {
-  assert.deepEqual(parseCaption("培養の様子"), { label: "", title: "培養の様子" });
+  assert.deepEqual(parseCaption("培養の様子"), {
+    label: "",
+    title: "培養の様子",
+    description: [],
+  });
 });
 
 test("キャプション付き画像をFigureカードにする", () => {
@@ -64,26 +74,8 @@ test("static.igem.wikiかどうかを判定する", () => {
   assert.equal(isIgemStatic("/notion-images/a.png"), false);
 });
 
-test("calloutをNoteのHTMLにする", () => {
-  assert.equal(
-    renderNote("本文 **強調**\n\n2段落目"),
-    '<aside class="note">\n<p class="note__label">Note</p>\n<p>本文 <strong>強調</strong></p>\n<p>2段落目</p>\n</aside>'
-  );
-});
-
-test("Noteは外側のMarkdown変換でも形が崩れない", () => {
-  const note = renderNote("a\n\nb");
-  assert.equal(renderMarkdown(`前\n\n${note}\n\n後`), `<p>前</p>\n${note}<p>後</p>`);
-});
-
-test("rich_textをMarkdownにする", () => {
-  const plain = { bold: false, italic: false, strikethrough: false, code: false };
-  assert.equal(
-    richTextToMarkdown([
-      { type: "text", plain_text: "a", annotations: { ...plain, bold: true } },
-      { type: "text", plain_text: "b", annotations: plain, href: "https://x" },
-      { type: "equation", plain_text: "x^2", equation: { expression: "x^2" } },
-    ]),
-    "**a**[b](https://x)$x^2$"
-  );
+test("キャプションの2行目以降を説明の段落にし、altは全文のままにする", () => {
+  const html = renderImage({ src: "/a.png", caption: "Fig. 1 題\n説明1\n説明2" });
+  assert.match(html, /<h3 class="figure-card__title">題<\/h3>\n<p>説明1<\/p>\n<p>説明2<\/p>\n<\/figcaption>/);
+  assert.match(html, /alt="Fig\. 1 題\n説明1\n説明2"/);
 });
