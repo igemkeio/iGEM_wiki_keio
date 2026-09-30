@@ -16,8 +16,8 @@ export function pagePath({ locale, slug }: Pick<WikiPage, "locale" | "slug">): s
   return slug === "home" ? prefix : `${prefix}${slug}/`;
 }
 
-export function buildRoutes(modules: Record<string, unknown>): Route[] {
-  return Object.entries(modules)
+export function buildRoutes(entries: Record<string, unknown>): Route[] {
+  return Object.entries(entries)
     .map(([file, json]) => ({ file, page: readPage(json, file) }))
     .filter(({ page }) => page.published)
     .sort((a, b) => a.page.order - b.page.order || (a.page.slug < b.page.slug ? -1 : a.page.slug > b.page.slug ? 1 : 0))

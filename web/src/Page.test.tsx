@@ -30,29 +30,35 @@ const withIsland = readPage({
 });
 
 const render = (p: typeof en) => renderToStaticMarkup(<Page page={p} assets={assets} />);
+const parse = (html: string) => new DOMParser().parseFromString(html, "text/html");
+const scripts = (doc: Document) => doc.querySelectorAll('script[type="module"]');
 
 describe("Page", () => {
   it("enのページ", () => {
     const html = render(en);
     expect(html).toMatchSnapshot();
-    expect(html).toContain('<html lang="en">');
-    expect(html).toContain("<title>Model | iGEM Keio 2026</title>");
-    expect(html).toContain("<h1>Model</h1>");
-    expect(html).not.toContain("<script");
+    const doc = parse(html);
+    expect(doc.documentElement.lang).toBe("en");
+    expect(doc.title).toBe("Model | iGEM Keio 2026");
+    expect(doc.querySelector("h1")?.textContent).toBe("Model");
+    expect(scripts(doc)).toHaveLength(0);
   });
 
   it("jaのページ", () => {
     const html = render(ja);
     expect(html).toMatchSnapshot();
-    expect(html).toContain('<html lang="ja">');
-    expect(html).toContain("<title>モデル | iGEM Keio 2026</title>");
-    expect(html).toContain("<h1>モデル</h1>");
-    expect(html).not.toContain("<script");
+    const doc = parse(html);
+    expect(doc.documentElement.lang).toBe("ja");
+    expect(doc.title).toBe("モデル | iGEM Keio 2026");
+    expect(doc.querySelector("h1")?.textContent).toBe("モデル");
+    expect(scripts(doc)).toHaveLength(0);
   });
 
   it("islandsがあるページだけscriptを入れる", () => {
     const html = render(withIsland);
     expect(html).toMatchSnapshot();
-    expect(html).toContain('<script type="module" src="/assets/index-abc.js">');
+    const found = scripts(parse(html));
+    expect(found.length).toBeGreaterThanOrEqual(1);
+    expect(found[0].getAttribute("src")).toBe("/assets/index-abc.js");
   });
 });

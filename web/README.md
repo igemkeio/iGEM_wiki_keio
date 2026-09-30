@@ -36,7 +36,7 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 ## テスト
 
 - Vitestは`src/**/*.test.{ts,tsx}`を対象にする。環境はhappy-domで、`src/test/setup.ts`でjest-domのmatcherを登録している。
-- `vitest.config.ts`は`vite.config.ts`を`mergeConfig`で継承する。`import.meta.glob`と`base`の設定がテストでも同じように効く。
+- `vitest.config.ts`は`vite.config.ts`を`mergeConfig`で継承する。`import.meta.glob`などのpluginの設定は引き継ぐが、Vitestは`base`を`/`に固定するので、テストでは`WIKI_BASE`を指定しても常に`/`になる。
 - `routes.ts`のテストは、`import.meta.glob`の結果を受け取る`buildRoutes`に入力を渡して書く。
 - `Page.test.tsx`はプリレンダーのHTMLをスナップショットで固定する。スナップショットは`src/__snapshots__/`に置く。
 - `Page`やマークアップを意図して変えたときは、差分を確認してからスナップショットを更新する。
