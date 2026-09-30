@@ -2,17 +2,25 @@
 import { posix } from "node:path";
 
 const allowedHosts = ["static.igem.wiki", "video.igem.org", "igem.org", "igem.wiki"];
+const dummyHost = "base.invalid";
 
 export function isAllowedHost(host) {
-  const h = host.toLowerCase();
+  const h = host.toLowerCase().replace(/\.$/, "");
   return allowedHosts.some((allowed) => h === allowed || h.endsWith(`.${allowed}`));
 }
 
-// http、https、プロトコル相対のURLならホストを返す。それ以外はnull。
+// ブラウザと同じ規則でURLを解釈し、http、httpsの外部ホストならホスト名を返す。
+// サイト内のパス、mailto:やdata:などのスキーム、解釈できない値はnull。
 export function externalHost(value) {
-  const m = /^(?:https?:)?\/\/([^/?#\\]*)/i.exec(value);
-  if (!m) return null;
-  return m[1].replace(/^.*@/, "").replace(/:\d+$/, "");
+  let url;
+  try {
+    url = new URL(value, `https://${dummyHost}/`);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+  if (url.hostname === dummyHost) return null;
+  return url.hostname.replace(/\.$/, "");
 }
 
 // 外部URLの違反理由を返す。許可されていれば空配列。
@@ -22,35 +30,36 @@ export function checkExternalUrl(value) {
   return [`許可されていない外部URLです: ${value}`];
 }
 
-// "/"で始まるサイト内の絶対パスか。"//"で始まるプロトコル相対URLは含まない。
+// "/"で始まるサイト内の絶対パスか。"//"や"/\\"で始まるプロトコル相対URLは含まない。
 export function isInternalPath(value) {
-  return value.startsWith("/") && !value.startsWith("//");
+  return value.startsWith("/") && !/^\/[/\\]/.test(value);
 }
 
 // baseを除いたdist内の相対パスを返す。baseの外を指していればnull。
-// baseは"/"か"/keio/"のように前後が"/"の形に揃えて扱う。
+// baseは"/"、"/keio/"、"keio"のどれでも同じ形に揃えて扱う。
 export function stripBase(pathname, base) {
   const normalized = `/${base.replace(/^\/+|\/+$/g, "")}/`.replace(/^\/\/$/, "/");
   if (!pathname.startsWith(normalized)) return null;
   return pathname.slice(normalized.length);
 }
 
-// 内部リンクの違反理由を返す。files はdist内のファイルの相対パス(posix)の集合。
+// 内部リンクの違反理由を返す。filesはdist内のファイルの相対パス(posix)の集合。
 export function checkInternalLink(value, base, files) {
   if (!isInternalPath(value)) return [];
   const pathname = value.replace(/[?#].*$/, "");
   const rel = stripBase(pathname, base);
-  if (rel === null) return [`base(${base})の外を指すリンクです: ${value}`];
+  if (rel === null) return [`baseの外を指すリンクです(base: ${base}): ${value}`];
   let decoded;
   try {
     decoded = decodeURIComponent(rel);
   } catch {
-    decoded = rel;
+    return [`パスをURLデコードできません: ${value}`];
   }
   const target = posix.normalize(decoded);
-  if (target.startsWith("..")) return [`dist の外を指すリンクです: ${value}`];
+  if (target === ".." || target.startsWith("../")) return [`distの外を指すリンクです: ${value}`];
   const dir = target === "." || target === "" ? "" : target.replace(/\/$/, "");
-  const candidates = target.endsWith("/") || dir === "" ? [posix.join(dir, "index.html")] : [dir, posix.join(dir, "index.html")];
+  const candidates =
+    target.endsWith("/") || dir === "" ? [posix.join(dir, "index.html")] : [dir, posix.join(dir, "index.html")];
   if (candidates.some((c) => files.has(c))) return [];
-  return [`リンク先が dist に存在しません: ${value}`];
+  return [`リンク先がdistに存在しません: ${value}`];
 }
