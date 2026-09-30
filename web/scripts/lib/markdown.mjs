@@ -36,6 +36,35 @@ export function createRenderer() {
   return new Marked({ async: false, extensions: mathExtensions });
 }
 
+// 見出しidを付けない本文変換。HTMLブロックの中に埋め込む断片に使う。
+function renderFragment(md) {
+  return createRenderer().parse(md).trim();
+}
+
 export function renderMarkdown(md) {
-  return addHeadingIds(createRenderer().parse(md).trim());
+  return addHeadingIds(renderFragment(md));
+}
+
+// Notionのcalloutの本文(Markdown)を Note の HTML にする。
+// 外側のmarkedがHTMLブロックとして素通しするよう、内側の空行は詰める。
+export function renderNote(bodyMarkdown) {
+  const body = renderFragment(bodyMarkdown).replace(/\n{2,}/g, "\n");
+  return `<aside class="note">\n<p class="note__label">Note</p>\n${body}\n</aside>`;
+}
+
+// Notionのrich_text配列をMarkdownにする。インライン数式は$...$、装飾とリンクはMarkdownの記法で書く。
+export function richTextToMarkdown(richText) {
+  return richText
+    .map((t) => {
+      if (t.type === "equation") return `$${t.equation.expression}$`;
+      const a = t.annotations ?? {};
+      let text = t.plain_text;
+      if (a.code) text = `\`${text}\``;
+      if (a.bold) text = `**${text}**`;
+      if (a.italic) text = `_${text}_`;
+      if (a.strikethrough) text = `~~${text}~~`;
+      if (t.href) text = `[${text}](${t.href})`;
+      return text;
+    })
+    .join("");
 }
