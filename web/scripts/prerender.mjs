@@ -72,7 +72,7 @@ export async function prerender() {
   const assets = await readAssets();
   let written = 0;
   for (const { page, path } of routeModule.routes) {
-    const html = renderToStaticMarkup(createElement(pageModule.Page, { page, assets }));
+    const html = renderToStaticMarkup(createElement(pageModule.Page, { page, routes: routeModule.routes, assets }));
     const file = join(dist, path, "index.html");
     await mkdir(dirname(file), { recursive: true });
     await writeFile(file, `<!doctype html>${html}`);

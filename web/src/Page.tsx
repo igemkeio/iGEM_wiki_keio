@@ -1,7 +1,7 @@
 import { withBase } from "./base";
 import { PageShell } from "./components/PageShell";
 import type { WikiPage } from "./content";
-import { routes } from "./routes";
+import type { Route } from "./routes";
 
 // vite.config.tsのdefineで埋まる。未指定のときは空文字で、配信パス配下の/fontsを使う。
 declare const __WIKI_FONT_BASE__: string;
@@ -13,7 +13,16 @@ export type Assets = {
   js: string;
 };
 
-export function Page({ page, assets }: { page: WikiPage; assets: Assets }) {
+export function Page({
+  page,
+  routes,
+  assets,
+}: {
+  page: WikiPage;
+  // ナビと言語切り替えに使うページ一覧。
+  routes: Route[];
+  assets: Assets;
+}) {
   return (
     <html lang={page.locale}>
       <head>
