@@ -1,0 +1,7 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Page > enのページ 1`] = `"<html lang="en"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Model | iGEM Keio 2026</title><link rel="stylesheet" href="/assets/index-abc.css"/></head><body><h1>Model</h1><p>Sub</p><p>Lead</p><div><h2>Section</h2></div></body></html>"`;
+
+exports[`Page > islandsがあるページだけscriptを入れる 1`] = `"<html lang="en"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Model | iGEM Keio 2026</title><link rel="stylesheet" href="/assets/index-abc.css"/></head><body><h1>Model</h1><div><h2>Section</h2></div><script type="module" src="/assets/index-abc.js"></script></body></html>"`;
+
+exports[`Page > jaのページ 1`] = `"<html lang="ja"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>モデル | iGEM Keio 2026</title><link rel="stylesheet" href="/assets/index-abc.css"/></head><body><h1>モデル</h1><p>サブ</p><p>リード</p><div><h2>節</h2></div></body></html>"`;
