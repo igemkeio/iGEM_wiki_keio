@@ -1,5 +1,11 @@
 import { withBase } from "./base";
+import { PageShell } from "./components/PageShell";
 import type { WikiPage } from "./content";
+import { routes } from "./routes";
+
+// vite.config.tsのdefineで埋まる。未指定のときは空文字で、配信パス配下の/fontsを使う。
+declare const __WIKI_FONT_BASE__: string;
+const fontBase = __WIKI_FONT_BASE__ || withBase("/fonts");
 
 export type Assets = {
   css: string[];
@@ -14,15 +20,13 @@ export function Page({ page, assets }: { page: WikiPage; assets: Assets }) {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>{`${page.title} | iGEM Keio 2026`}</title>
+        <link rel="stylesheet" href={`${fontBase}/fonts.css`} />
         {assets.css.map((file) => (
           <link key={file} rel="stylesheet" href={withBase(`/${file}`)} />
         ))}
       </head>
       <body>
-        <h1>{page.title}</h1>
-        {page.subtitle && <p>{page.subtitle}</p>}
-        {page.lead && <p dangerouslySetInnerHTML={{ __html: page.lead }} />}
-        <div dangerouslySetInnerHTML={{ __html: page.html }} />
+        <PageShell page={page} routes={routes} />
         {page.islands.length > 0 && (
           <script type="module" src={withBase(`/${assets.js}`)} />
         )}
