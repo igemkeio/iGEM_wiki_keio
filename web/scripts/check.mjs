@@ -1,10 +1,19 @@
-// vite build と prerender の後に実行し、dist/ の HTML と CSS を検査する。
-// 検査の関数は scripts/lib/check/ にあり、ここはファイルの読み書きと集計だけを行う。
+// vite buildとprerenderの後に実行し、dist/のHTMLとdist/assets/のCSSを検査する。
+// 検査の関数はscripts/lib/check/にあり、ここはファイルの読み取り、集計、出力、終了コードを受け持つ。
 import { readdir, readFile } from "node:fs/promises";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { extractCssUrls } from "./lib/check/css.mjs";
-import { checkLang, checkNoScript, checkStructure, extractRefs, isExternalCheckTarget } from "./lib/check/html.mjs";
+import {
+  checkLang,
+  checkNoScript,
+  checkStructure,
+  extractRefs,
+  extractStyleUrls,
+  isExternalCheckTarget,
+  isInternalCheckTarget,
+} from "./lib/check/html.mjs";
+import { comparePages, toPage } from "./lib/check/pages.mjs";
 import { checkExternalUrl, checkInternalLink } from "./lib/check/urls.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -22,7 +31,7 @@ async function walk(dir) {
   return out;
 }
 
-// dist/ の直下にある、web/public/ 由来の名前。HTMLとCSSの検査から外す。
+// dist/の直下にある、web/public/由来の名前。HTMLの検査から外す。
 async function publicNames() {
   try {
     return new Set(await readdir(join(root, "public")));
@@ -31,36 +40,46 @@ async function publicNames() {
   }
 }
 
-function pagePath({ locale, slug }) {
-  const prefix = locale === "en" ? "" : "ja/";
-  return slug === "home" ? `${prefix}index.html` : `${prefix}${slug}/index.html`;
-}
-
+// content/を読む。読めないもの、壊れたJSONはファイル名付きのメッセージで返す。
 async function readContent() {
   const pages = [];
-  for (const locale of await readdir(contentDir, { withFileTypes: true })) {
+  const errors = [];
+  let locales;
+  try {
+    locales = await readdir(contentDir, { withFileTypes: true });
+  } catch (error) {
+    return { pages, errors: [`content/: 読めません(${error.message})`] };
+  }
+  for (const locale of locales) {
     if (!locale.isDirectory()) continue;
     for (const file of await readdir(join(contentDir, locale.name))) {
       if (!file.endsWith(".json")) continue;
-      const json = JSON.parse(await readFile(join(contentDir, locale.name, file), "utf8"));
-      if (json.published === false) continue;
-      pages.push({
-        file: `content/${locale.name}/${file}`,
-        dist: pagePath({ locale: locale.name, slug: file.replace(/\.json$/, "") }),
-        islands: Array.isArray(json.islands) ? json.islands : [],
-      });
+      const name = `content/${locale.name}/${file}`;
+      try {
+        const json = JSON.parse(await readFile(join(contentDir, locale.name, file), "utf8"));
+        const page = toPage(locale.name, file, json);
+        if (page) pages.push(page);
+      } catch (error) {
+        errors.push(`${name}: JSONを読めません(${error.message})`);
+      }
     }
   }
-  return pages;
+  return { pages, errors };
 }
 
 async function main() {
   try {
     await readdir(dist);
   } catch {
-    console.error("dist/ がありません。先に npm run build を実行してください");
+    console.error("dist/がありません。先にnpm run buildを実行してください");
     process.exit(1);
   }
+  const { pages, errors } = await readContent();
+  if (errors.length > 0) {
+    for (const line of errors) console.error(line);
+    process.exit(1);
+  }
+
   const violations = [];
   const report = (file, reasons) => {
     for (const reason of reasons) violations.push(`${file}: ${reason}`);
@@ -68,42 +87,40 @@ async function main() {
 
   const publicDirs = await publicNames();
   const files = new Set(await walk(dist));
-  const isPublic = (rel) => !rel.includes("/") && publicDirs.has(rel);
-  const htmlFiles = [...files].filter((f) => f.endsWith(".html") && !isPublic(f.split("/")[0]));
+  const isPublic = (f) => publicDirs.has(f.split("/")[0]);
+  const htmlFiles = [...files].filter((f) => f.endsWith(".html") && !isPublic(f));
   const cssFiles = [...files].filter((f) => f.startsWith("assets/") && f.endsWith(".css"));
 
-  const pages = await readContent();
   const indexFiles = htmlFiles.filter((f) => f === "index.html" || f.endsWith("/index.html"));
-  if (pages.length !== indexFiles.length) {
-    report("dist", [`index.html の数(${indexFiles.length})が content/ の published 数(${pages.length})と一致しません`]);
-  }
-  const islandsByDist = new Map(pages.map((p) => [p.dist, p]));
+  for (const v of comparePages(pages, indexFiles)) report(v.file, [v.reason]);
+  const pageByDist = new Map(pages.map((p) => [p.dist, p]));
+
+  const checkUrl = (name, value, { external, internal }) => {
+    if (value === "" || value.startsWith("#") || /^mailto:/i.test(value) || /^data:/i.test(value)) return;
+    if (external) report(name, checkExternalUrl(value));
+    if (internal) report(name, checkInternalLink(value, base, files));
+  };
 
   for (const file of htmlFiles) {
     const html = await readFile(join(dist, file), "utf8");
     const name = `dist/${file}`;
     report(name, checkStructure(html));
     report(name, checkLang(html));
-    const page = islandsByDist.get(file);
+    const page = pageByDist.get(file);
     if (page && page.islands.length === 0) report(name, checkNoScript(html));
     for (const ref of extractRefs(html)) {
-      if (ref.value === "" || ref.value.startsWith("#") || /^mailto:/i.test(ref.value)) continue;
-      if (isExternalCheckTarget(ref)) report(name, checkExternalUrl(ref.value));
-      report(name, checkInternalLink(ref.value, base, files));
+      checkUrl(name, ref.value, { external: isExternalCheckTarget(ref), internal: isInternalCheckTarget(ref) });
     }
+    for (const url of extractStyleUrls(html)) checkUrl(name, url, { external: true, internal: true });
   }
 
   for (const file of cssFiles) {
     const css = await readFile(join(dist, file), "utf8");
-    for (const url of extractCssUrls(css)) {
-      if (url === "" || url.startsWith("#") || /^data:/i.test(url)) continue;
-      report(`dist/${file}`, checkExternalUrl(url));
-      report(`dist/${file}`, checkInternalLink(url, base, files));
-    }
+    for (const url of extractCssUrls(css)) checkUrl(`dist/${file}`, url, { external: true, internal: true });
   }
 
   for (const line of violations) console.error(line);
-  console.log(`check: HTML ${htmlFiles.length} 件、CSS ${cssFiles.length} 件を検査し、違反は ${violations.length} 件でした`);
+  console.log(`check: HTML ${htmlFiles.length}件、CSS ${cssFiles.length}件を検査し、違反は${violations.length}件でした`);
   if (violations.length > 0) process.exitCode = 1;
 }
 
