@@ -1,0 +1,14 @@
+@layer components {
+  .root {
+    padding: 16px var(--space-frame-x) 40px;
+    color: var(--color-muted);
+    font-size: var(--size-subtitle);
+    line-height: var(--size-subtitle-leading);
+  }
+
+  @media (max-width: 767px) {
+    .root {
+      padding-inline: 24px;
+    }
+  }
+}
