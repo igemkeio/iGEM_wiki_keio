@@ -13,8 +13,8 @@ Node は 24 系(リポジトリ直下の `.node-version`)、パッケージマ�
 | `npm run build` | `vite build` のあとに `scripts/prerender.mjs` を実行し、`dist/` に全ページの HTML を書く |
 | `npm run preview` | `dist/` を配信する |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run notion:sync` | Notion から原稿を取り込む |
-| `npm run notion:import` | Notion へ原稿を取り込む |
+| `npm run notion:sync` | Notion の原稿を書き出す(#27 で content/ 向けに更新予定) |
+| `npm run notion:import` | 既存の wiki/pages/*.html を Notion へ取り込む(初期移行用) |
 
 ## 配信パス
 
