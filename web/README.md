@@ -42,15 +42,15 @@ UltraciteのプリセットでoxlintとoxfmtをCSSとJSONを含めて掛ける�
 2. `oxfmt --write`(`.ts`、`.tsx`、`.mjs`、`.css`、`.json`、`.md`)
 3. `npm run typecheck`(`.ts`か`.tsx`が含まれるときだけ)
 
-`npm ci`の`prepare`が`lefthook install`を実行してフックを入れる。直せないlintのエラーや型エラーがあるとコミットは止まる。
+`npm ci`では、lefthookのpostinstallと`prepare`の両方が`lefthook install`を試みてフックを入れる。直せないlintのエラーや型エラーがあるとコミットは止まる。
 
-`core.hooksPath`をグローバルに設定している環境では、`lefthook install`が拒否される(`--force`はグローバルのフックを上書きするので使わない)。その場合は、リポジトリの`.git/hooks`へ入れる。
+`core.hooksPath`をグローバルに設定している環境では、どちらの`lefthook install`も拒否される(`--force`はグローバルのフックを上書きするので使わない)。その場合は、リポジトリの`.git/hooks`へ入れる。
 
 ```sh
 GIT_CONFIG_GLOBAL=/dev/null npx lefthook install
 ```
 
-グローバルのフックがリポジトリの`.git/hooks/pre-commit`を呼ぶ作りなら、gitleaksなどのグローバルの検査とlefthookの両方が走る。
+グローバルのフックがリポジトリの`.git/hooks/pre-commit`を呼ぶ作りなら、gitleaksなどのグローバルの検査とlefthookの両方が走る。worktreeでは、グローバルのフックが`git rev-parse --git-common-dir`のhooksを呼ぶ作りでないとlefthookが走らない。
 
 ## E2E
 

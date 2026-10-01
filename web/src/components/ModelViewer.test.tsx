@@ -38,7 +38,7 @@ const stubObserver = () => {
         observed = options ?? {};
         intersect = (isIntersecting) => notify([{ isIntersecting }]);
       }
-      // oxlint-disable-next-line eslint/class-methods-use-this -- IntersectionObserver の代役で、this を使わない
+      // oxlint-disable-next-line eslint/class-methods-use-this -- IntersectionObserverの代役で、thisを使わない
       observe() {}
       // oxlint-disable-next-line eslint/class-methods-use-this -- 同上
       disconnect() {}
@@ -55,7 +55,7 @@ const render = async (props: object = model) => {
 beforeEach(async () => {
   vi.resetModules();
   state.imported = 0;
-  // oxlint-disable-next-line vitest/prefer-import-in-mock -- 空のモジュールで置き換えるので、型付きの import() 形式は合わない
+  // oxlint-disable-next-line vitest/prefer-import-in-mock -- 空のモジュールで置き換えるので、型付きのimport()形式は合わない
   vi.doMock("@google/model-viewer", () => {
     state.imported += 1;
     return {};

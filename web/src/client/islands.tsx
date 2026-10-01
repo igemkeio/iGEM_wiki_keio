@@ -2,8 +2,7 @@ import type { ComponentType } from "react";
 import { createRoot } from "react-dom/client";
 
 // 島の名前と部品の遅延ローダー。キーはislands.tsのISLANDSと揃える。
-// 島ごとに props の型が違うので any で受ける。
-// oxlint-disable-next-line typescript/no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any -- 島ごとにpropsの型が違うのでanyで受ける
 const loaders: Record<string, () => Promise<{ default: ComponentType<any> }>> =
   {
     "attribution-form": () => import("../components/AttributionForm"),

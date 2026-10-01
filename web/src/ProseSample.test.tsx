@@ -10,7 +10,7 @@ import { readPage } from "./content";
 // 同期スクリプトの.mjsは型宣言を持たないので、必要な関数の型だけここで与える。
 const FIGURE = resolve(process.cwd(), "scripts/lib/figure.mjs");
 const MARKDOWN = resolve(process.cwd(), "scripts/lib/markdown.mjs");
-// oxlint-disable-next-line eslint/no-inline-comments -- Vite に動的 import を解析させない印
+// oxlint-disable-next-line eslint/no-inline-comments -- Viteに動的importを解析させない印
 const { renderImage } = (await import(/* @vite-ignore */ FIGURE)) as {
   renderImage: (a: { src: string; caption: string }) => string;
 };

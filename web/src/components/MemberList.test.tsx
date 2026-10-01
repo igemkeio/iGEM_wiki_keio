@@ -27,7 +27,7 @@ let root: Root;
 
 beforeEach(() => {
   const proto = HTMLDialogElement.prototype;
-  // oxlint-disable-next-line unicorn/consistent-function-scoping -- this を使う代役で、アロー関数にできない
+  // oxlint-disable-next-line unicorn/consistent-function-scoping -- thisを使う代役で、アロー関数にできない
   proto.showModal ??= function showModal(this: HTMLDialogElement) {
     this.setAttribute("open", "");
   };

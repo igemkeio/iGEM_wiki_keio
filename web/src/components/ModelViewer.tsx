@@ -7,7 +7,7 @@ import type { Model } from "../content";
 import styles from "./ModelViewer.module.css";
 
 declare module "react" {
-  // oxlint-disable-next-line typescript/no-namespace -- React の JSX.IntrinsicElements の拡張に namespace が要る
+  // oxlint-disable-next-line typescript/no-namespace -- ReactのJSX.IntrinsicElementsの拡張にnamespaceが要る
   namespace JSX {
     interface IntrinsicElements {
       "model-viewer": DetailedHTMLProps<

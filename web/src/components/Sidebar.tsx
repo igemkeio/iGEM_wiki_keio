@@ -58,7 +58,7 @@ export function Sidebar({ page, routes }: { page: WikiPage; routes: Route[] }) {
             ))}
           </nav>
           {alternateHref && (
-            // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- fieldset にすると既定の枠線とレイアウトが付く
+            // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- fieldsetにすると既定の枠線とレイアウトが付く
             <div className={styles.lang} role="group" aria-label={label.lang}>
               <span className={styles.langCurrent} lang={page.locale}>
                 {page.locale.toUpperCase()}

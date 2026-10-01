@@ -39,7 +39,7 @@ export function AttributionForm({ src }: { src: string }) {
   }, []);
 
   return (
-    // oxlint-disable-next-line react/iframe-missing-sandbox -- 外部フォームのスクリプトと送信を止めないため sandbox を付けない
+    // oxlint-disable-next-line react/iframe-missing-sandbox -- 外部フォームのスクリプトと送信を止めないためsandboxを付けない
     <iframe
       ref={frameRef}
       id="igem-attribution-form"

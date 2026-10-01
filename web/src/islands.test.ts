@@ -6,7 +6,7 @@ import { ISLANDS } from "./islands";
 const page = (extra: object = {}) =>
   readPage({ slug: "x", locale: "en", title: "X", html: "", ...extra });
 
-// oxlint-disable-next-line vitest/prefer-describe-function-title -- ISLANDS は関数ではなくオブジェクト
+// oxlint-disable-next-line vitest/prefer-describe-function-title -- ISLANDSは関数ではなくオブジェクト
 describe("ISLANDS", () => {
   it("model-viewerがafterBodyで登録されている", () => {
     expect(ISLANDS["model-viewer"]?.place).toBe("afterBody");

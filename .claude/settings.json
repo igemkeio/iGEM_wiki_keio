@@ -6,6 +6,8 @@
       "Bash(npm run typecheck)",
       "Bash(npm run check)",
       "Bash(npm run check:code)",
+      "Bash(npm run test:sync)",
+      "Bash(npm run test:check)",
       "Bash(npm run fix)",
       "Bash(npm run build)",
       "Bash(npm run test:e2e)",
