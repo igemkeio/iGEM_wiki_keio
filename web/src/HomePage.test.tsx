@@ -14,6 +14,7 @@ const make = (slug: string, locale: Locale, extra: Partial<WikiPage> = {}): Rout
     lead: "",
     order: Number.MAX_SAFE_INTEGER,
     islands: [],
+    models: [],
     published: true,
     ...extra,
   };
