@@ -1,0 +1,25 @@
+@layer components {
+  .frame {
+    max-width: var(--size-frame);
+    margin-left: var(--size-sidebar);
+  }
+
+  .inner {
+    display: flex;
+    gap: 40px;
+    min-height: 100vh;
+    padding: 0 var(--space-frame-x) 112px;
+  }
+
+  @media (max-width: 767px) {
+    .frame {
+      margin-left: 0;
+      padding-top: var(--size-topbar);
+    }
+
+    .inner {
+      padding-inline: 24px;
+      padding-bottom: 64px;
+    }
+  }
+}

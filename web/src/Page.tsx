@@ -1,5 +1,8 @@
 import { withBase } from "./base";
+import { ArticlePage } from "./components/ArticlePage";
+import { PageShell } from "./components/PageShell";
 import type { WikiPage } from "./content";
+import type { Route } from "./routes";
 
 export type Assets = {
   css: string[];
@@ -7,7 +10,16 @@ export type Assets = {
   js: string;
 };
 
-export function Page({ page, assets }: { page: WikiPage; assets: Assets }) {
+export function Page({
+  page,
+  routes,
+  assets,
+}: {
+  page: WikiPage;
+  // ナビと言語切り替えに使うページ一覧。
+  routes: Route[];
+  assets: Assets;
+}) {
   return (
     <html lang={page.locale}>
       <head>
@@ -19,10 +31,9 @@ export function Page({ page, assets }: { page: WikiPage; assets: Assets }) {
         ))}
       </head>
       <body>
-        <h1>{page.title}</h1>
-        {page.subtitle && <p>{page.subtitle}</p>}
-        {page.lead && <p dangerouslySetInnerHTML={{ __html: page.lead }} />}
-        <div dangerouslySetInnerHTML={{ __html: page.html }} />
+        <PageShell page={page} routes={routes}>
+          <ArticlePage page={page} />
+        </PageShell>
         {page.islands.length > 0 && (
           <script type="module" src={withBase(`/${assets.js}`)} />
         )}

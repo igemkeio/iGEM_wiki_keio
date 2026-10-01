@@ -21,9 +21,36 @@ function watchContent(): Plugin {
   };
 }
 
+// global.cssの@font-faceにある目印を、環境変数WIKI_FONT_BASE(未指定ならbaseを付けた/fonts)に置き換える。
+function fontBase(base: string): Plugin {
+  const marker = "__WIKI_FONT_BASE__";
+  return {
+    name: "font-base",
+    enforce: "pre",
+    transform(code, id) {
+      if (!id.split("?")[0].endsWith(".css") || !code.includes(marker)) return;
+      const dir = (process.env.WIKI_FONT_BASE || `${base.replace(/\/$/, "")}/fonts`).replace(/\/+$/, "");
+      return { code: code.replaceAll(marker, dir), map: null };
+    },
+  };
+}
+
+// 部品のCSSはSSRでしか参照されないので、tree-shakeで捨てられないようにしてクライアントのCSSに束ねる。
+function keepCssModules(): Plugin {
+  return {
+    name: "keep-css-modules",
+    enforce: "post",
+    transform(code, id) {
+      if (/\.module\.css($|\?)/.test(id)) return { code, map: null, moduleSideEffects: "no-treeshake" };
+    },
+  };
+}
+
+const base = process.env.WIKI_BASE ?? "/";
+
 export default defineConfig({
-  base: process.env.WIKI_BASE ?? "/",
-  plugins: [react(), watchContent()],
+  base,
+  plugins: [react(), watchContent(), fontBase(base), keepCssModules()],
   build: {
     manifest: true,
   },

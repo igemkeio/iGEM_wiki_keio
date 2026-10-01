@@ -17,6 +17,7 @@
     "test:watch": "vitest",
     "notion:sync": "node scripts/notion-sync.mjs",
     "notion:import": "node scripts/notion-import.mjs",
+    "fonts:subset": "node scripts/fonts-subset.mjs",
     "test:sync": "node --test \"scripts/lib/*.test.mjs\""
   },
   "dependencies": {
@@ -37,6 +38,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5",
+    "subset-font": "^2.9.0",
     "happy-dom": "^20.14.5",
     "typescript": "^5",
     "vite": "^7",

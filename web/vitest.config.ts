@@ -6,6 +6,12 @@ export default mergeConfig(
   defineConfig({
     test: {
       environment: "happy-dom",
+      // パースしたHTMLの<link>や<script>を取りに行かないようにする。
+      environmentOptions: {
+        happyDOM: {
+          settings: { disableCSSFileLoading: true, disableJavaScriptFileLoading: true },
+        },
+      },
       setupFiles: ["src/test/setup.ts"],
       include: ["src/**/*.test.{ts,tsx}"],
     },
