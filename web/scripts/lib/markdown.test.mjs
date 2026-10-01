@@ -16,12 +16,15 @@ test("空文字は空文字を返す", () => {
   assert.equal(renderMarkdown(""), "");
 });
 
-test("h2とh3にidが付き、h1とh4には付かない", () => {
-  const html = renderMarkdown("# A\n\n## B c\n\n### D\n\n#### E");
-  assert.equal(
-    html,
-    '<h1>A</h1>\n<h2 id="b-c">B c</h2>\n<h3 id="d">D</h3>\n<h4>E</h4>'
-  );
+test("h2とh3にidが付き、h4には付かない", () => {
+  const html = renderMarkdown("## B c\n\n### D\n\n#### E");
+  assert.equal(html, '<h2 id="b-c">B c</h2>\n<h3 id="d">D</h3>\n<h4>E</h4>');
+});
+
+test("本文のh1はh2として出し、idを付ける", () => {
+  const html = renderMarkdown("# A\n\n## B\n\n### C");
+  assert.equal(html, '<h2 id="a">A</h2>\n<h2 id="b">B</h2>\n<h3 id="c">C</h3>');
+  assert.equal(renderMarkdown("# A **b**"), '<h2 id="a-b">A <strong>b</strong></h2>');
 });
 
 test("idは小文字化し、句読点と記号を除き、日本語を残す", () => {
