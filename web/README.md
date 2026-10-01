@@ -19,7 +19,13 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 | `npm run test:check` | `check`の検査関数のテスト(`node:test`) |
 | `npm test` | Vitestを1回流す |
 | `npm run test:watch` | Vitestをwatchモードで流す |
+| `npm run test:e2e` | PlaywrightでE2Eとビジュアル回帰を流す(`e2e/README.md`) |
+| `npm run test:e2e:ui` | PlaywrightのUIモードで流す |
 | `npm run notion:sync` | Notionの原稿を書き出す(#27で`content/`向けに更新予定) |
+
+## E2E
+
+`e2e/`にPlaywrightのE2Eとビジュアル回帰がある。初回は`npx playwright install chromium`でブラウザを入れ、`npm run test:e2e`で流す。`PRERENDER_ALL=1`で`published: false`のE2E用ページも含めてビルドしてから配信するので、実行後の`dist/`は`npm run check`に通らない。`check`の前に`npm run build`をやり直す。変更箇所とテストの対応、基準画像の扱い、CIのジョブ案は`e2e/README.md`を参照。Vitestの対象は`src/`だけなので、`e2e/`は拾われない。
 
 ## フォント
 

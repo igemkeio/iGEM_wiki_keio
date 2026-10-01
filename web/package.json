@@ -10,11 +10,13 @@
     "dev": "node scripts/dev.mjs",
     "build": "vite build && node scripts/prerender.mjs",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p e2e",
     "check": "node scripts/check.mjs",
     "test:check": "node --test \"scripts/lib/check/*.test.mjs\"",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test -c e2e",
+    "test:e2e:ui": "playwright test -c e2e --ui",
     "notion:sync": "node scripts/notion-sync.mjs",
     "fonts:subset": "node scripts/fonts-subset.mjs",
     "test:sync": "node --test \"scripts/lib/*.test.mjs\""
@@ -29,6 +31,7 @@
     "react-dom": "^19"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",

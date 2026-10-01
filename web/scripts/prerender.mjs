@@ -10,6 +10,8 @@ import { build } from "vite";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
 const ssrDir = join(root, ".vite", "ssr");
+// PRERENDER_ALL=1のとき、published: falseのページも書き出す(E2E用)。
+const includeUnpublished = process.env.PRERENDER_ALL === "1";
 
 async function bundle() {
   await rm(ssrDir, { recursive: true, force: true });
@@ -52,36 +54,49 @@ async function readAssets() {
   return { css: entry.css ?? [], js: entry.file };
 }
 
-// routes.ts を通さず content/ の JSON を直接数え、書き出し数の突き合わせに使う。
-async function countPublished() {
+// routes.ts を通さず content/ の JSON を直接読む。書き出し数の突き合わせと、PRERENDER_ALL のルート作りに使う。
+async function readContentJson() {
   const contentDir = join(root, "..", "content");
-  let count = 0;
+  const entries = {};
   for (const locale of await readdir(contentDir, { withFileTypes: true })) {
     if (!locale.isDirectory()) continue;
     for (const file of await readdir(join(contentDir, locale.name))) {
       if (!file.endsWith(".json")) continue;
-      const json = JSON.parse(await readFile(join(contentDir, locale.name, file), "utf8"));
-      if (json.published !== false) count += 1;
+      entries[`../../content/${locale.name}/${file}`] = JSON.parse(
+        await readFile(join(contentDir, locale.name, file), "utf8"),
+      );
     }
   }
-  return count;
+  return entries;
+}
+
+async function countPublished() {
+  const entries = Object.values(await readContentJson());
+  return entries.filter((json) => includeUnpublished || json.published !== false).length;
+}
+
+// 全ページを published: true として並べ直す。
+async function allRoutes(routeModule) {
+  const entries = await readContentJson();
+  return routeModule.buildRoutes(Object.fromEntries(Object.entries(entries).map(([k, v]) => [k, { ...v, published: true }])));
 }
 
 export async function prerender() {
   const { routes: routeModule, page: pageModule } = await bundle();
   const assets = await readAssets();
+  const routes = includeUnpublished ? await allRoutes(routeModule) : routeModule.routes;
   let written = 0;
-  for (const { page, path } of routeModule.routes) {
-    const html = renderToStaticMarkup(createElement(pageModule.Page, { page, routes: routeModule.routes, assets }));
+  for (const { page, path } of routes) {
+    const html = renderToStaticMarkup(createElement(pageModule.Page, { page, routes, assets }));
     const file = join(dist, path, "index.html");
     await mkdir(dirname(file), { recursive: true });
     await writeFile(file, `<!doctype html>${html}`);
     written += 1;
   }
   const expected = await countPublished();
-  console.log(`prerender: ${written} ページを書き出しました(content/ の published は ${expected} ページ)`);
+  console.log(`prerender: ${written} ページを書き出しました(content/ の${includeUnpublished ? "全ページ" : "publishedなページ"}は ${expected} ページ)`);
   if (written !== expected) {
-    throw new Error(`書き出したページ数(${written})と content/ の published 数(${expected})が一致しません`);
+    throw new Error(`書き出したページ数(${written})と content/ の${includeUnpublished ? "全ページ" : "published"}数(${expected})が一致しません`);
   }
 }
 

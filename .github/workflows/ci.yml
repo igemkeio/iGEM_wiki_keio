@@ -2,6 +2,12 @@ name: CI
 
 on:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      update_snapshots:
+        description: E2Eのビジュアル回帰の基準画像をこの環境(Linux)で作り直し、artifactに上げる
+        type: boolean
+        default: false
   push:
     branches:
       - feature/vite-mpa
@@ -79,8 +85,49 @@ jobs:
       - name: GitLab Pages 想定(base は /keio/)
         run: WIKI_BASE=/keio/ npm run build && WIKI_BASE=/keio/ npm run check
 
+  e2e:
+    needs:
+      - typecheck
+      - test
+      - test-scripts
+      - build-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: E2E
+        if: ${{ !inputs.update_snapshots }}
+        run: npm run test:e2e
+      - name: E2E(基準画像の作り直し)
+        if: ${{ inputs.update_snapshots }}
+        continue-on-error: true
+        run: npm run test:e2e -- --update-snapshots=all
+      - uses: actions/upload-artifact@v4
+        if: ${{ inputs.update_snapshots }}
+        with:
+          name: e2e-snapshots
+          path: web/e2e/**/*-snapshots/
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: |
+            web/e2e/playwright-report/
+            web/e2e/test-results/
+          retention-days: 7
+
   # ruleset の必須チェックはこのジョブだけにする。
-  # E2E のジョブ(#37)を足すときは、ジョブを追加して下の needs に e2e を加える。
   ci-passed:
     if: always()
     needs:
@@ -88,6 +135,7 @@ jobs:
       - test
       - test-scripts
       - build-check
+      - e2e
     runs-on: ubuntu-latest
     steps:
       - name: 依存ジョブがすべて成功したか確認する
