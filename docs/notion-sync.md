@@ -12,9 +12,7 @@ Notion（Markdown 執筆）→ API 取得 → Markdown 化 → HTML 化 → cont
 > `content/**/*.json` は同期で上書きされ、Notion に無くなったページの JSON は削除されるため、
 > 直接編集しないでください。`content/README.md` は削除されません。
 
-移行中は環境変数 `NOTION_SYNC_LEGACY_HTML=1` を付けると、従来の
-`wiki/pages/<slug>.html`（en）/ `wiki/pages/ja/<slug>.html`（ja）も出力します
-（`main` の Next.js 版が読む形式）。既定では JSON だけを出します。
+ページで使う島(`islands`)は Notion には持たせず、`web/scripts/lib/page.mjs` の `ISLANDS_BY_SLUG`(slug から島の名前の配列を引く表)で決め、JSON の `islands` に出す。島の名前は `web/src/islands.ts` の `ISLANDS` のキーと手で揃える。
 
 ## 1. Notion Integration を作る
 

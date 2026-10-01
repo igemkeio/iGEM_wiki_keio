@@ -20,7 +20,6 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 | `npm test` | Vitestを1回流す |
 | `npm run test:watch` | Vitestをwatchモードで流す |
 | `npm run notion:sync` | Notionの原稿を書き出す(#27で`content/`向けに更新予定) |
-| `npm run notion:import` | 既存の`wiki/pages/*.html`をNotionへ取り込む(初期移行用) |
 
 ## フォント
 
