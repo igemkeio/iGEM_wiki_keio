@@ -7,5 +7,6 @@
   "html": "<h2 id=\"plain\">Plain</h2>\n<p>A page without islands.</p>",
   "order": 901,
   "islands": [],
-  "published": false
+  "published": false,
+  "source": "local"
 }
