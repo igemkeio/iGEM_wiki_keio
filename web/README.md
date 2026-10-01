@@ -102,3 +102,16 @@ MPAではページを移るとJSのメモリが消えるため、ページをま
 - `locale.ts`の`rememberLocaleOnClick()`が、言語切り替えリンク(`a[hreflang]`)のクリックを`document`で受けて、移る先の言語を`wiki:locale`に保存する。島の中に描画されたリンクも拾う。保存した言語への自動遷移はしない。Sidebarはビルド時のコードでJSを持たないため、クリックの登録は`main.tsx`から行う。
 - `rememberLocale`は保存領域に直接書くので、同じページで`usePersistedState("wiki:locale")`を使う島があっても、そのメモリ上の値は更新されない。
 - 制約として、島のないページにはJSが配信されないので、言語の保存は島のあるページでしか動かない。全ページで保存したくなったら、数行の素のJSを`public/`に置く別Issueにする。
+
+## 3Dモデル
+
+`model-viewer`島が、`content/`の`models`フィールドの先頭1件を`<model-viewer>`(Googleのweb component、npmの`@google/model-viewer`)で表示する。フィールドの形は`content/README.md`を参照。
+
+- 島の中身は`src/components/ModelViewer.tsx`。WebGLが使え、島が画面の200px手前まで来てから`@google/model-viewer`を動的importし、別チャンクとして配る。それまでと、WebGLが無い環境では、`poster`の画像だけを出す。`<model-viewer>`は`loading="lazy"`なので、.glbは画面に入るまで取得されない。
+- Blenderからglb(glTF Binary)で書き出し、Draco圧縮を有効にする。1モデル2〜5MB以下を目安にする。テクスチャは2048px以下に縮める。
+- `ModelViewer`はDracoとKTX2のデコーダーの場所を`/models/decoders/draco/`と`/models/decoders/basis/`(baseを付ける)に向けていて、`gstatic.com`には出ない。デコーダーを`public/models/decoders/`か`static.igem.wiki`に置くまでは、Draco圧縮とKTX2テクスチャを使わない。
+- .glbとposterは画像と同じ扱いで`static.igem.wiki`に置く。リポジトリには入れない。`tools.igem.org`が.glbを受け付けるかは未確認で、人が確かめる。
+- posterはモデルを正面斜めから撮ったPNGで、100KB以下にする。
+- 暫定のサンプルとして`public/models/sample.glb`(約360KB)と`sample.png`を置いてある。`content/en/model-sample.json`が使う(`published: false`)。確認するときは`published`をtrueにしてビルドする。本番の配信前に消す。
+- サンプルのglbはKhronosのglTF-Sample-AssetsにあるCesiumMilkTruck(c) 2017 Cesium、CC BY 4.0。出典は`https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CesiumMilkTruck`、ライセンスは`https://creativecommons.org/licenses/by/4.0/`。
+- `models`の`src`と`poster`が`/`で始まり`//`で始まらないときは、`ISLANDS`の`props`がビルド時にbaseを付ける。`https://`のURLはそのまま使う。
