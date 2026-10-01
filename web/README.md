@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# web
 
-## Getting Started
+iGEM Keioのwikiを生成するViteとReactのプロジェクト。`content/`の原稿JSONから、ページごとの静的HTMLを`dist/`に書き出す。全体の構成は`docs/architecture.md`を参照。
 
-First, run the development server:
+Nodeは24系(リポジトリ直下の`.node-version`)、パッケージマネージャーはnpm。
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7で固定し、8への移行は別Issueで扱う。
+
+## コマンド
+
+| コマンド | 内容 |
+| --- | --- |
+| `npm ci` | 依存を入れる |
+| `npm run dev` | `vite build --watch`と`vite preview`を並走させる。`web/src/`と`content/`の保存ごとに再ビルドし、prerenderをやり直す。URLは起動時に表示される |
+| `npm run build` | `vite build`のあとに`scripts/prerender.mjs`を実行し、`dist/`に全ページのHTMLを書く |
+| `npm run preview` | `dist/`を配信する |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run check` | `dist/`のHTMLとCSSを検査する。`npm run build`の後に実行する |
+| `npm run test:check` | `check`の検査関数のテスト(`node:test`) |
+| `npm test` | Vitestを1回流す |
+| `npm run test:watch` | Vitestをwatchモードで流す |
+| `npm run notion:sync` | Notionの原稿を書き出す(#27で`content/`向けに更新予定) |
+| `npm run notion:import` | 既存の`wiki/pages/*.html`をNotionへ取り込む(初期移行用) |
+
+## 配信パス
+
+`WIKI_BASE`で配信パスを切り替える。既定は`/`。GitLab Pagesでは`WIKI_BASE=/keio/ npm run build`とすると、CSS、JS、リンクがすべて`/keio/`から始まる。
+
+## プリレンダーの仕組み
+
+- `src/routes.ts`が`content/<locale>/*.json`を読み、`published`なページの一覧を作る。URLパスが衝突するページがあればエラーにする。
+- `scripts/prerender.mjs`が`vite build`のSSRモードで`src/routes.ts`と`src/Page.tsx`を`.vite/ssr/`に束ね、Nodeから読み込む。`.tsx`を直接実行する`tsx`などの依存は増やさない。
+- `dist/.vite/manifest.json`からCSSとJSのハッシュ付きファイル名を取り、`Page`に渡す。
+- `Page`は`renderToStaticMarkup`でHTMLにして`dist/<path>/index.html`に書く。`islands`が空のページには`<script>`を入れない。
+- 最後に、書き出したページ数と`content/`の`published`なJSONの数を突き合わせ、一致しなければ非ゼロで終了する。
+- ビルド時にNodeで動く`src/`のコードでは`window`と`document`を参照しない。
+
+## 出力の検査
+
+`npm run check`は`dist/`を走査し、違反を`ファイル: 理由`の1行ずつ出す。1件でもあれば終了コード1。`WIKI_BASE`を読むので、`WIKI_BASE=/keio/ npm run build`で作った`dist/`は`WIKI_BASE=/keio/ npm run check`で検査する。
+
+- ページの対応: `content/`の`published`なJSONから決まるパスの集合と、`dist/**/index.html`の集合が一致する。対応のない`index.html`と、`index.html`のない原稿を、それぞれ違反として出す。`content/`が読めないときと、JSONが壊れているときは、ファイル名付きで終了コード1にする。
+- 外部URL: `<a>`と`<area>`の`href`を除くすべてのタグの`src`、`href`、`data`、`poster`、`srcset`、`imagesrcset`(候補ごと)、SVGの`xlink:href`、`<meta>`の`content`と、`style`属性、`<style>`、CSSの`url(...)`と`@import`は、ブラウザと同じ規則でURLを解釈して外部ホストを指す場合に、ホストが`static.igem.wiki`、`video.igem.org`、`igem.org`と`igem.wiki`(サブドメインを含む)のどれかであること。`<a href>`の外部リンクは対象外。
+- 内部リンク: `/`で始まる`href`と`src`(`<a>`を含む)は、`base`を除いたパスが`dist/`のファイルか、`index.html`を持つディレクトリを指すこと。`base`の外を指すリンクも違反。`#`だけの`href`と`mailto:`は見ない。
+- 構造: 各HTMLに`<title>`(SVGの中は数えない)と`<h1>`が1つずつあり、`<img>`に`alt`属性がある(空文字は可)。
+- `<html lang>`が`en`か`ja`。
+- `islands`が空のページに`<script>`がない。
+
+検査するのは`dist/`のHTMLと、`dist/assets/`配下のCSSだけ。`web/public/`由来のディレクトリ(`static/`、`people/`、`notion-images/`)のHTMLとCSSは読まない。HTMLの解析は正規表現で行い、依存は増やさない。検査の関数は`scripts/lib/check/`にあり、`npm run test:check`でテストする。
+## テスト
+
+- Vitestは`src/**/*.test.{ts,tsx}`を対象にする。環境はhappy-domで、`src/test/setup.ts`でjest-domのmatcherを登録している。
+- `vitest.config.ts`は`vite.config.ts`を`mergeConfig`で継承する。`import.meta.glob`などのpluginの設定は引き継ぐが、Vitestは`base`を`/`に固定するので、テストでは`WIKI_BASE`を指定しても常に`/`になる。
+- `routes.ts`のテストは、`import.meta.glob`の結果を受け取る`buildRoutes`に入力を渡して書く。
+- `Page.test.tsx`はプリレンダーのHTMLをスナップショットで固定する。スナップショットは`src/__snapshots__/`に置く。
+- `Page`やマークアップを意図して変えたときは、差分を確認してからスナップショットを更新する。
+
+```sh
+npx vitest run -u
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `scripts/lib/*.test.mjs`は`node:test`で書かれており、Vitestの対象外。
