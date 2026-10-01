@@ -236,7 +236,7 @@
 
   @container (min-width: 720px) {
     .figure-card {
-      grid-template-columns: minmax(280px, 434px) 1px minmax(0, 1fr);
+      grid-template-columns: minmax(0, 434fr) 1px minmax(0, 477fr);
       column-gap: 40px;
       padding: var(--space-card);
       border-radius: var(--radius-card);
@@ -259,7 +259,7 @@
     }
   }
 
-  @media (max-width: 767px) {
+  @container (max-width: 719px) {
     table {
       display: block;
       overflow-x: auto;
