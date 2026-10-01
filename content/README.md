@@ -20,8 +20,9 @@ Notion同期とプリレンダーをつなぐ受け渡し形式。同期スク�
 | `islands`   | string[]             | 任意 | このページで使う島の名前。省略時は空配列                                 |
 | `models`    | `{ src, poster, alt }[]` | 任意 | 3Dモデルの一覧。省略時は空配列。`model-viewer`島は先頭の1件を表示する |
 | `published` | boolean              | 任意 | 省略時はtrue。falseのページはビルドから除く                              |
+| `source`    | `"notion"` または `"local"` | 任意 | 省略時はnotion。localはリポジトリ側で置く確認用ページで、Notion同期が消さない |
 
-- 任意フィールドの既定値は`readPage`が埋める。`WikiPage`型では`subtitle`と`lead`が空文字、`order`が`Number.MAX_SAFE_INTEGER`、`islands`と`models`が空配列、`published`がtrueになる。
+- 任意フィールドの既定値は`readPage`が埋める。`WikiPage`型では`subtitle`と`lead`が空文字、`order`が`Number.MAX_SAFE_INTEGER`、`islands`と`models`が空配列、`published`がtrueに、`source`が`"notion"`になる。
 - JSONを直接importすると`locale`がstringに広がるので、`readPage`を通して読む。
 - 未知のフィールドは無視する。将来の拡張のため、バリデーションで落とさない。
 - `home`は`order: 0`にする。

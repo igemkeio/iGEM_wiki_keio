@@ -1,6 +1,7 @@
 {
   "slug": "prose-sample",
   "locale": "en",
+  "source": "local",
   "title": "Prose Sample",
   "subtitle": "本文の確認",
   "lead": "リード文の<b>確認</b>用ページです。",

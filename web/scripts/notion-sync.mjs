@@ -28,6 +28,7 @@ import {
 } from "./lib/markdown.mjs";
 import { collectImageSrcs, isIgemStatic, renderImage } from "./lib/figure.mjs";
 import { buildPage, islandsFor, normalizeSlug, serializePage } from "./lib/page.mjs";
+import { staleJsonFiles } from "./lib/stale.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const WEB_DIR = path.join(__dirname, "..");
@@ -259,16 +260,23 @@ async function buildPageData(row) {
   };
 }
 
-// DB に無くなったページの JSON を消す。README.md など .json 以外には触れない。
+// DB に無くなったページの JSON を消す。README.md など .json 以外と source が local のものには触れない。
 function removeStaleJson(keep) {
+  const existing = [];
   for (const locale of LOCALES) {
     const dir = path.join(CONTENT_DIR, locale);
     if (!fs.existsSync(dir)) continue;
-    for (const name of fs.readdirSync(dir)) {
-      if (!name.endsWith(".json") || keep.has(`${locale}/${name}`)) continue;
-      fs.rmSync(path.join(dir, name));
-      console.log(`[notion-sync] removed ${locale}/${name}`);
-    }
+    for (const name of fs.readdirSync(dir)) existing.push(`${locale}/${name}`);
+  }
+  const { stale, unreadable } = staleJsonFiles(existing, keep, (file) =>
+    JSON.parse(fs.readFileSync(path.join(CONTENT_DIR, file), "utf8"))
+  );
+  for (const file of unreadable) {
+    console.warn(`[notion-sync] JSON を読めないため消さずに残しました: ${file}`);
+  }
+  for (const file of stale) {
+    fs.rmSync(path.join(CONTENT_DIR, file));
+    console.log(`[notion-sync] removed ${file}`);
   }
 }
 
