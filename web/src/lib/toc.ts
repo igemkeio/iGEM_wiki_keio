@@ -4,20 +4,26 @@ export type TocItem = {
   children: TocItem[];
 };
 
-const entities: Record<string, string> = {
-  "&amp;": "&",
-  "&lt;": "<",
-  "&gt;": ">",
-  "&quot;": '"',
-  "&#39;": "'",
-  "&nbsp;": " ",
+const named: Record<string, string> = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
 };
 
+// 名前付きと数値の文字参照を1回の走査で復号する。復号結果が別の参照に見えても再復号しない。
+function decodeEntities(text: string): string {
+  return text.replace(/&(?:#(\d+)|#[xX]([0-9a-fA-F]+)|(amp|lt|gt|quot|apos|nbsp));/g, (m, dec, hex, name) => {
+    if (name) return named[name];
+    const code = dec ? Number(dec) : parseInt(hex, 16);
+    return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : m;
+  });
+}
+
 function toText(inner: string): string {
-  return inner
-    .replace(/<span class="katex-mathml">[\s\S]*?<\/span>/g, "")
-    .replace(/<[^>]*>/g, "")
-    .replace(/&(?:amp|lt|gt|quot|#39|nbsp);/g, (m) => entities[m])
+  return decodeEntities(inner.replace(/<span class="katex-mathml">[\s\S]*?<\/span>/g, "").replace(/<[^>]*>/g, ""))
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -28,7 +34,7 @@ export function buildToc(html: string): TocItem[] {
   const items: TocItem[] = [];
   let current: TocItem | null = null;
   for (const m of body.matchAll(/<h([23])\b([^>]*)>([\s\S]*?)<\/h\1>/g)) {
-    const id = /\bid="([^"]*)"/.exec(m[2])?.[1];
+    const id = /(?:^|\s)id="([^"]*)"/.exec(m[2])?.[1];
     if (!id) continue;
     const item: TocItem = { id, text: toText(m[3]), children: [] };
     if (m[1] === "2") {
