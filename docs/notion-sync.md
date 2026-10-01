@@ -83,8 +83,8 @@ git には入れない。自動アップロードは行わない。
 ```bash
 cd web
 cp .env.local.example .env.local   # 値を埋める（NOTION_TOKEN / NOTION_DATABASE_ID）
-yarn notion:sync                   # content/ に JSON を生成
-yarn dev                           # 反映を確認
+npm run notion:sync                # content/ に JSON を生成
+npm run dev                        # 反映を確認
 ```
 
 `.env.local` は `.gitignore` 済みでコミットされない。
@@ -94,8 +94,11 @@ yarn dev                           # 反映を確認
 `.github/workflows/notion-sync.yml` が以下を行う。
 
 - 手動実行（Actions タブの「Run workflow」）または毎日 00:00 UTC（09:00 JST）
-- `yarn notion:sync` を実行し、差分があれば `chore/notion-sync` ブランチに
-  コミットして **PR を自動作成**（`main` へ直接 push はしない）
+- `npm ci` のあと `npm run notion:sync` を実行し、`content/images-todo.json` の件数と
+  先頭10件をジョブのサマリーに出す
+- `npm run build && npm run check` を実行する。失敗したら PR を作らずにジョブを失敗させる
+- 差分があれば `chore/notion-sync` ブランチにコミットして PR を自動作成
+  （`main` へ直接 push はしない）。コミット対象は `content/` と `web/public/notion-images/` だけ
 
 ### 必要な Secrets
 
