@@ -5,3 +5,4 @@ __pycache__
 public
 !web/public
 !web/public/**
+content/images-todo.json
