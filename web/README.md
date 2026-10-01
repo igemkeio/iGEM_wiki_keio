@@ -14,7 +14,9 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 | `npm run dev` | `vite build --watch`と`vite preview`を並走させる。`web/src/`と`content/`の保存ごとに再ビルドし、prerenderをやり直す。URLは起動時に表示される |
 | `npm run build` | `vite build`のあとに`scripts/prerender.mjs`を実行し、`dist/`に全ページのHTMLを書く |
 | `npm run preview` | `dist/`を配信する |
-| `npm run typecheck` | `tsc --noEmit` |
+| `npm run typecheck` | `tsc --noEmit`と`tsc -p e2e` |
+| `npm run check:code` | oxlintとoxfmtの検査(Ultracite経由)。修正はしない |
+| `npm run fix` | oxfmtで整形し、oxlintで自動修正する |
 | `npm run check` | `dist/`のHTMLとCSSを検査する。`npm run build`の後に実行する |
 | `npm run test:check` | `check`の検査関数のテスト(`node:test`) |
 | `npm test` | Vitestを1回流す |
@@ -22,6 +24,33 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 | `npm run test:e2e` | PlaywrightでE2Eとビジュアル回帰を流す(`e2e/README.md`) |
 | `npm run test:e2e:ui` | PlaywrightのUIモードで流す |
 | `npm run notion:sync` | Notionの原稿を書き出す(#27で`content/`向けに更新予定) |
+
+## LintとFormat
+
+UltraciteのプリセットでoxlintとoxfmtをCSSとJSONを含めて掛ける。設定は`oxlint.config.ts`と`oxfmt.config.ts`で、どちらもUltraciteのプリセットを継承する。
+
+- `npm run check:code`が検査で、エラー0がCIの`lint`ジョブの条件。`npm run fix`が自動修正。
+- oxfmtの対象は`.ts`、`.tsx`、`.mjs`、`.css`、`.json`、`.md`。`src/__snapshots__/`、`e2e/**/*-snapshots/`、`public/`、`dist/`は両方から除外する。
+- oxlintはcore、react、vitestのプリセットを使う。vitestのルールは`src/**/*.test.{ts,tsx}`だけに掛ける(`scripts/`は`node:test`、`e2e/`はPlaywrightのため)。
+- ルールは緩めずにコードを直す。理由があって守れないものだけ、行の直前に`// oxlint-disable-next-line <rule> -- <理由>`と書く。プロジェクト全体で止めているルールと理由は`oxlint.config.ts`のコメントにある。
+
+## pre-commit
+
+リポジトリ直下の`lefthook.yml`が、コミット時にステージした`web/`配下のファイルへ次を直列に流し、直したファイルをステージし直す。
+
+1. `oxlint --fix`(`.ts`、`.tsx`、`.mjs`)
+2. `oxfmt --write`(`.ts`、`.tsx`、`.mjs`、`.css`、`.json`、`.md`)
+3. `npm run typecheck`(`.ts`か`.tsx`が含まれるときだけ)
+
+`npm ci`の`prepare`が`lefthook install`を実行してフックを入れる。直せないlintのエラーや型エラーがあるとコミットは止まる。
+
+`core.hooksPath`をグローバルに設定している環境では、`lefthook install`が拒否される(`--force`はグローバルのフックを上書きするので使わない)。その場合は、リポジトリの`.git/hooks`へ入れる。
+
+```sh
+GIT_CONFIG_GLOBAL=/dev/null npx lefthook install
+```
+
+グローバルのフックがリポジトリの`.git/hooks/pre-commit`を呼ぶ作りなら、gitleaksなどのグローバルの検査とlefthookの両方が走る。
 
 ## E2E
 
@@ -47,7 +76,7 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 
 | 場所 | 設定 | 内容 |
 | --- | --- | --- |
-| GitHub Actions | `.github/workflows/ci.yml` | PRと`feature/vite-mpa`、`main`へのpushで、`typecheck`、`test`、`test-scripts`、`build-check`を並列に流し、`ci-passed`が結果を集約する。`build-check`は`WIKI_BASE=/`と`WIKI_BASE=/keio/`の2回、`npm run build && npm run check`を流す |
+| GitHub Actions | `.github/workflows/ci.yml` | PRと`feature/vite-mpa`、`main`へのpushで、`lint`、`typecheck`、`test`、`test-scripts`、`build-check`を並列に流し、`ci-passed`が結果を集約する。`build-check`は`WIKI_BASE=/`と`WIKI_BASE=/keio/`の2回、`npm run build && npm run check`を流す |
 | GitLab Pages | `.gitlab-ci.yml` | 既定ブランチだけで`node:24`の上で`web/`をビルドし、`npm run check`のあと`dist/`を`public/`に移す |
 | Vercel | `vercel.json` | PRのプレビュー。Root Directoryが`web`なので、そこでビルドと`npm run check`を流し、`dist`を配信する |
 
