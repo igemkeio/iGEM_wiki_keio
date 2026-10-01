@@ -49,3 +49,16 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 - 768px未満ではSidebarが上部のバーになり、`<details>`でナビを開閉する。デスクトップでナビを常に見せるために`::details-content`を使い、非対応のブラウザではデスクトップでもトグルを出して開閉式にする。
 - Tocは`lib/toc.ts`が`html`のh2とh3から作り、見出しのないページでは出さない。1440px以上で本文の右に置く。
 - Sidebarには`view-transition-name: sidebar`が付き、ページ遷移のアニメーションは`prefers-reduced-motion: no-preference`のときだけ有効。
+
+## 3Dモデル
+
+`model-viewer`島が、`content/`の`models`フィールドの先頭1件を`<model-viewer>`(Googleのweb component、npmの`@google/model-viewer`)で表示する。フィールドの形は`content/README.md`を参照。
+
+- 島の中身は`src/components/ModelViewer.tsx`。WebGLが使えると分かってから`@google/model-viewer`を動的importし、別チャンクとして配る。WebGLが無い環境では読み込まず、`poster`の画像だけを出す。`<model-viewer>`は`loading="lazy"`なので、.glbは画面に入るまで取得されない。
+- Blenderからglb(glTF Binary)で書き出し、Draco圧縮を有効にする。1モデル2〜5MB以下を目安にする。テクスチャは2048px以下に縮める。
+- Draco圧縮したglbは、デコーダーを実行時に`gstatic.com`から取りに行く。iGEMの規定で外部の読み込みができないので、圧縮を使うモデルを載せる前に、デコーダーを`static.igem.wiki`に置く対応が要る(別Issue)。
+- .glbとposterは画像と同じ扱いで`static.igem.wiki`に置く。リポジトリには入れない。`tools.igem.org`が.glbを受け付けるかは未確認で、人が確かめる。
+- posterはモデルを正面斜めから撮ったPNGで、100KB以下にする。
+- 暫定のサンプルとして`public/models/sample.glb`(約360KB)と`sample.png`を置いてある。`content/en/model-sample.json`が使う(`published: false`)。確認するときは`published`をtrueにしてビルドする。本番の配信前に消す。
+- サンプルのglbはKhronosのglTF-Sample-AssetsにあるCesiumMilkTruck(c) 2017 Cesium、CC BY 4.0。出典は`https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CesiumMilkTruck`。
+- `models`の`src`と`poster`にはbaseを付けない。`WIKI_BASE`で配信パスを変える環境で`/models/...`のような相対パスを使うときは、その分を含めて書く。
