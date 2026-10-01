@@ -5,6 +5,9 @@
   --color-line: rgba(13, 15, 18, 0.24);
   --color-page: #dfe4ea;
   --color-surface: #ffffff;
+  --color-accent-orange: #ffb347;
+  --color-accent-blue: #2962ff;
+  --color-curve: rgba(13, 15, 18, 0.144);
 
   --font-heading: "Montserrat", "Noto Sans JP", sans-serif;
   --font-body: "Noto Sans JP", sans-serif;
@@ -28,6 +31,15 @@
   --size-sidebar: 300px;
   --size-topbar: 56px;
   --size-toc: 200px;
+  --size-card-height: 178px;
+  --space-card: 48px;
+  --radius-card: 24px;
+  --size-hero: 993px;
+  --size-logo-width: 632px;
+  --size-logo-height: 228px;
+  --size-catch: 32px;
+  --size-hero-title: 48px;
+  --size-hero-text: 448px;
 
   --space-frame-x: 56px;
   --space-sidebar-x: 56px;

@@ -1,5 +1,6 @@
 import { withBase } from "./base";
 import { ArticlePage } from "./components/ArticlePage";
+import { HomePage } from "./components/HomePage";
 import { PageShell } from "./components/PageShell";
 import type { WikiPage } from "./content";
 import { ISLANDS } from "./islands";
@@ -33,7 +34,7 @@ export function Page({
       </head>
       <body>
         <PageShell page={page} routes={routes}>
-          <ArticlePage page={page} />
+          {page.slug === "home" ? <HomePage page={page} routes={routes} /> : <ArticlePage page={page} />}
         </PageShell>
         {page.islands.some((name) => name in ISLANDS) && (
           <script type="module" src={withBase(`/${assets.js}`)} />

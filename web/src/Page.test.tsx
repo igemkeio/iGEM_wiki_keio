@@ -83,3 +83,24 @@ describe("Page", () => {
     expect(doc.querySelector("[data-island]")).toBeNull();
   });
 });
+
+describe("Home", () => {
+  const home = readPage({ slug: "home", locale: "en", title: "Home", html: "", order: 0 });
+  const model = readPage({ slug: "model", locale: "en", title: "Model", html: '<h2 id="a">A</h2>', order: 30 });
+
+  it("slugがhomeならヒーローとContentsを描き、本文ページの型は使わない", () => {
+    const html = renderToStaticMarkup(
+      <Page page={home} routes={routesFor(home, model)} assets={assets} />
+    );
+    expect(html).toContain("one-direction.png");
+    expect(html).toContain("Contents");
+    expect(scripts(parse(html))).toHaveLength(0);
+  });
+
+  it("homeでなければHomePageを使わない", () => {
+    const html = renderToStaticMarkup(
+      <Page page={model} routes={routesFor(home, model)} assets={assets} />
+    );
+    expect(html).not.toContain("one-direction.png");
+  });
+});

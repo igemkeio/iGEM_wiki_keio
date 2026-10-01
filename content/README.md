@@ -33,7 +33,7 @@ Notion同期とプリレンダーをつなぐ受け渡し形式。同期スク�
 - lead: インライン要素(b、i、a、codeなど)のみ。pなどのブロック要素で包まない。描画側がpで包む。
 - slug: ファイル名は`<slug>.json`で、slugと一致させる。使える文字は小文字英数字とハイフンのみ。スラッシュは不可。
 - 画像のsrc: static.igem.wiki、video.igem.org、*.igem.org、*.igem.wiki以外のURLは、`npm run check`が違反として落とす。
-- Homeで使うフィールド: titleは`<title>`とh1の代替テキストに使う(見た目はロゴ画像)。leadはロゴ下のキャッチ文。htmlはContentsカードの上に本文として出す(空なら出さない)。Contentsカードには各ページのtitle、subtitle、leadを出す。
+- Homeで使うフィールド: titleは`<title>`とh1(視覚的に隠す)に使う(見た目はロゴ画像)。leadはロゴ下のキャッチで、`<b>`で囲んだ語は青で強調する(例: `WITH <b>SYNBIO</b>`)。subtitleは右下のiGEM Keio 2026の下に出す短いキャッチ(例: 走性を、設計する。)。htmlは右下の説明文で、3文程度の短い説明を想定し、6行を超える分は表示されず、空なら出さない。Contentsカードには各ページのtitle、subtitle、leadを出す。
 - 片方の言語しかないページ: ナビには現在の言語のページだけを出す。言語切り替えリンクは、相手の言語に同じslugがあればそこへ、なければ相手の言語のhomeへ向ける。
 
 ## 例
