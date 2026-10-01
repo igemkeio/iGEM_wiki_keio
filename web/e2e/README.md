@@ -108,28 +108,28 @@ npx playwright show-report e2e/playwright-report
 
 - `prose.e2e.ts`と`visual.e2e.ts`の`prose-sample`: #29(prose)が未マージで、ページも`prose.css`も無い。マージ後に`test.skip`を外し、`content/{en,ja}/prose-sample.json`の有無を確認して基準画像を生成する。
 
-## CIのジョブ定義(案)
+## CIのジョブ定義
 
-#38の`.github/workflows/ci.yml`がマージされたあとに足す。型、Vitest、build、checkを並列に流すジョブの後に置き、集約ジョブの`needs`に加える。
+`.github/workflows/ci.yml`の`e2e`ジョブが次の定義で流す。型、Vitest、スクリプトのテスト、build-checkの後に置き、`ci-passed`の`needs`に入れてある。
 
 ```yaml
   e2e:
-    needs: [typecheck, test, build]
+    needs: [typecheck, test, test-scripts, build-check]
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: web
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version-file: .node-version
           cache: npm
           cache-dependency-path: web/package-lock.json
       - run: npm ci
-        working-directory: web
       - run: npx playwright install --with-deps chromium
-        working-directory: web
       - run: npm run test:e2e
-        working-directory: web
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
