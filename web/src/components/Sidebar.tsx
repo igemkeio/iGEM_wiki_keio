@@ -1,6 +1,7 @@
 import { withBase } from "../base";
 import type { Locale, WikiPage } from "../content";
 import type { Route } from "../routes";
+
 import styles from "./Sidebar.module.css";
 
 const otherLocale = (locale: Locale): Locale => (locale === "en" ? "ja" : "en");
@@ -9,9 +10,14 @@ const homePath = (locale: Locale, routes: Route[]): string | undefined =>
   routes.find((r) => r.page.locale === locale && r.page.slug === "home")?.path;
 
 // 相手の言語に同じslugがあればそのページ、なければ相手の言語のhomeのURLパスを返す。homeも無ければundefined。
-export function alternatePath(page: Pick<WikiPage, "locale" | "slug">, routes: Route[]): string | undefined {
+export function alternatePath(
+  page: Pick<WikiPage, "locale" | "slug">,
+  routes: Route[]
+): string | undefined {
   const locale = otherLocale(page.locale);
-  const same = routes.find((r) => r.page.locale === locale && r.page.slug === page.slug);
+  const same = routes.find(
+    (r) => r.page.locale === locale && r.page.slug === page.slug
+  );
   return same ? same.path : homePath(locale, routes);
 }
 
@@ -27,7 +33,10 @@ export function Sidebar({ page, routes }: { page: WikiPage; routes: Route[] }) {
   const alternateHref = alternatePath(page, routes);
   return (
     <header className={styles.root}>
-      <a className={styles.logo} href={withBase(homePath(page.locale, routes) ?? "/")}>
+      <a
+        className={styles.logo}
+        href={withBase(homePath(page.locale, routes) ?? "/")}
+      >
         <span>iGEM</span>
         <span className={styles.logoSub}>Keio 2026</span>
       </a>
@@ -49,11 +58,17 @@ export function Sidebar({ page, routes }: { page: WikiPage; routes: Route[] }) {
             ))}
           </nav>
           {alternateHref && (
+            // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- fieldset にすると既定の枠線とレイアウトが付く
             <div className={styles.lang} role="group" aria-label={label.lang}>
               <span className={styles.langCurrent} lang={page.locale}>
                 {page.locale.toUpperCase()}
               </span>
-              <a className={styles.link} href={withBase(alternateHref)} hrefLang={alternate} lang={alternate}>
+              <a
+                className={styles.link}
+                href={withBase(alternateHref)}
+                hrefLang={alternate}
+                lang={alternate}
+              >
                 {alternate.toUpperCase()}
               </a>
             </div>

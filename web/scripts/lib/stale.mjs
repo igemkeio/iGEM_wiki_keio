@@ -4,7 +4,9 @@ export function staleJsonFiles(existingFiles, keep, readJson) {
   const stale = [];
   const unreadable = [];
   for (const file of existingFiles) {
-    if (!file.endsWith(".json") || keep.has(file)) continue;
+    if (!file.endsWith(".json") || keep.has(file)) {
+      continue;
+    }
     let data;
     try {
       data = readJson(file);
@@ -12,7 +14,9 @@ export function staleJsonFiles(existingFiles, keep, readJson) {
       unreadable.push(file);
       continue;
     }
-    if (data?.source === "local") continue;
+    if (data?.source === "local") {
+      continue;
+    }
     stale.push(file);
   }
   return { stale, unreadable };

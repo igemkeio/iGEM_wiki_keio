@@ -2,10 +2,9 @@
 // どちらもPRERENDER_ALL=1で、published: falseのE2E用ページも書き出す。
 import { execFileSync } from "node:child_process";
 import { cp, mkdir, rm, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join, resolve } from "node:path";
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+const root = resolve(import.meta.dirname, "../..");
 const site = join(root, "e2e", ".site");
 
 function build(env) {
@@ -28,5 +27,7 @@ try {
   ok = true;
 } finally {
   // 失敗した中途半端な.siteを、配信側が読まないよう消す。
-  if (!ok) await rm(site, { recursive: true, force: true });
+  if (!ok) {
+    await rm(site, { recursive: true, force: true });
+  }
 }

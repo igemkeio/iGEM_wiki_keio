@@ -2,17 +2,17 @@ export const IGEM_STATIC_HOST = "static.igem.wiki";
 
 export function escapeHtml(text) {
   return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
 }
 
 // キャプションの先頭が Fig. N の形ならラベルとして分ける。
 // 残りの1行目をタイトル、2行目以降を説明の段落にする。
 export function parseCaption(caption) {
   const text = caption.trim();
-  const m = /^(Fig\.?\s*\d+)[\s.:：\-–—]*([\s\S]*)$/i.exec(text);
+  const m = /^(Fig\.?\s*\d+)[\s.:：\-–—]*([\s\S]*)$/iu.exec(text);
   const label = m ? m[1] : "";
   const lines = (m ? m[2] : text)
     .split("\n")
@@ -25,9 +25,11 @@ export function parseCaption(caption) {
 // 空行を含めないのは、外側のmarkedにHTMLブロックとして素通しさせるため。
 export function renderImage({ src, caption }) {
   const text = caption.trim();
-  const alt = escapeHtml(text.replace(/\s*\n\s*/g, " "));
+  const alt = escapeHtml(text.replaceAll(/\s*\n\s*/gu, " "));
   const img = `<img src="${escapeHtml(src)}" alt="${alt}" />`;
-  if (!text) return img;
+  if (!text) {
+    return img;
+  }
   const { label, title, description } = parseCaption(text);
   const body = [
     label && `<p class="figure-card__label">${escapeHtml(label)}</p>`,
@@ -46,8 +48,8 @@ export function renderImage({ src, caption }) {
 
 // HTML 中の img の src を出現順に返す。
 export function collectImageSrcs(html) {
-  return [...html.matchAll(/<img\b[^>]*?\bsrc="([^"]*)"/g)].map((m) =>
-    m[1].replace(/&amp;/g, "&")
+  return [...html.matchAll(/<img\b[^>]*?\bsrc="([^"]*)"/gu)].map((m) =>
+    m[1].replaceAll("&amp;", "&")
   );
 }
 

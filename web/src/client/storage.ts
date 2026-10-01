@@ -9,14 +9,18 @@ function getStorage(kind: StorageKind): Storage {
 export function readStorage(kind: StorageKind, key: string): unknown {
   try {
     const raw = getStorage(kind)?.getItem(key);
-    return raw == null ? undefined : JSON.parse(raw);
+    return raw === null || raw === undefined ? undefined : JSON.parse(raw);
   } catch {
     return undefined;
   }
 }
 
 // 保存領域が使えない、容量超過などの失敗は何もしない。
-export function writeStorage(kind: StorageKind, key: string, value: unknown): void {
+export function writeStorage(
+  kind: StorageKind,
+  key: string,
+  value: unknown
+): void {
   try {
     getStorage(kind)?.setItem(key, JSON.stringify(value));
   } catch {

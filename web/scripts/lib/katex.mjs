@@ -1,8 +1,8 @@
-import katex from "katex";
+import { renderToString } from "katex";
 
 // LaTeX を KaTeX の HTML にする。不正な式でも例外を投げず、エラー表示の HTML を返す。
 export function renderMath(latex, displayMode) {
-  return katex.renderToString(latex, { displayMode, throwOnError: false });
+  return renderToString(latex, { displayMode, throwOnError: false });
 }
 
 // marked 用の拡張。ブロック数式($$ ... $$)とインライン数式($...$)を KaTeX の HTML にする。
@@ -13,8 +13,12 @@ export const mathExtensions = [
     level: "block",
     start: (src) => src.indexOf("$$"),
     tokenizer(src) {
-      const m = /^\$\$[ \t]*\n?([\s\S]+?)\n?[ \t]*\$\$[ \t]*(?:\n|$)/.exec(src);
-      if (!m) return undefined;
+      const m = /^\$\$[ \t]*\n?([\s\S]+?)\n?[ \t]*\$\$[ \t]*(?:\n|$)/u.exec(
+        src
+      );
+      if (!m) {
+        return null;
+      }
       return { type: "mathBlock", raw: m[0], text: m[1].trim() };
     },
     renderer: (token) => `${renderMath(token.text, true)}\n`,
@@ -24,8 +28,10 @@ export const mathExtensions = [
     level: "inline",
     start: (src) => src.indexOf("$"),
     tokenizer(src) {
-      const m = /^\$(?!\s)((?:\\.|[^$\\\n])+?)(?<!\s)\$(?!\d)/.exec(src);
-      if (!m) return undefined;
+      const m = /^\$(?!\s)((?:\\.|[^$\\\n])+?)(?<!\s)\$(?!\d)/u.exec(src);
+      if (!m) {
+        return null;
+      }
       return { type: "mathInline", raw: m[0], text: m[1] };
     },
     renderer: (token) => renderMath(token.text, false),

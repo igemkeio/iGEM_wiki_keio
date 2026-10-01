@@ -15,7 +15,9 @@ for (const { name, path } of pages) {
       await page.setViewportSize({ width, height: 800 });
       await page.goto(path);
       await page.evaluate(() => document.fonts.ready);
-      await expect(page).toHaveScreenshot(`${name}-${width}.png`, { fullPage: true });
+      await expect(page).toHaveScreenshot(`${name}-${width}.png`, {
+        fullPage: true,
+      });
     });
   }
 }

@@ -1,7 +1,9 @@
 import { readdirSync } from "node:fs";
 import { resolve } from "node:path";
+
 import react from "@vitejs/plugin-react";
-import { defineConfig, type Plugin } from "vite";
+import { defineConfig } from "vite";
+import type { Plugin } from "vite";
 
 const contentDir = resolve(import.meta.dirname, "../content");
 
@@ -12,10 +14,14 @@ function watchContent(): Plugin {
     buildStart() {
       this.addWatchFile(contentDir);
       for (const locale of readdirSync(contentDir, { withFileTypes: true })) {
-        if (!locale.isDirectory()) continue;
+        if (!locale.isDirectory()) {
+          continue;
+        }
         const dir = resolve(contentDir, locale.name);
         this.addWatchFile(dir);
-        for (const file of readdirSync(dir)) this.addWatchFile(resolve(dir, file));
+        for (const file of readdirSync(dir)) {
+          this.addWatchFile(resolve(dir, file));
+        }
       }
     },
   };
@@ -24,21 +30,33 @@ function watchContent(): Plugin {
 // 目印を本番の配信元に置き換える。global.cssの@font-faceにある__WIKI_FONT_BASE__は環境変数WIKI_FONT_BASE(未指定ならbaseを付けた/fonts)に、
 // ソース中の__WIKI_IMAGE_BASE__は環境変数WIKI_IMAGE_BASE(未指定ならbaseを付けた/images)にする。末尾のスラッシュは落とす。
 function assetBase(base: string): Plugin {
-  const prefix = base.replace(/\/$/, "");
+  const prefix = base.replace(/\/$/u, "");
   const markers = [
-    { marker: "__WIKI_FONT_BASE__", dir: process.env.WIKI_FONT_BASE || `${prefix}/fonts`, ext: /\.css$/ },
-    { marker: "__WIKI_IMAGE_BASE__", dir: process.env.WIKI_IMAGE_BASE || `${prefix}/images`, ext: /\.[jt]sx?$/ },
+    {
+      marker: "__WIKI_FONT_BASE__",
+      dir: process.env.WIKI_FONT_BASE || `${prefix}/fonts`,
+      ext: /\.css$/u,
+    },
+    {
+      marker: "__WIKI_IMAGE_BASE__",
+      dir: process.env.WIKI_IMAGE_BASE || `${prefix}/images`,
+      ext: /\.[jt]sx?$/u,
+    },
   ];
   return {
     name: "asset-base",
     enforce: "pre",
     transform(code, id) {
-      const file = id.split("?")[0];
+      const [file] = id.split("?");
       let out = code;
       for (const { marker, dir, ext } of markers) {
-        if (ext.test(file) && out.includes(marker)) out = out.replaceAll(marker, dir.replace(/\/+$/, ""));
+        if (ext.test(file) && out.includes(marker)) {
+          out = out.replaceAll(marker, dir.replace(/\/+$/u, ""));
+        }
       }
-      if (out !== code) return { code: out, map: null };
+      if (out !== code) {
+        return { code: out, map: null };
+      }
     },
   };
 }
@@ -49,7 +67,9 @@ function keepCssModules(): Plugin {
     name: "keep-css-modules",
     enforce: "post",
     transform(code, id) {
-      if (/\.module\.css($|\?)/.test(id)) return { code, map: null, moduleSideEffects: "no-treeshake" };
+      if (/\.module\.css($|\?)/u.test(id)) {
+        return { code, map: null, moduleSideEffects: "no-treeshake" };
+      }
     },
   };
 }

@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { usePersistedState } from "./usePersistedState";
 
 afterEach(() => {
@@ -9,7 +10,7 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-describe("usePersistedState", () => {
+describe(usePersistedState, () => {
   it("保存が無ければ初期値を返す", () => {
     const { result } = renderHook(() => usePersistedState("t:init", "x"));
     expect(result.current[0]).toBe("x");
@@ -37,7 +38,9 @@ describe("usePersistedState", () => {
   });
 
   it("kindにsessionを渡すとsessionStorageに保存する", () => {
-    const { result } = renderHook(() => usePersistedState("t:session", 1, "session"));
+    const { result } = renderHook(() =>
+      usePersistedState("t:session", 1, "session")
+    );
     act(() => result.current[1](5));
     expect(sessionStorage.getItem("t:session")).toBe("5");
     expect(localStorage.getItem("t:session")).toBeNull();
@@ -52,7 +55,9 @@ describe("usePersistedState", () => {
 
   it("同じkeyでもlocalとsessionの値は独立している", () => {
     const local = renderHook(() => usePersistedState("t:kind", "x", "local"));
-    const session = renderHook(() => usePersistedState("t:kind", "x", "session"));
+    const session = renderHook(() =>
+      usePersistedState("t:kind", "x", "session")
+    );
     act(() => local.result.current[1]("l"));
     expect(local.result.current[0]).toBe("l");
     expect(session.result.current[0]).toBe("x");

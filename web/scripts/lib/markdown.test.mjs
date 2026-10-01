@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+
 import {
   addHeadingIds,
   renderMarkdown,
@@ -28,7 +29,10 @@ test("属性付きのh1も属性を残してh2にする", () => {
 test("本文のh1はh2として出し、idを付ける", () => {
   const html = renderMarkdown("# A\n\n## B\n\n### C");
   assert.equal(html, '<h2 id="a">A</h2>\n<h2 id="b">B</h2>\n<h3 id="c">C</h3>');
-  assert.equal(renderMarkdown("# A **b**"), '<h2 id="a-b">A <strong>b</strong></h2>');
+  assert.equal(
+    renderMarkdown("# A **b**"),
+    '<h2 id="a-b">A <strong>b</strong></h2>'
+  );
 });
 
 test("idは小文字化し、句読点と記号を除き、日本語を残す", () => {
@@ -40,13 +44,13 @@ test("idは小文字化し、句読点と記号を除き、日本語を残す", 
 
 test("重複するidに-2、-3を付ける", () => {
   const html = renderMarkdown("## Aim\n\n## Aim\n\n## Aim");
-  assert.match(html, /id="aim"/);
-  assert.match(html, /id="aim-2"/);
-  assert.match(html, /id="aim-3"/);
+  assert.match(html, /id="aim"/u);
+  assert.match(html, /id="aim-2"/u);
+  assert.match(html, /id="aim-3"/u);
 });
 
 test("見出し内のインライン要素はidに含めず、文字だけを使う", () => {
-  assert.match(renderMarkdown("## **Bold** `code`"), /id="bold-code"/);
+  assert.match(renderMarkdown("## **Bold** `code`"), /id="bold-code"/u);
 });
 
 test("属性付きのh3(Figureカードの見出し)にはidを付けない", () => {
@@ -63,11 +67,19 @@ test("calloutをNoteのHTMLにする", () => {
 
 test("Noteは外側のMarkdown変換でも形が崩れない", () => {
   const note = renderNote("a\n\nb");
-  assert.equal(renderMarkdown(`前\n\n${note}\n\n後`), `<p>前</p>\n${note}<p>後</p>`);
+  assert.equal(
+    renderMarkdown(`前\n\n${note}\n\n後`),
+    `<p>前</p>\n${note}<p>後</p>`
+  );
 });
 
 test("rich_textをMarkdownにする", () => {
-  const plain = { bold: false, italic: false, strikethrough: false, code: false };
+  const plain = {
+    bold: false,
+    italic: false,
+    strikethrough: false,
+    code: false,
+  };
   assert.equal(
     richTextToMarkdown([
       { type: "text", plain_text: "a", annotations: { ...plain, bold: true } },
@@ -80,24 +92,24 @@ test("rich_textをMarkdownにする", () => {
 
 test("見出しのidが既存のid(Aim 2)と衝突しない", () => {
   const html = renderMarkdown("## Aim\n\n## Aim\n\n## Aim 2");
-  const ids = [...html.matchAll(/id="([^"]*)"/g)].map((x) => x[1]);
+  const ids = [...html.matchAll(/id="([^"]*)"/gu)].map((x) => x[1]);
   assert.equal(new Set(ids).size, 3);
   assert.deepEqual(ids, ["aim", "aim-2", "aim-2-2"]);
 });
 
 test("見出しの数式はMathMLを除いた描画テキストだけをidにする", () => {
-  assert.match(renderMarkdown("## $x$ gain"), /<h2 id="x-gain">/);
+  assert.match(renderMarkdown("## $x$ gain"), /<h2 id="x-gain">/u);
 });
 
 test("Noteの中の pre の空行は保たれる", () => {
   const html = renderMarkdown(`前\n\n${renderNote("```\na\n\nb\n```")}\n\n後`);
-  assert.match(html, /<pre><code>a\n\nb\n<\/code><\/pre>/);
-  assert.doesNotMatch(html, /blank/);
-  assert.match(html, /<\/aside><p>後<\/p>/);
+  assert.match(html, /<pre><code>a\n\nb\n<\/code><\/pre>/u);
+  assert.doesNotMatch(html, /blank/u);
+  assert.match(html, /<\/aside><p>後<\/p>/u);
 });
 
 test("Noteの中の pre の空白だけの行も保たれる", () => {
   const html = renderMarkdown(renderNote("```\na\n  \nb\n```"));
-  assert.match(html, /<pre><code>a\n  \nb\n<\/code><\/pre>/);
-  assert.doesNotMatch(html, /blank/);
+  assert.match(html, /<pre><code>a\n {2}\nb\n<\/code><\/pre>/u);
+  assert.doesNotMatch(html, /blank/u);
 });

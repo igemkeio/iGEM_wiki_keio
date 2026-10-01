@@ -6,11 +6,11 @@ import type { WikiPage } from "./content";
 import { ISLANDS } from "./islands";
 import type { Route } from "./routes";
 
-export type Assets = {
+export interface Assets {
   css: string[];
   // 島を使うページに読み込むブラウザ側のJS。
   js: string;
-};
+}
 
 export function Page({
   page,
@@ -34,7 +34,11 @@ export function Page({
       </head>
       <body>
         <PageShell page={page} routes={routes}>
-          {page.slug === "home" ? <HomePage page={page} routes={routes} /> : <ArticlePage page={page} />}
+          {page.slug === "home" ? (
+            <HomePage page={page} routes={routes} />
+          ) : (
+            <ArticlePage page={page} />
+          )}
         </PageShell>
         {page.islands.some((name) => name in ISLANDS) && (
           <script type="module" src={withBase(`/${assets.js}`)} />

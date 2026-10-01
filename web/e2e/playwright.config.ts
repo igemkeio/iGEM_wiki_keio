@@ -5,22 +5,30 @@ const previewPort = 4173;
 const basePort = 4174;
 
 // ヘッドレスでWebGLを使えるようにする。
-const launchOptions = { args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] };
+const launchOptions = {
+  args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
+};
 
 // base付き(/keio/)のprojectでも流す、配信パスに依存するテスト。
-const baseSensitive = /(nav|locale|islands|model-viewer)\.e2e\.ts$/;
+const baseSensitive = /(nav|locale|islands|model-viewer)\.e2e\.ts$/u;
 
 export default defineConfig({
   testDir: "./tests",
   testMatch: "**/*.e2e.ts",
   outputDir: "./test-results",
   // 基準画像はOSをファイル名に含めず、全環境で同じ画像と比べる。
-  snapshotPathTemplate: "{testDir}/{testFilePath}-snapshots/{arg}-{projectName}{ext}",
+  snapshotPathTemplate:
+    "{testDir}/{testFilePath}-snapshots/{arg}-{projectName}{ext}",
   fullyParallel: true,
   forbidOnly: ci,
   retries: ci ? 1 : 0,
-  reporter: [["list"], ["html", { open: "never", outputFolder: "./playwright-report" }]],
-  expect: { toHaveScreenshot: { maxDiffPixelRatio: 0.02, animations: "disabled" } },
+  reporter: [
+    ["list"],
+    ["html", { open: "never", outputFolder: "./playwright-report" }],
+  ],
+  expect: {
+    toHaveScreenshot: { maxDiffPixelRatio: 0.02, animations: "disabled" },
+  },
   use: {
     baseURL: `http://localhost:${previewPort}/`,
     trace: ci ? "on-first-retry" : "off",
@@ -30,7 +38,10 @@ export default defineConfig({
     {
       name: "chromium",
       testIgnore: "**/mobile/**",
-      use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 } },
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1280, height: 800 },
+      },
     },
     {
       name: "mobile-chromium",

@@ -1,9 +1,14 @@
 // @vitest-environment happy-dom
 import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
+import { createRoot } from "react-dom/client";
+import type { Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+import type { ModelViewer as ModelViewerComponent } from "./ModelViewer";
+
+(
+  globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 const state = vi.hoisted(() => ({ imported: 0 }));
 
@@ -11,26 +16,33 @@ const model = { src: "/models/a.glb", poster: "/models/a.png", alt: "A model" };
 
 let container: HTMLDivElement;
 let root: Root;
-let ModelViewer: typeof import("./ModelViewer").ModelViewer;
+let ModelViewer: typeof ModelViewerComponent;
 let intersect: (isIntersecting: boolean) => void;
 let observed: { rootMargin?: string } = {};
 
 const stubWebGL = (context: unknown) => {
-  vi.stubGlobal("WebGLRenderingContext", function () {});
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation((() => context) as never);
+  vi.stubGlobal("WebGLRenderingContext", () => {});
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(
+    (() => context) as never
+  );
 };
 
 const stubObserver = () => {
   vi.stubGlobal(
     "IntersectionObserver",
     class {
-      constructor(cb: (entries: { isIntersecting: boolean }[]) => void, options?: { rootMargin?: string }) {
+      constructor(
+        notify: (entries: { isIntersecting: boolean }[]) => void,
+        options?: { rootMargin?: string }
+      ) {
         observed = options ?? {};
-        intersect = (isIntersecting) => cb([{ isIntersecting }]);
+        intersect = (isIntersecting) => notify([{ isIntersecting }]);
       }
+      // oxlint-disable-next-line eslint/class-methods-use-this -- IntersectionObserver の代役で、this を使わない
       observe() {}
+      // oxlint-disable-next-line eslint/class-methods-use-this -- 同上
       disconnect() {}
-    },
+    }
   );
 };
 
@@ -43,6 +55,7 @@ const render = async (props: object = model) => {
 beforeEach(async () => {
   vi.resetModules();
   state.imported = 0;
+  // oxlint-disable-next-line vitest/prefer-import-in-mock -- 空のモジュールで置き換えるので、型付きの import() 形式は合わない
   vi.doMock("@google/model-viewer", () => {
     state.imported += 1;
     return {};
@@ -63,6 +76,7 @@ afterEach(() => {
 
 describe("ModelViewer", () => {
   it("WebGLRenderingContextが無いときはposterを出し、読み込まない", async () => {
+    // oxlint-disable-next-line unicorn/no-useless-undefined -- グローバルを未定義の値で置き換える
     vi.stubGlobal("WebGLRenderingContext", undefined);
     stubObserver();
     await render();
@@ -102,13 +116,18 @@ describe("ModelViewer", () => {
     expect(el?.hasAttribute("camera-controls")).toBe(true);
     expect(el?.hasAttribute("auto-rotate")).toBe(true);
     expect(container.querySelector("img")).toBeNull();
-    const config = (window as unknown as { ModelViewerElement: Record<string, string> }).ModelViewerElement;
-    expect(config.dracoDecoderLocation).toMatch(/models\/decoders\/draco\/$/);
-    expect(config.ktx2TranscoderLocation).toMatch(/models\/decoders\/basis\/$/);
+    const config = (
+      window as unknown as { ModelViewerElement: Record<string, string> }
+    ).ModelViewerElement;
+    expect(config.dracoDecoderLocation).toMatch(/models\/decoders\/draco\/$/u);
+    expect(config.ktx2TranscoderLocation).toMatch(
+      /models\/decoders\/basis\/$/u
+    );
   });
 
   it("IntersectionObserverが無い環境では即importする", async () => {
     stubWebGL({ getExtension: () => null });
+    // oxlint-disable-next-line unicorn/no-useless-undefined -- グローバルを未定義の値で置き換える
     vi.stubGlobal("IntersectionObserver", undefined);
     await render();
     await flush();
@@ -117,11 +136,11 @@ describe("ModelViewer", () => {
   });
 
   it("判定用のコンテキストを解放する", async () => {
-    const loseContext = vi.fn();
+    const loseContext = vi.fn<() => void>();
     stubWebGL({ getExtension: () => ({ loseContext }) });
     stubObserver();
     await render();
-    expect(loseContext).toHaveBeenCalled();
+    expect(loseContext).toHaveBeenCalledWith();
   });
 
   it("srcが無いときは何も出さない", async () => {

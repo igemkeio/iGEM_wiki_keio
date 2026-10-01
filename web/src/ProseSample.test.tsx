@@ -1,22 +1,29 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+
 import { ArticlePage } from "./components/ArticlePage";
 import { readPage } from "./content";
 
 // 同期スクリプトの.mjsは型宣言を持たないので、必要な関数の型だけここで与える。
 const FIGURE = resolve(process.cwd(), "scripts/lib/figure.mjs");
 const MARKDOWN = resolve(process.cwd(), "scripts/lib/markdown.mjs");
+// oxlint-disable-next-line eslint/no-inline-comments -- Vite に動的 import を解析させない印
 const { renderImage } = (await import(/* @vite-ignore */ FIGURE)) as {
   renderImage: (a: { src: string; caption: string }) => string;
 };
+// oxlint-disable-next-line eslint/no-inline-comments -- 同上
 const { renderNote } = (await import(/* @vite-ignore */ MARKDOWN)) as {
   renderNote: (md: string) => string;
 };
 
 const file = resolve(process.cwd(), "../content/en/prose-sample.json");
-const page = readPage(JSON.parse(readFileSync(file, "utf8")), "content/en/prose-sample.json");
+const page = readPage(
+  JSON.parse(readFileSync(file, "utf-8")),
+  "content/en/prose-sample.json"
+);
 
 describe("prose-sample", () => {
   it("確認用ページは非公開", () => {
@@ -29,16 +36,34 @@ describe("prose-sample", () => {
     const prose = doc.querySelector(".prose");
     expect(prose?.innerHTML).toMatchSnapshot();
     for (const selector of [
-      "h2", "h3", "p", "ul", "ol", "blockquote", "pre", "table", "img", "hr",
-      ".figure-card .figure-card__media img", ".figure-card__label", ".figure-card__title",
-      ".note .note__label", ".katex", ".katex-display",
+      "h2",
+      "h3",
+      "p",
+      "ul",
+      "ol",
+      "blockquote",
+      "pre",
+      "table",
+      "img",
+      "hr",
+      ".figure-card .figure-card__media img",
+      ".figure-card__label",
+      ".figure-card__title",
+      ".note .note__label",
+      ".katex",
+      ".katex-display",
     ]) {
       expect(prose?.querySelector(selector), selector).not.toBeNull();
     }
   });
 
   it("Figureカードと素の画像とNoteが同期側の出力と同じ形", () => {
-    expect(page.html).toContain(renderImage({ src: "https://static.igem.wiki/teams/0000/sample.png", caption: "" }));
+    expect(page.html).toContain(
+      renderImage({
+        src: "https://static.igem.wiki/teams/0000/sample.png",
+        caption: "",
+      })
+    );
     expect(page.html).toContain(
       renderImage({
         src: "https://static.igem.wiki/teams/0000/sample.png",

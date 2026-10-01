@@ -1,12 +1,19 @@
-import { useEffect, useRef, useState, type DetailedHTMLProps, type HTMLAttributes } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { DetailedHTMLProps, HTMLAttributes } from "react";
+
 import { withBase } from "../base";
 import type { Model } from "../content";
+
 import styles from "./ModelViewer.module.css";
 
 declare module "react" {
+  // oxlint-disable-next-line typescript/no-namespace -- React の JSX.IntrinsicElements の拡張に namespace が要る
   namespace JSX {
     interface IntrinsicElements {
-      "model-viewer": DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> & {
+      "model-viewer": DetailedHTMLProps<
+        HTMLAttributes<HTMLElement>,
+        HTMLElement
+      > & {
         src?: string;
         poster?: string;
         alt?: string;
@@ -20,7 +27,9 @@ declare module "react" {
 }
 
 function hasWebGL(): boolean {
-  if (!window.WebGLRenderingContext) return false;
+  if (!window.WebGLRenderingContext) {
+    return false;
+  }
   try {
     const gl = document.createElement("canvas").getContext("webgl");
     gl?.getExtension("WEBGL_lose_context")?.loseContext();
@@ -31,6 +40,8 @@ function hasWebGL(): boolean {
 }
 
 // 外部(gstatic.com)に出ないよう、デコーダーの場所を自サイト内に向ける。
+const loadModelViewer = () => import("@google/model-viewer");
+
 function setDecoderLocations() {
   (window as unknown as { ModelViewerElement: object }).ModelViewerElement = {
     dracoDecoderLocation: withBase("/models/decoders/draco/"),
@@ -45,23 +56,33 @@ export function ModelViewer({ src, poster, alt }: Partial<Model>) {
 
   useEffect(() => {
     const el = rootRef.current;
-    if (!src || !el || !hasWebGL()) return;
+    if (!src || !el || !hasWebGL()) {
+      return;
+    }
     let cancelled = false;
     let observer: IntersectionObserver | undefined;
-    const load = () => {
+    const load = async () => {
       observer?.disconnect();
       setDecoderLocations();
-      import("@google/model-viewer").then(
-        () => !cancelled && setReady(true),
-        (error) => console.warn("model-viewerを読み込めません", error),
-      );
+      try {
+        await loadModelViewer();
+        if (!cancelled) {
+          setReady(true);
+        }
+      } catch (error) {
+        console.warn("model-viewerを読み込めません", error);
+      }
     };
     if (typeof IntersectionObserver === "undefined") {
-      load();
+      void load();
     } else {
       observer = new IntersectionObserver(
-        (entries) => entries.some((e) => e.isIntersecting) && load(),
-        { rootMargin: "200px" },
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            void load();
+          }
+        },
+        { rootMargin: "200px" }
       );
       observer.observe(el);
     }
@@ -71,7 +92,9 @@ export function ModelViewer({ src, poster, alt }: Partial<Model>) {
     };
   }, [src]);
 
-  if (!src) return null;
+  if (!src) {
+    return null;
+  }
   return (
     <div ref={rootRef} className={styles.root}>
       {ready ? (

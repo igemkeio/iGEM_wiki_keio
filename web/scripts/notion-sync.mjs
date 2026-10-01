@@ -15,22 +15,29 @@
 //   - subtitle (Rich text) … 任意。見出しの下の小見出し
 //   - published (Checkbox) … 任意。存在し false の行はスキップ。
 
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import crypto from "node:crypto";
-import { fileURLToPath } from "node:url";
+import { setTimeout as sleep } from "node:timers/promises";
+
 import { Client } from "@notionhq/client";
 import { NotionToMarkdown } from "notion-to-md";
+
+import { collectImageSrcs, isIgemStatic, renderImage } from "./lib/figure.mjs";
 import {
   renderMarkdown,
   renderNote,
   richTextToMarkdown,
 } from "./lib/markdown.mjs";
-import { collectImageSrcs, isIgemStatic, renderImage } from "./lib/figure.mjs";
-import { buildPage, islandsFor, normalizeSlug, serializePage } from "./lib/page.mjs";
+import {
+  buildPage,
+  islandsFor,
+  normalizeSlug,
+  serializePage,
+} from "./lib/page.mjs";
 import { staleJsonFiles } from "./lib/stale.mjs";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = import.meta.dirname;
 const WEB_DIR = path.join(__dirname, "..");
 const CONTENT_DIR = path.join(WEB_DIR, "..", "content");
 const LOCALES = ["en", "ja"];
@@ -42,11 +49,15 @@ const IMAGES_URL_PREFIX = "/notion-images";
 // web/.env.local があれば最小パースで読み込む（dotenv 非依存）。
 function loadEnvLocal() {
   const envPath = path.join(WEB_DIR, ".env.local");
-  if (!fs.existsSync(envPath)) return;
-  for (const line of fs.readFileSync(envPath, "utf8").split("\n")) {
-    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
-    if (!m) continue;
-    const key = m[1];
+  if (!fs.existsSync(envPath)) {
+    return;
+  }
+  for (const line of fs.readFileSync(envPath, "utf-8").split("\n")) {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/u);
+    if (!m) {
+      continue;
+    }
+    const [, key] = m;
     let val = m[2].trim();
     if (
       (val.startsWith('"') && val.endsWith('"')) ||
@@ -54,14 +65,16 @@ function loadEnvLocal() {
     ) {
       val = val.slice(1, -1);
     }
-    if (!(key in process.env)) process.env[key] = val;
+    if (!(key in process.env)) {
+      process.env[key] = val;
+    }
   }
 }
 
 loadEnvLocal();
 
-const NOTION_TOKEN = process.env.NOTION_TOKEN;
-const NOTION_DATABASE_ID = process.env.NOTION_DATABASE_ID;
+const { NOTION_TOKEN } = process.env;
+const { NOTION_DATABASE_ID } = process.env;
 
 if (!NOTION_TOKEN || !NOTION_DATABASE_ID) {
   console.error(
@@ -80,34 +93,39 @@ const notion = new Client({
 });
 const n2m = new NotionToMarkdown({ notionClient: notion });
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
 // Notion の上限は平均 3 req/秒。notion-to-md はブロックごとに叩くので
 // 呼び出しの間隔を空けて平均レートを抑える。
 const MIN_INTERVAL_MS = 350;
 let lastCallAt = 0;
 async function throttle() {
   const wait = lastCallAt + MIN_INTERVAL_MS - Date.now();
-  if (wait > 0) await sleep(wait);
+  if (wait > 0) {
+    await sleep(wait);
+  }
   lastCallAt = Date.now();
 }
 
 // 一時的な接続断（Premature close 等）と rate limit に備えてリトライする薄いラッパ。
 // rate limit のときは Notion が返す Retry-After に従い、無ければ指数バックオフで待つ。
 async function withRetry(label, fn, retries = 5) {
-  for (let attempt = 1; ; attempt++) {
+  for (let attempt = 1; ; attempt += 1) {
     try {
       await throttle();
       return await fn();
-    } catch (err) {
-      if (attempt > retries) throw err;
-      const limited = err.code === "rate_limited" || err.status === 429;
-      const retryAfterSec = Number(err.headers?.["retry-after"]);
-      const waitMs = limited
-        ? (Number.isFinite(retryAfterSec) ? retryAfterSec * 1000 : 2000 * 2 ** (attempt - 1))
-        : attempt * 1000;
+    } catch (error) {
+      if (attempt > retries) {
+        throw error;
+      }
+      const limited = error.code === "rate_limited" || error.status === 429;
+      const retryAfterSec = Number(error.headers?.["retry-after"]);
+      let waitMs = attempt * 1000;
+      if (limited) {
+        waitMs = Number.isFinite(retryAfterSec)
+          ? retryAfterSec * 1000
+          : 2000 * 2 ** (attempt - 1);
+      }
       console.warn(
-        `[notion-sync] ${label} 失敗(${attempt}/${retries}): ${err.message} — ${waitMs}ms 後に再試行`
+        `[notion-sync] ${label} 失敗(${attempt}/${retries}): ${error.message} — ${waitMs}ms 後に再試行`
       );
       await sleep(waitMs);
     }
@@ -125,9 +143,11 @@ function guessExt(contentType, url) {
     "image/svg+xml": "svg",
     "image/avif": "avif",
   };
-  if (contentType && byType[contentType.split(";")[0].trim()])
-    return byType[contentType.split(";")[0].trim()];
-  const m = new URL(url).pathname.match(/\.([a-zA-Z0-9]+)$/);
+  const known = contentType && byType[contentType.split(";")[0].trim()];
+  if (known) {
+    return known;
+  }
+  const m = new URL(url).pathname.match(/\.([a-zA-Z0-9]+)$/u);
   return m ? m[1].toLowerCase() : "png";
 }
 
@@ -136,20 +156,28 @@ function guessExt(contentType, url) {
 async function localizeImage(url) {
   try {
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
     const buf = Buffer.from(await res.arrayBuffer());
-    const hash = crypto.createHash("sha256").update(buf).digest("hex").slice(0, 16);
+    const hash = crypto
+      .createHash("sha256")
+      .update(buf)
+      .digest("hex")
+      .slice(0, 16);
     const ext = guessExt(res.headers.get("content-type"), url);
     const fileName = `${hash}.${ext}`;
     const outPath = path.join(IMAGES_DIR, fileName);
     if (!fs.existsSync(outPath)) {
       fs.mkdirSync(IMAGES_DIR, { recursive: true });
       fs.writeFileSync(outPath, buf);
-      console.log(`[notion-sync] image saved ${fileName} (${buf.length} bytes)`);
+      console.log(
+        `[notion-sync] image saved ${fileName} (${buf.length} bytes)`
+      );
     }
     return `${IMAGES_URL_PREFIX}/${fileName}`;
-  } catch (err) {
-    console.warn(`[notion-sync] 画像取得失敗のためスキップ: ${err.message}`);
+  } catch (error) {
+    console.warn(`[notion-sync] 画像取得失敗のためスキップ: ${error.message}`);
     return null;
   }
 }
@@ -166,10 +194,30 @@ n2m.setCustomTransformer("image", async (block) => {
     src = img.external.url;
   } else {
     src = await localizeImage(img.file.url);
-    if (!src) return `<!-- 画像をスキップしました -->`;
+    if (!src) {
+      return `<!-- 画像をスキップしました -->`;
+    }
   }
   return renderImage({ src, caption });
 });
+
+// ブロックの子を全件取得する。
+async function listChildren(blockId) {
+  const blocks = [];
+  let cursor;
+  do {
+    const startCursor = cursor;
+    const res = await withRetry(`blocks.children.list(${blockId})`, () =>
+      notion.blocks.children.list({
+        block_id: blockId,
+        start_cursor: startCursor,
+      })
+    );
+    blocks.push(...res.results);
+    cursor = res.has_more ? res.next_cursor : undefined;
+  } while (cursor);
+  return blocks;
+}
 
 // callout ブロックのカスタム変換。本文と子ブロックを Note の HTML にする。アイコンは捨てる。
 n2m.setCustomTransformer("callout", async (block) => {
@@ -184,12 +232,21 @@ n2m.setCustomTransformer("callout", async (block) => {
 
 // Notion のプロパティ値から素のテキストを取り出すヘルパ。
 function plainText(prop) {
-  if (!prop) return "";
-  if (prop.type === "title") return prop.title.map((t) => t.plain_text).join("");
-  if (prop.type === "rich_text")
+  if (!prop) {
+    return "";
+  }
+  if (prop.type === "title") {
+    return prop.title.map((t) => t.plain_text).join("");
+  }
+  if (prop.type === "rich_text") {
     return prop.rich_text.map((t) => t.plain_text).join("");
-  if (prop.type === "select") return prop.select?.name ?? "";
-  if (prop.type === "checkbox") return prop.checkbox;
+  }
+  if (prop.type === "select") {
+    return prop.select?.name ?? "";
+  }
+  if (prop.type === "checkbox") {
+    return prop.checkbox;
+  }
   return "";
 }
 
@@ -203,32 +260,19 @@ function numberValue(prop) {
 // Database 全行を取得（ページネーション対応）。
 async function queryAllRows(databaseId) {
   const rows = [];
-  let cursor = undefined;
+  let cursor;
   do {
+    const startCursor = cursor;
     const res = await withRetry("databases.query", () =>
       notion.databases.query({
         database_id: databaseId,
-        start_cursor: cursor,
+        start_cursor: startCursor,
       })
     );
     rows.push(...res.results);
     cursor = res.has_more ? res.next_cursor : undefined;
   } while (cursor);
   return rows;
-}
-
-// ブロックの子を全件取得する。
-async function listChildren(blockId) {
-  const blocks = [];
-  let cursor = undefined;
-  do {
-    const res = await withRetry(`blocks.children.list(${blockId})`, () =>
-      notion.blocks.children.list({ block_id: blockId, start_cursor: cursor })
-    );
-    blocks.push(...res.results);
-    cursor = res.has_more ? res.next_cursor : undefined;
-  } while (cursor);
-  return blocks;
 }
 
 // 1行ぶんを JSON 用のページに組み立てる。
@@ -265,14 +309,20 @@ function removeStaleJson(keep) {
   const existing = [];
   for (const locale of LOCALES) {
     const dir = path.join(CONTENT_DIR, locale);
-    if (!fs.existsSync(dir)) continue;
-    for (const name of fs.readdirSync(dir)) existing.push(`${locale}/${name}`);
+    if (!fs.existsSync(dir)) {
+      continue;
+    }
+    for (const name of fs.readdirSync(dir)) {
+      existing.push(`${locale}/${name}`);
+    }
   }
   const { stale, unreadable } = staleJsonFiles(existing, keep, (file) =>
-    JSON.parse(fs.readFileSync(path.join(CONTENT_DIR, file), "utf8"))
+    JSON.parse(fs.readFileSync(path.join(CONTENT_DIR, file), "utf-8"))
   );
   for (const file of unreadable) {
-    console.warn(`[notion-sync] JSON を読めないため消さずに残しました: ${file}`);
+    console.warn(
+      `[notion-sync] JSON を読めないため消さずに残しました: ${file}`
+    );
   }
   for (const file of stale) {
     fs.rmSync(path.join(CONTENT_DIR, file));
@@ -288,35 +338,47 @@ async function collectPages(rows) {
   for (const row of rows) {
     const props = row.properties;
     // published プロパティがあり、かつ false ならスキップ。
-    if (props.published && props.published.type === "checkbox" && props.published.checkbox === false) {
-      skipped++;
+    if (
+      props.published &&
+      props.published.type === "checkbox" &&
+      props.published.checkbox === false
+    ) {
+      skipped += 1;
       continue;
     }
 
     // __ 接頭辞は制御用の行（__build__ など）。ページ生成しない。
     if (plainText(props.slug).trim().startsWith("__")) {
-      skipped++;
+      skipped += 1;
       continue;
     }
 
     const { rawSlug, page } = await buildPageData(row);
     if (!page.slug) {
-      console.warn("[notion-sync] slug が空（または使える文字が無い）行をスキップしました。");
-      skipped++;
+      console.warn(
+        "[notion-sync] slug が空（または使える文字が無い）行をスキップしました。"
+      );
+      skipped += 1;
       continue;
     }
     if (!LOCALES.includes(page.locale)) {
-      console.warn(`[notion-sync] locale "${page.locale}" は未対応のためスキップ: ${rawSlug}`);
-      skipped++;
+      console.warn(
+        `[notion-sync] locale "${page.locale}" は未対応のためスキップ: ${rawSlug}`
+      );
+      skipped += 1;
       continue;
     }
     if (rawSlug !== page.slug) {
-      console.log(`[notion-sync] slug を正規化: "${rawSlug}" -> "${page.slug}"`);
+      console.log(
+        `[notion-sync] slug を正規化: "${rawSlug}" -> "${page.slug}"`
+      );
     }
 
     const name = `${page.locale}/${page.slug}.json`;
     if (pages.has(name)) {
-      console.warn(`[notion-sync] ${name} が重複しています。後の行で上書きします。`);
+      console.warn(
+        `[notion-sync] ${name} が重複しています。後の行で上書きします。`
+      );
     }
     pages.set(name, page);
   }
@@ -328,7 +390,11 @@ function writeOutputs(pages) {
 
   for (const [name, page] of pages) {
     fs.mkdirSync(path.join(CONTENT_DIR, page.locale), { recursive: true });
-    fs.writeFileSync(path.join(CONTENT_DIR, name), serializePage(page), "utf8");
+    fs.writeFileSync(
+      path.join(CONTENT_DIR, name),
+      serializePage(page),
+      "utf-8"
+    );
     console.log(`[notion-sync] wrote content/${name}`);
 
     for (const src of collectImageSrcs(page.html)) {
@@ -342,7 +408,7 @@ function writeOutputs(pages) {
   fs.writeFileSync(
     path.join(CONTENT_DIR, "images-todo.json"),
     serializePage(imagesTodo),
-    "utf8"
+    "utf-8"
   );
   return imagesTodo.length;
 }
@@ -351,13 +417,17 @@ async function main() {
   const rows = await queryAllRows(NOTION_DATABASE_ID);
   // 取得が 0 件のときに全 JSON を消さないよう、何も書かずに止める。
   if (rows.length === 0) {
-    console.error("[notion-sync] DB から 1 行も取得できませんでした。何も書き出さずに終了します。");
+    console.error(
+      "[notion-sync] DB から 1 行も取得できませんでした。何も書き出さずに終了します。"
+    );
     process.exit(1);
   }
 
   const { pages, skipped } = await collectPages(rows);
   if (pages.size === 0) {
-    console.error("[notion-sync] 書き出せるページが 0 件でした。何も書き出さずに終了します。");
+    console.error(
+      "[notion-sync] 書き出せるページが 0 件でした。何も書き出さずに終了します。"
+    );
     process.exit(1);
   }
   const imageCount = writeOutputs(pages);
@@ -367,7 +437,9 @@ async function main() {
   );
 }
 
-main().catch((err) => {
-  console.error("[notion-sync] 失敗:", err.message);
+try {
+  await main();
+} catch (error) {
+  console.error("[notion-sync] 失敗:", error.message);
   process.exit(1);
-});
+}

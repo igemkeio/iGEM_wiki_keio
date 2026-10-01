@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { rememberLocale, rememberLocaleOnClick } from "./locale";
 
 let stop: (() => void) | undefined;
@@ -23,20 +24,35 @@ describe("locale", () => {
 
   it("hreflang付きリンクのクリックで移る先の言語を保存する", () => {
     stop = rememberLocaleOnClick();
-    document.getElementById("lang")!.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    document
+      .querySelector("#lang")!
+      .dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true })
+      );
     expect(localStorage.getItem("wiki:locale")).toBe('"ja"');
   });
 
   it("後から描画されたリンクのクリックでも保存する", () => {
     stop = rememberLocaleOnClick();
-    document.body.insertAdjacentHTML("beforeend", `<a id="late" href="/en/" hreflang="en"><span id="inner">EN</span></a>`);
-    document.getElementById("inner")!.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      `<a id="late" href="/en/" hreflang="en"><span id="inner">EN</span></a>`
+    );
+    document
+      .querySelector("#inner")!
+      .dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true })
+      );
     expect(localStorage.getItem("wiki:locale")).toBe('"en"');
   });
 
   it("hreflangの無いリンクでは保存しない", () => {
     stop = rememberLocaleOnClick();
-    document.getElementById("plain")!.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    document
+      .querySelector("#plain")!
+      .dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true })
+      );
     expect(localStorage.getItem("wiki:locale")).toBeNull();
   });
 
@@ -48,7 +64,11 @@ describe("locale", () => {
     });
     stop = rememberLocaleOnClick();
     expect(() =>
-      document.getElementById("lang")!.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true })),
+      document
+        .querySelector("#lang")!
+        .dispatchEvent(
+          new MouseEvent("click", { bubbles: true, cancelable: true })
+        )
     ).not.toThrow();
   });
 });

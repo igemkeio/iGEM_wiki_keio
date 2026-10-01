@@ -1,25 +1,38 @@
 import { describe, expect, it } from "vitest";
+
 import { readPage } from "./content";
 
-const minimal = { slug: "model", locale: "en", title: "Model", html: "<p>a</p>" };
+const minimal = {
+  slug: "model",
+  locale: "en",
+  title: "Model",
+  html: "<p>a</p>",
+};
 
-describe("readPage", () => {
-  it.each(["slug", "locale", "title", "html"])("%sが欠けるとthrowする", (key) => {
-    const raw: Record<string, unknown> = { ...minimal };
-    delete raw[key];
-    expect(() => readPage(raw)).toThrow(/必須フィールド/);
-  });
+describe(readPage, () => {
+  it.each(["slug", "locale", "title", "html"])(
+    "%sが欠けるとthrowする",
+    (key) => {
+      const raw: Record<string, unknown> = { ...minimal };
+      Reflect.deleteProperty(raw, key);
+      expect(() => readPage(raw)).toThrow(/必須フィールド/u);
+    }
+  );
 
   it("localeがenとja以外ならthrowする", () => {
-    expect(() => readPage({ ...minimal, locale: "fr" })).toThrow(/必須フィールド/);
+    expect(() => readPage({ ...minimal, locale: "fr" })).toThrow(
+      /必須フィールド/u
+    );
   });
 
   it("nullでもthrowする", () => {
-    expect(() => readPage(null)).toThrow(/必須フィールド/);
+    expect(() => readPage(null)).toThrow(/必須フィールド/u);
   });
 
   it("sourceをメッセージに含める", () => {
-    expect(() => readPage({}, "content/en/x.json")).toThrow(/content\/en\/x\.json/);
+    expect(() => readPage({}, "content/en/x.json")).toThrow(
+      /content\/en\/x\.json/u
+    );
   });
 
   it("任意フィールドの既定値を埋める", () => {
@@ -34,7 +47,12 @@ describe("readPage", () => {
   });
 
   it("指定した任意フィールドは上書きしない", () => {
-    const page = readPage({ ...minimal, order: 3, islands: ["x"], published: false });
+    const page = readPage({
+      ...minimal,
+      order: 3,
+      islands: ["x"],
+      published: false,
+    });
     expect(page).toMatchObject({ order: 3, islands: ["x"], published: false });
   });
 

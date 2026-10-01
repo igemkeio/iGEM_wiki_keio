@@ -1,10 +1,10 @@
 import { useSyncExternalStore } from "react";
 
-export type Store<T> = {
+export interface Store<T> {
   get: () => T;
   set: (value: T) => void;
   subscribe: (listener: () => void) => () => void;
-};
+}
 
 // モジュールスコープに置いて島の間で共有するストア。同じ値の set では購読者を呼ばない。
 export function createStore<T>(initial: T): Store<T> {
@@ -13,9 +13,13 @@ export function createStore<T>(initial: T): Store<T> {
   return {
     get: () => value,
     set: (next) => {
-      if (Object.is(next, value)) return;
+      if (Object.is(next, value)) {
+        return;
+      }
       value = next;
-      listeners.forEach((listener) => listener());
+      for (const listener of listeners) {
+        listener();
+      }
     },
     subscribe: (listener) => {
       listeners.add(listener);

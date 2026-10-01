@@ -1,5 +1,6 @@
 // 開発用。vite build --watchでビルドし、完了ごとにprerenderを走らせ、vite previewで配信する。
 import { build, preview } from "vite";
+
 import { prerender } from "./prerender.mjs";
 
 let running = false;
@@ -26,8 +27,12 @@ async function runPrerender() {
 
 const watcher = await build({ build: { watch: {} } });
 watcher.on("event", (event) => {
-  if (event.code === "END") void runPrerender();
-  if (event.code === "ERROR") console.error(event.error);
+  if (event.code === "END") {
+    void runPrerender();
+  }
+  if (event.code === "ERROR") {
+    console.error(event.error);
+  }
 });
 
 const server = await preview();
