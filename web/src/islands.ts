@@ -6,4 +6,5 @@ export const ISLANDS: Record<
   { place: "afterBody"; props: (page: WikiPage) => Record<string, unknown> }
 > = {
   "member-list": { place: "afterBody", props: (page) => ({ locale: page.locale }) },
+  "model-viewer": { place: "afterBody", props: (page) => page.models[0] ?? {} },
 };
