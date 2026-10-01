@@ -12,4 +12,157 @@
     clip-path: inset(50%);
     white-space: nowrap;
   }
+
+  .hero {
+    position: relative;
+    height: var(--size-hero);
+    overflow: hidden;
+  }
+
+  .decoration {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1260px;
+    height: 100%;
+  }
+
+  .curve {
+    stroke: var(--color-curve);
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+
+  .ring {
+    fill: none;
+    stroke: var(--color-curve);
+  }
+
+  .orb {
+    fill: var(--color-accent-orange);
+  }
+
+  .logo {
+    position: absolute;
+    top: 112px;
+    left: 0;
+    width: var(--size-logo-width);
+    height: var(--size-logo-height);
+  }
+
+  .catch {
+    position: absolute;
+    top: 568px;
+    left: 0;
+    font-family: var(--font-heading);
+    font-size: var(--size-catch);
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .catch b {
+    color: var(--color-accent-blue);
+    font-weight: inherit;
+  }
+
+  .about {
+    position: absolute;
+    right: 0;
+    bottom: 64px;
+    width: var(--size-hero-text);
+    max-width: 100%;
+    text-align: right;
+  }
+
+  .name {
+    font-family: var(--font-heading);
+    font-size: var(--size-hero-title);
+    line-height: 1.15;
+    text-transform: uppercase;
+  }
+
+  .tagline {
+    padding-top: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 20px;
+  }
+
+  .description {
+    padding-top: 12px;
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 18px;
+  }
+
+  .description :is(ul, ol) {
+    padding-left: 0;
+    list-style-position: inside;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .curve {
+      animation: draw 8s ease-out 1 both;
+    }
+
+    .orb {
+      animation: float 6s ease-in-out infinite;
+    }
+  }
+
+  @keyframes draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes float {
+    50% {
+      transform: translateY(-14px);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .hero {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      height: auto;
+      padding: 48px 0 56px;
+    }
+
+    .decoration {
+      display: none;
+    }
+
+    .logo,
+    .catch,
+    .about {
+      position: static;
+    }
+
+    .logo {
+      width: 100%;
+      max-width: var(--size-logo-width);
+      height: auto;
+      aspect-ratio: 632 / 228;
+    }
+
+    .catch {
+      font-size: 24px;
+    }
+
+    .about {
+      width: 100%;
+      text-align: left;
+    }
+
+    .name {
+      font-size: 36px;
+    }
+  }
 }
