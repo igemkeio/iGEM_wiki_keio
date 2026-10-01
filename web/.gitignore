@@ -22,3 +22,8 @@ npm-debug.log*
 # typescript
 *.tsbuildinfo
 /fonts-src/
+
+# playwright(基準画像のe2e/**/*-snapshots/は追跡する)
+/e2e/test-results/
+/e2e/playwright-report/
+/e2e/.site/
