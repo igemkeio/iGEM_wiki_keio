@@ -19,11 +19,11 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: ci,
   retries: ci ? 1 : 0,
-  reporter: ci ? [["list"], ["html", { open: "never", outputFolder: "./playwright-report" }]] : "list",
+  reporter: [["list"], ["html", { open: "never", outputFolder: "./playwright-report" }]],
   expect: { toHaveScreenshot: { maxDiffPixelRatio: 0.02, animations: "disabled" } },
   use: {
     baseURL: `http://localhost:${previewPort}/`,
-    trace: "on-first-retry",
+    trace: ci ? "on-first-retry" : "off",
     launchOptions,
   },
   projects: [

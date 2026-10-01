@@ -9,6 +9,8 @@ test("JAに切り替えると、移る先の言語がlocalStorageに保存され
   await page.locator("a[hreflang=ja]").click();
   await expect(page).toHaveURL((url) => pathOf(url.href, baseURL) === "/ja/members/");
   expect(await stored(page)).toBe('"ja"');
+  await page.goto("ja/");
+  expect(await stored(page)).toBe('"ja"');
 });
 
 test("相手の言語に同じslugがあれば、そのページに切り替わる", async ({ page, baseURL }) => {

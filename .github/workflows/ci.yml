@@ -2,6 +2,12 @@ name: CI
 
 on:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      update_snapshots:
+        description: E2Eのビジュアル回帰の基準画像をこの環境(Linux)で作り直し、artifactに上げる
+        type: boolean
+        default: false
   push:
     branches:
       - feature/vite-mpa
@@ -99,7 +105,19 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+      - name: E2E
+        if: ${{ !inputs.update_snapshots }}
+        run: npm run test:e2e
+      - name: E2E(基準画像の作り直し)
+        if: ${{ inputs.update_snapshots }}
+        continue-on-error: true
+        run: npm run test:e2e -- --update-snapshots=all
+      - uses: actions/upload-artifact@v4
+        if: ${{ inputs.update_snapshots }}
+        with:
+          name: e2e-snapshots
+          path: web/e2e/**/*-snapshots/
+          retention-days: 7
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

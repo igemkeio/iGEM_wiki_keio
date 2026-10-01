@@ -1,5 +1,5 @@
-// e2e/.site/keio/ を /keio/ 配下で配信する静的サーバー。vite preview は --base を読まないので Node の http で書く。
-// prepare.mjs が作る e2e/.site/ready を待ってから待ち受ける。
+// e2e/.site/keio/を/keio/配下で配信する静的サーバー。vite previewは--baseを読まないのでNodeのhttpで書く。
+// prepare.mjsが作るe2e/.site/readyを待ってから待ち受ける。
 import { existsSync } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import { createServer } from "node:http";
@@ -17,6 +17,10 @@ const types = {
   ".jpg": "image/jpeg",
   ".gif": "image/gif",
   ".woff2": "font/woff2",
+  ".svg": "image/svg+xml",
+  ".webp": "image/webp",
+  ".wasm": "application/wasm",
+  ".ico": "image/x-icon",
   ".glb": "model/gltf-binary",
 };
 
@@ -33,7 +37,13 @@ async function resolveFile(pathname) {
 }
 
 createServer(async (req, res) => {
-  const pathname = decodeURIComponent(new URL(req.url ?? "/", "http://localhost").pathname);
+  let pathname;
+  try {
+    pathname = decodeURIComponent(new URL(req.url ?? "/", "http://localhost").pathname);
+  } catch {
+    res.writeHead(400, { "content-type": "text/plain" }).end("bad request");
+    return;
+  }
   const file = await resolveFile(pathname).catch(() => undefined);
   const body = file && (await readFile(file).catch(() => undefined));
   if (!file || !body) {

@@ -43,11 +43,11 @@ test.describe("/members/ のモーダル", () => {
   });
 });
 
-test("/members/ のリクエストにmodel-viewerのチャンクが無い", async ({ page }) => {
+test("/members/ のリクエストにmodel-viewerのチャンクもModelViewerの部品も無い", async ({ page }) => {
   const scripts = trackScripts(page);
   await page.goto("members/");
   await expect(page.locator('[data-island="member-list"] ul button').first()).toBeVisible();
   await page.waitForLoadState("networkidle");
   expect(scripts.length).toBeGreaterThan(0);
-  expect(scripts.filter((url) => /model-viewer-[\w-]+\.js/.test(url))).toEqual([]);
+  expect(scripts.filter((url) => /model-?viewer-[\w-]+\.js/i.test(url))).toEqual([]);
 });

@@ -1,13 +1,14 @@
-# E2E とビジュアル回帰
+# E2Eとビジュアル回帰
 
-ビルド済みのwikiをChromiumで開き、MPAでしか確かめられない振る舞いを固定する。ページをまたぐ状態、島の動作、JSの配信範囲、3Dの遅延読み込みが対象。設計は`docs/architecture.md`の「テスト」にある。
+ビルド済みのwikiをChromiumで開き、MPAでしか確かめられない振る舞いを固定する。ページをまたぐ状態、島の動作、JSの配信範囲、3Dの遅延読み込みが対象。設計は`docs/architecture.md`のテストの節にある。
 
 ## 構成
 
 | ファイル | 内容 |
 | --- | --- |
 | `playwright.config.ts` | project、webServer、スクリーンショットの許容差 |
-| `fixtures.ts` | 全テストに掛ける外部リクエストの遮断と、パスの補助関数 |
+| `fixtures.ts` | 全テストに掛ける外部リクエストの扱いと、パスの補助関数 |
+| `pages.ts` | `content/`のpublishedなページの一覧と、言語ごとのナビのラベル |
 | `server/prepare.mjs` | E2E用のビルド。`/keio/`付きと、付かないものの2つを作る |
 | `server/serve-base.mjs` | `/keio/`付きのビルドを配信する静的サーバー |
 | `tests/*.e2e.ts` | 1ファイル1テーマのテスト |
@@ -40,9 +41,14 @@
 
 `serve-base.mjs`は`e2e/.site/ready`ができるのを待ってから4174番で待ち受ける。`e2e/.site/`はgit管理外。
 
-## 外部リクエストの遮断
+## 外部リクエストの扱い
 
-`fixtures.ts`が全テストに自動で掛かり、`localhost`以外へのリクエストを失敗させて記録する。1件でもあればテストが落ちる。外部リソースを`static.igem.wiki`などの許可先に限る規定を、ビルド後の動作でも固定するため。
+`fixtures.ts`が全テストに自動で掛かる。
+
+- 許可ホスト(`igem.org`と`igem.wiki`、サブドメインを含む。`static.igem.wiki`と`video.igem.org`はこれに入る)へのリクエストは、実際には出さず空のダミーを返す。画像なら1x1のPNG、それ以外は200の空。違反には数えない。
+- それ以外の`localhost`以外へのリクエストは失敗させて記録する。1件でもあればテストが落ちる。
+
+外部リソースを許可ホストに限る規定を、ビルド後の動作でも固定するため。
 
 ## ローカルでの実行
 
@@ -67,10 +73,15 @@ npm run test:e2e -- --project=chromium tests/islands.e2e.ts
 npm run test:e2e -- -g "Escで閉じる"
 ```
 
-UIモード、失敗時のトレース確認は次のとおり。
+UIモードで流す。
 
 ```sh
 npm run test:e2e:ui
+```
+
+HTMLレポートは、ローカルでもCIでも実行のたびに`e2e/playwright-report/`へ出る(自動では開かない)。トレースはCIで、失敗して再試行したときだけ付く。
+
+```sh
 npx playwright show-report e2e/playwright-report
 ```
 
@@ -99,46 +110,22 @@ npx playwright show-report e2e/playwright-report
 
 - 基準画像は`tests/visual.e2e.ts-snapshots/`にあり、git管理に入れる。ファイル名にOSを含めず、どの環境でも同じ画像と比べる。
 - 比較は`maxDiffPixelRatio: 0.02`で緩める。LinuxのCIとmacOSでは字形のずれがわずかに出るため。
-- 基準にするのはLinuxのCIで撮った画像。CIを入れたら、CIで画像を生成し直して差し替える。ローカルで`--update-snapshots`をかけて、そのまま上書きしない。
-- 見た目を意図して変えたときだけ、CIの成果物の画像を`tests/visual.e2e.ts-snapshots/`に入れてコミットする。
+- 基準にするのはLinuxのCIで撮った画像。ローカルで`--update-snapshots`をかけて、そのまま上書きしない。
 - 現在の基準画像はmacOSでローカルに生成した暫定のもの。
+- homeの画像には、ナビとContentsカードに並ぶE2E用ページ(`PRERENDER_ALL=1`で出る)が写り込む。E2E用ページや`prose-sample`を足したときは、homeの画像も撮り直す。
 - `prose-sample`は#29(prose)がマージされるまで`test.skip`にしている。
+
+### 基準画像の作り直し
+
+PRを作ったあとに、メインセッションが次の手順で行う。
+
+1. GitHub ActionsでCIを`workflow_dispatch`で実行し、入力`update_snapshots`をtrueにする。`e2e`ジョブが`npm run test:e2e -- --update-snapshots=all`を流し(テストが落ちてもジョブは落とさない)、`web/e2e/**/*-snapshots/`をartifact`e2e-snapshots`に上げる
+2. artifactの画像で`tests/visual.e2e.ts-snapshots/`を差し替えてコミットする
 
 ## skipしているテスト
 
 - `prose.e2e.ts`と`visual.e2e.ts`の`prose-sample`: #29(prose)が未マージで、ページも`prose.css`も無い。マージ後に`test.skip`を外し、`content/{en,ja}/prose-sample.json`の有無を確認して基準画像を生成する。
 
-## CIのジョブ定義
+## CI
 
-`.github/workflows/ci.yml`の`e2e`ジョブが次の定義で流す。型、Vitest、スクリプトのテスト、build-checkの後に置き、`ci-passed`の`needs`に入れてある。
-
-```yaml
-  e2e:
-    needs: [typecheck, test, test-scripts, build-check]
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    defaults:
-      run:
-        working-directory: web
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version-file: .node-version
-          cache: npm
-          cache-dependency-path: web/package-lock.json
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report
-          path: |
-            web/e2e/playwright-report/
-            web/e2e/test-results/
-          retention-days: 7
-```
-
-- `CI`環境変数があると、`retries: 1`、`trace: on-first-retry`、HTMLレポートが有効になり、`reuseExistingServer`が無効になる。
-- 基準画像を作り直すときは、`workflow_dispatch`で`npm run test:e2e -- --update-snapshots`を流し、`tests/visual.e2e.ts-snapshots/`を成果物として出すジョブを別に用意する。
+`.github/workflows/ci.yml`の`e2e`ジョブが流す。型、Vitest、スクリプトのテスト、build-checkの後に置き、`ci-passed`の`needs`に入れてある。`CI`環境変数があると、`retries: 1`、`trace: on-first-retry`になり、`reuseExistingServer`が無効になる。レポートと`test-results/`はartifact`playwright-report`に上がる。

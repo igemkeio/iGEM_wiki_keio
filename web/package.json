@@ -10,7 +10,7 @@
     "dev": "node scripts/dev.mjs",
     "build": "vite build && node scripts/prerender.mjs",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p e2e",
     "check": "node scripts/check.mjs",
     "test:check": "node --test \"scripts/lib/check/*.test.mjs\"",
     "test": "vitest run",

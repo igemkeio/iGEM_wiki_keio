@@ -96,7 +96,7 @@ export async function prerender() {
   const expected = await countPublished();
   console.log(`prerender: ${written} ページを書き出しました(content/ の${includeUnpublished ? "全ページ" : "publishedなページ"}は ${expected} ページ)`);
   if (written !== expected) {
-    throw new Error(`書き出したページ数(${written})と content/ の published 数(${expected})が一致しません`);
+    throw new Error(`書き出したページ数(${written})と content/ の${includeUnpublished ? "全ページ" : "published"}数(${expected})が一致しません`);
   }
 }
 

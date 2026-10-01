@@ -1,7 +1,17 @@
 import { test as base, expect } from "@playwright/test";
 
-// localhost以外へのリクエストをすべて失敗させ、1件でもあればテストを落とす。
-// iGEMの規定でstatic.igem.wiki等以外に出ないことを、E2Eでも固定する。
+// 許可ホスト(iGEMの規定でwikiが読み込んでよい配信元)へのリクエストは、実際には出さず空のダミーを返す。
+// それ以外のlocalhost以外へのリクエストは失敗させて記録し、1件でもあればテストを落とす。
+const allowedHosts = ["igem.org", "igem.wiki"];
+const isAllowed = (hostname: string) =>
+  allowedHosts.some((host) => hostname === host || hostname.endsWith(`.${host}`));
+
+// 1x1の透明なPNG
+const pixel = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+  "base64",
+);
+
 export const test = base.extend<{ blockedRequests: string[] }>({
   blockedRequests: [
     async ({ context }, use) => {
@@ -9,6 +19,11 @@ export const test = base.extend<{ blockedRequests: string[] }>({
       await context.route("**/*", (route) => {
         const { hostname } = new URL(route.request().url());
         if (hostname === "localhost") return route.fallback();
+        if (isAllowed(hostname)) {
+          return route.request().resourceType() === "image"
+            ? route.fulfill({ status: 200, contentType: "image/png", body: pixel })
+            : route.fulfill({ status: 200, body: "" });
+        }
         blocked.push(route.request().url());
         return route.abort("blockedbyclient");
       });
