@@ -88,3 +88,9 @@ test("Noteの中の pre の空行は保たれる", () => {
   assert.doesNotMatch(html, /blank/);
   assert.match(html, /<\/aside><p>後<\/p>/);
 });
+
+test("Noteの中の pre の空白だけの行も保たれる", () => {
+  const html = renderMarkdown(renderNote("```\na\n  \nb\n```"));
+  assert.match(html, /<pre><code>a\n  \nb\n<\/code><\/pre>/);
+  assert.doesNotMatch(html, /blank/);
+});

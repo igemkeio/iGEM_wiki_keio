@@ -57,7 +57,7 @@ export function renderNote(bodyMarkdown) {
     .split(/(<pre[\s\S]*?<\/pre>)/)
     .map((part, i) =>
       i % 2 === 1
-        ? part.replace(/\n(?=\n)/g, `\n${BLANK_MARK}`)
+        ? part.replace(/\n[ \t]*(?=\n)/g, (m) => `\n${BLANK_MARK}${m.slice(1)}`)
         : part.replace(/\n{2,}/g, "\n")
     )
     .join("");

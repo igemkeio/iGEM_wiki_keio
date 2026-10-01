@@ -77,5 +77,12 @@ test("static.igem.wikiかどうかを判定する", () => {
 test("キャプションの2行目以降を説明の段落にし、altは全文のままにする", () => {
   const html = renderImage({ src: "/a.png", caption: "Fig. 1 題\n説明1\n説明2" });
   assert.match(html, /<h3 class="figure-card__title">題<\/h3>\n<p>説明1<\/p>\n<p>説明2<\/p>\n<\/figcaption>/);
-  assert.match(html, /alt="Fig\. 1 題\n説明1\n説明2"/);
+  assert.match(html, /alt="Fig\. 1 題 説明1 説明2"/);
+});
+
+test("キャプションに空行があってもimgが壊れない", () => {
+  const html = renderImage({ src: "/a.png", caption: "Fig. 1 題\n\n説明" });
+  assert.match(html, /alt="Fig\. 1 題 説明"/);
+  assert.doesNotMatch(html, /\n\n/);
+  assert.equal(renderMarkdown(html).includes('alt="Fig. 1 題 説明"'), true);
 });

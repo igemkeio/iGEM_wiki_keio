@@ -25,7 +25,7 @@ export function parseCaption(caption) {
 // 空行を含めないのは、外側のmarkedにHTMLブロックとして素通しさせるため。
 export function renderImage({ src, caption }) {
   const text = caption.trim();
-  const alt = escapeHtml(text);
+  const alt = escapeHtml(text.replace(/\s*\n\s*/g, " "));
   const img = `<img src="${escapeHtml(src)}" alt="${alt}" />`;
   if (!text) return img;
   const { label, title, description } = parseCaption(text);

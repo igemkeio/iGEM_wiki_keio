@@ -385,6 +385,10 @@ async function main() {
   }
 
   const { pages, skipped } = await collectPages(rows);
+  if (pages.size === 0) {
+    console.error("[notion-sync] 書き出せるページが 0 件でした。何も書き出さずに終了します。");
+    process.exit(1);
+  }
   const imageCount = writeOutputs(pages);
 
   console.log(
