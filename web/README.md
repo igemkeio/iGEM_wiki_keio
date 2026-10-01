@@ -20,18 +20,13 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 
 ## フォント
 
-見出しとナビはMontserrat、本文はNoto Sans JP(どちらもSIL Open Font License)。`public/fonts/`に置き、`public/fonts/fonts.css`の`@font-face`から読む。`Page.tsx`が`<head>`の`<link>`で`fonts.css`を読み、woff2は`fonts.css`からの相対パスで引く。
+見出しとナビはMontserrat、本文はNoto Sans JP(どちらもSIL Open Font License)。`public/fonts/`にサブセット済みのwoff2を置き、`src/styles/global.css`の`@font-face`から読む。
 
-- `WIKI_FONT_BASE`で`fonts.css`の置き場所を切り替える。未指定なら配信パス配下の`/fonts`(`WIKI_BASE=/keio/`なら`/keio/fonts`)。本番では`WIKI_FONT_BASE=https://static.igem.wiki/teams/<id>/fonts npm run build`とし、`public/fonts/`の中身を同じ場所へ人がアップロードする。
-- いまの`public/fonts/`はGoogle Fontsが配るunicode-range付きの分割woff2(Montserratが5つ、Noto Sans JPが124)をそのまま置いたもの。ブラウザは使う文字を含む分割だけを取りに行く。全体は約5.4MBあり、未サブセットの状態。
-- サブセット化して1ファイルにするときは、fonttoolsを使う。`content/**/*.json`の文字に、JIS第1水準、ひらがな、カタカナ、記号、ラテン文字を足した文字列を`chars.txt`に作り、次を実行する。
-
-```sh
-pip install fonttools brotli
-pyftsubset NotoSansJP[wght].ttf --text-file=chars.txt --flavor=woff2 --layout-features='*' --output-file=noto-sans-jp-subset.woff2
-```
-
-  できた`woff2`を`public/fonts/`に置き、`fonts.css`の`@font-face`を1つにして、`unicode-range`を外す。
+- `public/fonts/`の中身はMontserratが可変の1本(ラテン文字のみ)、Noto Sans JPがweight 400と700の静的2本。合計は約1.2MB。可変のままだと1MBを超えるため静的にしている。
+- Noto Sans JPに含める文字は、JIS第1水準の漢字、ひらがな、カタカナ、全角と半角の記号、ラテン文字(ASCIIとラテン1)、`content/**/*.json`に出てくる文字。原稿に新しい漢字が増えたら再生成する。
+- 再生成は`npm run fonts:subset`。元のフォントはgoogle/fontsのリポジトリ(`ofl/notosansjp`と`ofl/montserrat`の可変TTF)で、`fonts-src/`に無ければスクリプトがダウンロードする。`fonts-src/`はgit管理外。手元のTTFを使うときは`fonts-src/NotoSansJP.ttf`と`fonts-src/Montserrat.ttf`として置く。サブセット化には`subset-font`(devDependency)を使う。
+- `global.css`の`url()`の先頭は目印の`__WIKI_FONT_BASE__`で、`vite.config.ts`のプラグインが環境変数`WIKI_FONT_BASE`に置き換える。未指定なら配信パスを付けた`/fonts`(`WIKI_BASE=/keio/`なら`/keio/fonts`)。末尾のスラッシュは落とす。
+- 本番では`WIKI_FONT_BASE=https://static.igem.wiki/teams/<id>/fonts npm run build`とし、`public/fonts/`の中身を同じ場所へ人がアップロードする。
 
 ## 配信パス
 
@@ -48,7 +43,9 @@ pyftsubset NotoSansJP[wght].ttf --text-file=chars.txt --flavor=woff2 --layout-fe
 
 ## レイアウト
 
-- `src/components/PageShell.tsx`が全ページの枠(Sidebar、本文、Toc、Footer)を作る。見た目の値は`src/styles/tokens.css`、リセットと`@layer`の宣言は`src/styles/global.css`にある。
-- 部品のCSSは`*.module.css`で、`@layer components`の中に書く。SSRでしか参照されないため、`src/main.tsx`で値として読み込み、クライアント側のCSSに束ねている。
-- 768px未満ではSidebarが上部のバーになり、`<details>`でナビを開閉する。ナビをデスクトップで常に見せるために`::details-content`を使うので、対応していない古いブラウザではナビが閉じたままになる。
-- Tocは`lib/toc.ts`が`html`のh2とh3から作り、見出しのないページでは出さない。1280px以上で本文の右に置く。
+- `src/components/PageShell.tsx`が全ページ共通の枠(Sidebar、children、Footer)を作る。`ArticlePage.tsx`がh1、subtitle、lead、本文と目次を描き、`Page.tsx`が`ArticlePage`を`PageShell`の子に入れる。本文を包む要素にはハッシュの付かないクラス`prose`を付けてあり、本文の幅は#29で子要素に当てる。
+- 見た目の値は`src/styles/tokens.css`、リセットと`@layer`の宣言は`src/styles/global.css`にある。
+- 部品のCSSは`*.module.css`で、`@layer components`の中に書く。SSRでしか参照されないため、`vite.config.ts`の`keep-css-modules`がtree-shakeで捨てられないようにし、`src/main.tsx`の`import.meta.glob`でクライアント側のCSSに束ねる。`global.css`を先に読むのは、`@layer`の宣言を最初に置くため。
+- 768px未満ではSidebarが上部のバーになり、`<details>`でナビを開閉する。デスクトップでナビを常に見せるために`::details-content`を使い、非対応のブラウザではデスクトップでもトグルを出して開閉式にする。
+- Tocは`lib/toc.ts`が`html`のh2とh3から作り、見出しのないページでは出さない。1440px以上で本文の右に置く。
+- Sidebarには`view-transition-name: sidebar`が付き、ページ遷移のアニメーションは`prefers-reduced-motion: no-preference`のときだけ有効。
