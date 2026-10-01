@@ -12,6 +12,8 @@ Notion（Markdown 執筆）→ API 取得 → Markdown 化 → HTML 化 → cont
 > `content/**/*.json` は同期で上書きされ、Notion に無くなったページの JSON は削除されるため、
 > 直接編集しないでください。`content/README.md` は削除されません。
 
+ページで使う島(`islands`)は Notion には持たせず、`web/scripts/notion-sync.mjs` の `ISLANDS_BY_SLUG`(slug から島の名前の配列を引く表)で決め、JSON の `islands` に出す。島の名前は `web/src/islands.ts` の `ISLANDS` のキーと手で揃える。
+
 ## 1. Notion Integration を作る
 
 1. https://www.notion.so/my-integrations で「New integration」を作成。

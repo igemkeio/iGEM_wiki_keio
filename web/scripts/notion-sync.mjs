@@ -256,6 +256,9 @@ const FIXED_BLOCKS = {
 `,
 };
 
+// slug ごとに、そのページで使う島の名前。web/src/islands.ts の名前と手で揃える。
+const ISLANDS_BY_SLUG = { members: ["member-list"] };
+
 // 1行ぶんを JSON 用のページに組み立てる。
 async function buildPageData(row) {
   const props = row.properties;
@@ -281,6 +284,7 @@ async function buildPageData(row) {
       lead: plainText(props.lead).trim(),
       html,
       order: numberValue(props.order),
+      islands: ISLANDS_BY_SLUG[slug],
     }),
   };
 }
