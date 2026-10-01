@@ -20,6 +20,7 @@
     "test:sync": "node --test \"scripts/lib/*.test.mjs\""
   },
   "dependencies": {
+    "@google/model-viewer": "^4.3.1",
     "@notionhq/client": "^2.2.15",
     "katex": "^0.18.9",
     "marked": "^18.0.5",

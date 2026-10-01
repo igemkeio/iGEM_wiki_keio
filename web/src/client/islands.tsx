@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 // 島の名前と部品の遅延ローダー。キーはislands.tsのISLANDSと揃える。
 const loaders: Record<string, () => Promise<{ default: ComponentType<any> }>> = {
   "member-list": () => import("../components/MemberList"),
+  "model-viewer": () => import("../components/ModelViewer"),
 };
 
 export async function mountIslands(root: ParentNode = document) {
