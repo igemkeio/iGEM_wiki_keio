@@ -1,0 +1,11 @@
+{
+  "slug": "members",
+  "locale": "en",
+  "title": "Members",
+  "subtitle": "メンバー",
+  "lead": "",
+  "html": "<h2 id=\"team\">Team</h2>\n<p>Select a member to read more.</p>",
+  "order": 80,
+  "islands": ["member-list"],
+  "published": true
+}

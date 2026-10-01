@@ -23,6 +23,14 @@ const ja = readPage({
   html: "<h2>節</h2>",
 });
 const withIsland = readPage({
+  slug: "members",
+  locale: "en",
+  title: "Members",
+  html: "<h2>Section</h2>",
+  islands: ["member-list"],
+});
+// 対応表に無い島の名前だけのページ。器も script も出ない。
+const withUnknownIsland = readPage({
   slug: "model",
   locale: "en",
   title: "Model",
@@ -62,8 +70,16 @@ describe("Page", () => {
   it("islandsがあるページだけscriptを入れる", () => {
     const html = render(withIsland);
     expect(html).toMatchSnapshot();
-    const found = scripts(parse(html));
-    expect(found.length).toBeGreaterThanOrEqual(1);
+    const doc = parse(html);
+    const found = scripts(doc);
+    expect(found).toHaveLength(1);
     expect(found[0].getAttribute("src")).toBe("/assets/index-abc.js");
+    expect(doc.querySelector('[data-island="member-list"]')).not.toBeNull();
+  });
+
+  it("対応表に無い島の名前だけならscriptも器も出さない", () => {
+    const doc = parse(render(withUnknownIsland));
+    expect(scripts(doc)).toHaveLength(0);
+    expect(doc.querySelector("[data-island]")).toBeNull();
   });
 });
