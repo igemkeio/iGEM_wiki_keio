@@ -1,12 +1,8 @@
 export type StorageKind = "local" | "session";
 
-// localStorageやsessionStorageへの参照自体が例外を投げる環境があるため、取得も含めて握る。
-function getStorage(kind: StorageKind): Storage | undefined {
-  try {
-    return kind === "local" ? window.localStorage : window.sessionStorage;
-  } catch {
-    return undefined;
-  }
+// 保存領域への参照自体が例外を投げる環境があるため、呼び出し側のtryで握る。
+function getStorage(kind: StorageKind): Storage {
+  return kind === "local" ? window.localStorage : window.sessionStorage;
 }
 
 // 読めない、無い、壊れたJSONのときはundefinedを返す。

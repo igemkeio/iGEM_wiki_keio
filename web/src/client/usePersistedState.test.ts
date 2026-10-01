@@ -50,6 +50,14 @@ describe("usePersistedState", () => {
     expect(b.result.current[0]).toBe("z");
   });
 
+  it("同じkeyでもlocalとsessionの値は独立している", () => {
+    const local = renderHook(() => usePersistedState("t:kind", "x", "local"));
+    const session = renderHook(() => usePersistedState("t:kind", "x", "session"));
+    act(() => local.result.current[1]("l"));
+    expect(local.result.current[0]).toBe("l");
+    expect(session.result.current[0]).toBe("x");
+  });
+
   it("保存領域が例外を投げても動き、値はメモリ上で保たれる", () => {
     vi.stubGlobal("localStorage", {
       getItem: () => {

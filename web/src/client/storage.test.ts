@@ -4,6 +4,7 @@ import { readStorage, writeStorage } from "./storage";
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
   localStorage.clear();
   sessionStorage.clear();
 });
@@ -50,6 +51,5 @@ describe("storage", () => {
     });
     expect(readStorage("local", "k")).toBeUndefined();
     expect(() => writeStorage("local", "k", 1)).not.toThrow();
-    vi.restoreAllMocks();
   });
 });
