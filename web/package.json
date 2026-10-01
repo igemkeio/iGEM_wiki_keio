@@ -16,19 +16,16 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "notion:sync": "node scripts/notion-sync.mjs",
-    "notion:import": "node scripts/notion-import.mjs",
     "fonts:subset": "node scripts/fonts-subset.mjs",
     "test:sync": "node --test \"scripts/lib/*.test.mjs\""
   },
   "dependencies": {
     "@notionhq/client": "^2.2.15",
-    "@tryfabric/martian": "^1.2.4",
     "katex": "^0.18.9",
     "marked": "^18.0.5",
     "notion-to-md": "^3.1.9",
     "react": "^19",
-    "react-dom": "^19",
-    "turndown": "^7.2.4"
+    "react-dom": "^19"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^7.0.1",
