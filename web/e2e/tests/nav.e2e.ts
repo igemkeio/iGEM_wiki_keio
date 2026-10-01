@@ -9,6 +9,8 @@ for (const locale of locales) {
     page,
     baseURL,
   }) => {
+    // 全ページを順に開くので、制限時間はページ数に比例させる(1ページ5秒の見積もり)。
+    test.setTimeout(30_000 + 5000 * pages.length);
     expect(pages.length).toBeGreaterThan(1);
     for (const entry of pages) {
       await page.goto(start);
