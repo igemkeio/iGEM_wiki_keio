@@ -1,8 +1,9 @@
 import type { Page } from "@playwright/test";
+
 import { expect, test } from "../fixtures";
 
-const chunk = /\/assets\/model-viewer-[\w-]+\.js/;
-const glb = /\.glb(\?|$)/;
+const chunk = /\/assets\/model-viewer-[\w-]+\.js/u;
+const glb = /\.glb(\?|$)/u;
 
 function track(page: Page) {
   const urls: string[] = [];
@@ -15,7 +16,9 @@ function track(page: Page) {
 
 test.use({ viewport: { width: 1280, height: 400 } });
 
-test("画面外のあいだは読み込まず、近づくとチャンクと.glbを1件ずつ取って表示する", async ({ page }) => {
+test("画面外のあいだは読み込まず、近づくとチャンクと.glbを1件ずつ取って表示する", async ({
+  page,
+}) => {
   const requests = track(page);
   await page.goto("e2e-model/");
   const island = page.locator('[data-island="model-viewer"]');
@@ -26,14 +29,26 @@ test("画面外のあいだは読み込まず、近づくとチャンクと.glb�
   expect(requests.glbs()).toHaveLength(0);
 
   await island.scrollIntoViewIfNeeded();
-  await expect.poll(() => requests.chunks().length, { timeout: 15_000 }).toBe(1);
+  await expect
+    .poll(() => requests.chunks().length, { timeout: 15_000 })
+    .toBe(1);
   await expect.poll(() => requests.glbs().length, { timeout: 15_000 }).toBe(1);
   const viewer = page.locator("model-viewer");
   await expect(viewer).toBeAttached();
-  await expect.poll(() => viewer.evaluate((el) => (el as HTMLElement & { loaded: boolean }).loaded), { timeout: 30_000 }).toBe(true);
+  await expect
+    .poll(
+      () =>
+        viewer.evaluate(
+          (el) => (el as HTMLElement & { loaded: boolean }).loaded
+        ),
+      { timeout: 30_000 }
+    )
+    .toBe(true);
 });
 
-test("WebGLが使えないときはposterを出し、チャンクも.glbも取らない", async ({ page }) => {
+test("WebGLが使えないときはposterを出し、チャンクも.glbも取らない", async ({
+  page,
+}) => {
   await page.addInitScript(() => {
     HTMLCanvasElement.prototype.getContext = () => null;
   });

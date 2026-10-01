@@ -1,10 +1,14 @@
 // @vitest-environment happy-dom
 import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
+import { createRoot } from "react-dom/client";
+import type { Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
 import { AttributionForm } from "./AttributionForm";
 
-(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 const SRC = "https://teams.igem.org/wiki/5539/attributions";
 
@@ -24,15 +28,22 @@ afterEach(() => {
 });
 
 const frame = () => container.querySelector("iframe") as HTMLIFrameElement;
-const send = (origin: string, data: unknown, source: MessageEventSource | null = frame().contentWindow) =>
+const send = (
+  origin: string,
+  data: unknown,
+  source: MessageEventSource | null = frame().contentWindow
+) =>
   act(() => {
     window.dispatchEvent(new MessageEvent("message", { origin, data, source }));
   });
-const body = (data: unknown) => JSON.stringify({ type: "igem-attribution-form", data });
+const body = (data: unknown) =>
+  JSON.stringify({ type: "igem-attribution-form", data });
 
-describe("AttributionForm", () => {
+describe(AttributionForm, () => {
   it("既定のsrcでiframeを出す", () => {
-    expect(frame().getAttribute("src")).toBe("https://teams.igem.org/wiki/5539/attributions");
+    expect(frame().getAttribute("src")).toBe(
+      "https://teams.igem.org/wiki/5539/attributions"
+    );
   });
 
   it("teams.igem.orgのmessageで高さが変わる", () => {
@@ -63,7 +74,11 @@ describe("AttributionForm", () => {
     act(() => root.unmount());
     act(() => {
       window.dispatchEvent(
-        new MessageEvent("message", { origin: "https://teams.igem.org", data: body(500), source }),
+        new MessageEvent("message", {
+          origin: "https://teams.igem.org",
+          data: body(500),
+          source,
+        })
       );
     });
     expect(el.style.height).toBe("");
@@ -72,7 +87,10 @@ describe("AttributionForm", () => {
 
   it("壊れたmessageや別のtypeは無視する", () => {
     send("https://teams.igem.org", "not json");
-    send("https://teams.igem.org", JSON.stringify({ type: "other", data: 500 }));
+    send(
+      "https://teams.igem.org",
+      JSON.stringify({ type: "other", data: 500 })
+    );
     send("https://teams.igem.org", body("x"));
     expect(frame().style.height).toBe("");
   });

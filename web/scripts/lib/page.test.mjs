@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { buildPage, islandsFor, normalizeSlug, serializePage } from "./page.mjs";
+
+import {
+  buildPage,
+  islandsFor,
+  normalizeSlug,
+  serializePage,
+} from "./page.mjs";
 
 test("slugを小文字英数字とハイフンに正規化する", () => {
   assert.equal(normalizeSlug("Model"), "model");
@@ -20,7 +26,14 @@ test("任意フィールドは値があるときだけ出し、キーの順はRE
     html: "",
     order: 0,
   });
-  assert.deepEqual(Object.keys(page), ["slug", "locale", "title", "lead", "html", "order"]);
+  assert.deepEqual(Object.keys(page), [
+    "slug",
+    "locale",
+    "title",
+    "lead",
+    "html",
+    "order",
+  ]);
 });
 
 test("JSONは2スペースインデントで末尾に改行を付ける", () => {
@@ -28,12 +41,20 @@ test("JSONは2スペースインデントで末尾に改行を付ける", () => 
 });
 
 test("islandsは空でないときだけ出し、orderの後ろに置く", () => {
-  const base = { slug: "members", locale: "en", title: "Members", html: "", order: 80 };
+  const base = {
+    slug: "members",
+    locale: "en",
+    title: "Members",
+    html: "",
+    order: 80,
+  };
   assert.deepEqual(
     Object.keys(buildPage({ ...base, islands: ["member-list"] })),
     ["slug", "locale", "title", "html", "order", "islands"]
   );
-  assert.deepEqual(buildPage({ ...base, islands: ["member-list"] }).islands, ["member-list"]);
+  assert.deepEqual(buildPage({ ...base, islands: ["member-list"] }).islands, [
+    "member-list",
+  ]);
   assert.equal("islands" in buildPage({ ...base, islands: [] }), false);
   assert.equal("islands" in buildPage(base), false);
 });

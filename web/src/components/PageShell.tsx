@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
+
 import type { WikiPage } from "../content";
 import type { Route } from "../routes";
 import { Footer } from "./Footer";
-import styles from "./PageShell.module.css";
 import { Sidebar } from "./Sidebar";
+
+import styles from "./PageShell.module.css";
 
 // 全ページ共通の枠。中身はchildrenに任せる。
 export function PageShell({

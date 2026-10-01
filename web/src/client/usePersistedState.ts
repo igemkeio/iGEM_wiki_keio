@@ -1,6 +1,9 @@
 import { useCallback } from "react";
-import { createStore, useStore, type Store } from "./store";
-import { readStorage, writeStorage, type StorageKind } from "./storage";
+
+import { readStorage, writeStorage } from "./storage";
+import type { StorageKind } from "./storage";
+import { createStore, useStore } from "./store";
+import type { Store } from "./store";
 
 // 同じkindとkeyを使う島が同じ値を見るよう、ストアはモジュールスコープで共有する。
 const stores = new Map<string, Store<unknown>>();
@@ -20,17 +23,20 @@ function storeFor<T>(kind: StorageKind, key: string, initial: T): Store<T> {
 export function usePersistedState<T>(
   key: string,
   initial: T,
-  kind: StorageKind = "local",
+  kind: StorageKind = "local"
 ): [T, (next: T | ((prev: T) => T)) => void] {
   const store = storeFor(kind, key, initial);
   const value = useStore(store);
   const setValue = useCallback(
     (next: T | ((prev: T) => T)) => {
-      const resolved = typeof next === "function" ? (next as (prev: T) => T)(store.get()) : next;
+      const resolved =
+        typeof next === "function"
+          ? (next as (prev: T) => T)(store.get())
+          : next;
       store.set(resolved);
       writeStorage(kind, key, resolved);
     },
-    [store, kind, key],
+    [store, kind, key]
   );
   return [value, setValue];
 }

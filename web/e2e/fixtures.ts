@@ -1,15 +1,17 @@
-import { test as base, expect } from "@playwright/test";
+import { expect, test as base } from "@playwright/test";
 
 // 許可ホスト(iGEMの規定でwikiが読み込んでよい配信元)へのリクエストは、実際には出さず空のダミーを返す。
 // それ以外のlocalhost以外へのリクエストは失敗させて記録し、1件でもあればテストを落とす。
 const allowedHosts = ["igem.org", "igem.wiki"];
 const isAllowed = (hostname: string) =>
-  allowedHosts.some((host) => hostname === host || hostname.endsWith(`.${host}`));
+  allowedHosts.some(
+    (host) => hostname === host || hostname.endsWith(`.${host}`)
+  );
 
 // 1x1の透明なPNG
 const pixel = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
-  "base64",
+  "base64"
 );
 
 export const test = base.extend<{ blockedRequests: string[] }>({
@@ -18,10 +20,16 @@ export const test = base.extend<{ blockedRequests: string[] }>({
       const blocked: string[] = [];
       await context.route("**/*", (route) => {
         const { hostname } = new URL(route.request().url());
-        if (hostname === "localhost") return route.fallback();
+        if (hostname === "localhost") {
+          return route.fallback();
+        }
         if (isAllowed(hostname)) {
           return route.request().resourceType() === "image"
-            ? route.fulfill({ status: 200, contentType: "image/png", body: pixel })
+            ? route.fulfill({
+                status: 200,
+                contentType: "image/png",
+                body: pixel,
+              })
             : route.fulfill({ status: 200, body: "" });
         }
         blocked.push(route.request().url());
@@ -34,15 +42,20 @@ export const test = base.extend<{ blockedRequests: string[] }>({
   ],
 });
 
-export { expect };
+export { expect } from "@playwright/test";
 
 // baseURLの配信パス(/ か /keio/)を除いた、ページのパス。
 export function pathOf(url: string, baseURL: string | undefined): string {
-  const base = new URL(baseURL ?? "http://localhost/").pathname.replace(/\/$/, "");
-  return new URL(url).pathname.slice(base.length) || "/";
+  const prefix = new URL(baseURL ?? "http://localhost/").pathname.replace(
+    /\/$/u,
+    ""
+  );
+  return new URL(url).pathname.slice(prefix.length) || "/";
 }
 
 // ページのパスに、baseURLの配信パスを付けたhref。
 export function hrefOf(path: string, baseURL: string | undefined): string {
-  return new URL(baseURL ?? "http://localhost/").pathname.replace(/\/$/, "") + path;
+  return (
+    new URL(baseURL ?? "http://localhost/").pathname.replace(/\/$/u, "") + path
+  );
 }

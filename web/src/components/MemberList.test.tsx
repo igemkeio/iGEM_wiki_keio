@@ -1,10 +1,14 @@
 // @vitest-environment happy-dom
 import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
+import { createRoot } from "react-dom/client";
+import type { Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
 import { MemberList } from "./MemberList";
 
-(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 const list = [
   {
@@ -23,10 +27,12 @@ let root: Root;
 
 beforeEach(() => {
   const proto = HTMLDialogElement.prototype;
-  proto.showModal ??= function (this: HTMLDialogElement) {
+  // oxlint-disable-next-line unicorn/consistent-function-scoping -- thisを使う代役で、アロー関数にできない
+  proto.showModal ??= function showModal(this: HTMLDialogElement) {
     this.setAttribute("open", "");
   };
-  proto.close ??= function (this: HTMLDialogElement) {
+  // oxlint-disable-next-line unicorn/consistent-function-scoping -- 同上
+  proto.close ??= function close(this: HTMLDialogElement) {
     this.removeAttribute("open");
     this.dispatchEvent(new Event("close"));
   };
@@ -42,9 +48,10 @@ afterEach(() => {
 });
 
 const dialog = () => container.querySelector("dialog") as HTMLDialogElement;
-const openIt = () => act(() => container.querySelector<HTMLButtonElement>("ul button")!.click());
+const openIt = () =>
+  act(() => container.querySelector<HTMLButtonElement>("ul button")!.click());
 
-describe("MemberList", () => {
+describe(MemberList, () => {
   it("クリックでモーダルが開く", () => {
     expect(dialog().open).toBe(false);
     openIt();

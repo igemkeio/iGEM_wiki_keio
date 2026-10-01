@@ -1,14 +1,14 @@
 export type Locale = "en" | "ja";
 
-export type Model = {
+export interface Model {
   // .glbのURL
   src: string;
   // 読み込み前とWebGL非対応時に出す静止画のURL
   poster: string;
   alt: string;
-};
+}
 
-export type RawWikiPage = {
+export interface RawWikiPage {
   slug: string;
   locale: Locale;
   title: string;
@@ -20,7 +20,7 @@ export type RawWikiPage = {
   models?: Model[];
   published?: boolean;
   source?: "notion" | "local";
-};
+}
 
 export type WikiPage = Required<RawWikiPage>;
 

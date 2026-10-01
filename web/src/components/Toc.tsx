@@ -1,11 +1,14 @@
 import type { Locale } from "../content";
 import type { TocItem } from "../lib/toc";
+
 import styles from "./Toc.module.css";
 
 const titles: Record<Locale, string> = { en: "On this page", ja: "目次" };
 
 export function Toc({ items, locale }: { items: TocItem[]; locale: Locale }) {
-  if (items.length === 0) return null;
+  if (items.length === 0) {
+    return null;
+  }
   return (
     <aside className={styles.root}>
       <nav aria-label={titles[locale]}>

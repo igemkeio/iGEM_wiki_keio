@@ -3,10 +3,10 @@
 import { existsSync } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import { createServer } from "node:http";
-import { dirname, extname, join, normalize, resolve, sep } from "node:path";
-import { fileURLToPath } from "node:url";
+import { extname, join, normalize, resolve, sep } from "node:path";
+import { setTimeout as sleep } from "node:timers/promises";
 
-const site = resolve(dirname(fileURLToPath(import.meta.url)), "../.site");
+const site = resolve(import.meta.dirname, "../.site");
 const port = Number(process.env.PORT ?? 4174);
 const types = {
   ".html": "text/html; charset=utf-8",
@@ -24,31 +24,47 @@ const types = {
   ".glb": "model/gltf-binary",
 };
 
-while (!existsSync(join(site, "ready"))) await new Promise((r) => setTimeout(r, 200));
+while (!existsSync(join(site, "ready"))) {
+  await sleep(200);
+}
 
 async function resolveFile(pathname) {
   // /keio/ より外はサイトの外なので見つからない扱いにする。
-  if (!pathname.startsWith("/keio/")) return undefined;
+  if (!pathname.startsWith("/keio/")) {
+    return null;
+  }
   const file = normalize(join(site, pathname));
-  if (!file.startsWith(site + sep)) return undefined;
-  const info = await stat(file).catch(() => undefined);
-  if (info?.isDirectory()) return pathname.endsWith("/") ? join(file, "index.html") : undefined;
-  return info ? file : undefined;
+  if (!file.startsWith(site + sep)) {
+    return null;
+  }
+  const info = await stat(file).catch(() => null);
+  if (info?.isDirectory()) {
+    return pathname.endsWith("/") ? join(file, "index.html") : null;
+  }
+  return info ? file : null;
 }
 
 createServer(async (req, res) => {
   let pathname;
   try {
-    pathname = decodeURIComponent(new URL(req.url ?? "/", "http://localhost").pathname);
+    pathname = decodeURIComponent(
+      new URL(req.url ?? "/", "http://localhost").pathname
+    );
   } catch {
     res.writeHead(400, { "content-type": "text/plain" }).end("bad request");
     return;
   }
-  const file = await resolveFile(pathname).catch(() => undefined);
-  const body = file && (await readFile(file).catch(() => undefined));
+  const file = await resolveFile(pathname).catch(() => null);
+  const body = file && (await readFile(file).catch(() => null));
   if (!file || !body) {
     res.writeHead(404, { "content-type": "text/plain" }).end("not found");
     return;
   }
-  res.writeHead(200, { "content-type": types[extname(file)] ?? "application/octet-stream" }).end(body);
-}).listen(port, () => console.log(`serve-base: http://localhost:${port}/keio/`));
+  res
+    .writeHead(200, {
+      "content-type": types[extname(file)] ?? "application/octet-stream",
+    })
+    .end(body);
+}).listen(port, () =>
+  console.log(`serve-base: http://localhost:${port}/keio/`)
+);

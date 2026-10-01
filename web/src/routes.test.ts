@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { buildRoutes, pagePath } from "./routes";
 
 const page = (over: Record<string, unknown> = {}) => ({
@@ -9,7 +10,7 @@ const page = (over: Record<string, unknown> = {}) => ({
   ...over,
 });
 
-describe("pagePath", () => {
+describe(pagePath, () => {
   it("homeは言語ごとのルートになる", () => {
     expect(pagePath({ locale: "en", slug: "home" })).toBe("/");
     expect(pagePath({ locale: "ja", slug: "home" })).toBe("/ja/");
@@ -21,13 +22,13 @@ describe("pagePath", () => {
   });
 });
 
-describe("buildRoutes", () => {
+describe(buildRoutes, () => {
   it("published: falseのページを除く", () => {
     const routes = buildRoutes({
       "a.json": page({ slug: "a" }),
       "b.json": page({ slug: "b", published: false }),
     });
-    expect(routes.map((r) => r.path)).toEqual(["/a/"]);
+    expect(routes.map((r) => r.path)).toStrictEqual(["/a/"]);
   });
 
   it("orderの昇順に並べ、同値はslugの辞書順にする", () => {
@@ -37,7 +38,7 @@ describe("buildRoutes", () => {
       "z.json": page({ slug: "z", order: 0 }),
       "n.json": page({ slug: "n" }),
     });
-    expect(routes.map((r) => r.page.slug)).toEqual(["z", "b", "c", "n"]);
+    expect(routes.map((r) => r.page.slug)).toStrictEqual(["z", "b", "c", "n"]);
   });
 
   it("pathが衝突したら両方のファイル名を含めてthrowする", () => {
@@ -46,7 +47,7 @@ describe("buildRoutes", () => {
         "en/a.json": page({ slug: "same" }),
         "en/b.json": page({ slug: "same" }),
       })
-    ).toThrow(/en\/a\.json.*en\/b\.json/);
+    ).toThrow(/en\/a\.json.*en\/b\.json/u);
   });
 
   it("言語が違えば同じslugでも衝突しない", () => {
@@ -54,6 +55,6 @@ describe("buildRoutes", () => {
       "en/a.json": page({ slug: "home" }),
       "ja/a.json": page({ slug: "home", locale: "ja" }),
     });
-    expect(routes.map((r) => r.path).sort()).toEqual(["/", "/ja/"]);
+    expect(routes.map((r) => r.path).toSorted()).toStrictEqual(["/", "/ja/"]);
   });
 });

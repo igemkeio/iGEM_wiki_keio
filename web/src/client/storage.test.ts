@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { readStorage, writeStorage } from "./storage";
 
 afterEach(() => {
@@ -21,7 +22,7 @@ const throwingStorage = {
 describe("storage", () => {
   it("書いた値を読み戻せる", () => {
     writeStorage("local", "k", { a: [1, 2] });
-    expect(readStorage("local", "k")).toEqual({ a: [1, 2] });
+    expect(readStorage("local", "k")).toStrictEqual({ a: [1, 2] });
   });
 
   it("localとsessionは別の領域", () => {
