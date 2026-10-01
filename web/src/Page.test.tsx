@@ -22,7 +22,7 @@ describe("Page", () => {
   it("slugがhomeならヒーローとContentsを描き、本文ページの型は使わない", () => {
     const model = { ...base, slug: "model", title: "Model", order: 30 };
     const html = renderToStaticMarkup(<Page page={base} routes={[route(base), route(model)]} assets={assets} />);
-    expect(html).toContain("one-direction.svg");
+    expect(html).toContain("one-direction.png");
     expect(html).toContain("Contents");
     expect(html).not.toContain("<script");
   });
@@ -30,6 +30,6 @@ describe("Page", () => {
   it("homeでなければHomePageを使わない", () => {
     const model = { ...base, slug: "model", title: "Model", html: "<h2 id=\"a\">A</h2>" };
     const html = renderToStaticMarkup(<Page page={model} routes={[route(base), route(model)]} assets={assets} />);
-    expect(html).not.toContain("one-direction.svg");
+    expect(html).not.toContain("one-direction.png");
   });
 });

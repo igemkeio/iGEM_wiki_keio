@@ -16,15 +16,21 @@
   .hero {
     position: relative;
     height: var(--size-hero);
-    overflow: hidden;
   }
 
   .decoration {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 1260px;
-    height: 100%;
+    top: 64px;
+    left: 348px;
+    width: min(900px, calc(100vw - 720px));
+    height: 560px;
+    overflow: hidden;
+  }
+
+  .decoration svg {
+    display: block;
+    max-width: none;
+    overflow: visible;
   }
 
   .curve {

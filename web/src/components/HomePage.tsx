@@ -6,17 +6,19 @@ import styles from "./HomePage.module.css";
 // ビルド時にvite.config.tsのプラグインが画像の配信元に置き換える。
 const imageBase = "__WIKI_IMAGE_BASE__";
 
-const curveProps = { pathLength: 1, className: styles.curve, fill: "none", strokeWidth: 1 } as const;
+const curveProps = { pathLength: 1, className: styles.curve, fill: "none" } as const;
 
-// ヒーローの装飾。曲線は描かれ、オレンジの円は上下に揺れる。
+// ヒーローの装飾。原点はヒーロー内の(348, 64)で、曲線は描かれ、オレンジの円は上下に揺れる。
 function Decoration() {
   return (
-    <svg className={styles.decoration} viewBox="0 0 1260 993" aria-hidden="true" focusable="false">
-      <path {...curveProps} d="M347 356 C800 330 1000 330 1260 120" />
-      <path {...curveProps} d="M347 557 C700 490 1050 420 1260 217" />
-      <circle className={styles.ring} cx="964" cy="271" r="15" />
-      <circle className={styles.orb} cx="882" cy="330" r="32" />
-    </svg>
+    <div className={styles.decoration} aria-hidden="true">
+      <svg width="900" height="560" viewBox="0 0 900 560" focusable="false">
+        <path {...curveProps} d="M-60 520C220 380 520 470 940 120" />
+        <path {...curveProps} d="M-40 300C300 240 620 340 920 40" />
+        <circle className={styles.ring} cx="617" cy="208" r="14" />
+        <circle className={styles.orb} cx="534" cy="266" r="32" />
+      </svg>
+    </div>
   );
 }
 
@@ -41,7 +43,7 @@ export function HomePage({ page, routes }: { page: WikiPage; routes: Route[] }) 
         <Decoration />
         <img
           className={styles.logo}
-          src={`${imageBase}/one-direction.svg`}
+          src={`${imageBase}/one-direction.png`}
           alt="One Direction"
           width={632}
           height={228}

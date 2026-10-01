@@ -30,7 +30,7 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 
 ## 画像
 
-- `public/images/`にロゴなどの画像を置く。Homeのロゴは`public/images/one-direction.svg`。
+- `public/images/`にロゴなどの画像を置く。Homeのロゴは`public/images/one-direction.png`。
 - ソースの画像URLの先頭は目印の`__WIKI_IMAGE_BASE__`で、`vite.config.ts`のプラグイン(フォントの目印と同じもの)が環境変数`WIKI_IMAGE_BASE`に置き換える。未指定なら配信パスを付けた`/images`。末尾のスラッシュは落とす。
 - 本番では`WIKI_IMAGE_BASE=https://static.igem.wiki/teams/<id>/images npm run build`とし、`public/images/`の中身を同じ場所へ人がアップロードする。
 
