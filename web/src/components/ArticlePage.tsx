@@ -1,5 +1,6 @@
 import type { WikiPage } from "../content";
 import { ISLANDS } from "../islands";
+import { applyBase } from "../lib/applyBase";
 import { buildToc } from "../lib/toc";
 import styles from "./ArticlePage.module.css";
 import { Island } from "./Island";
@@ -18,8 +19,8 @@ export function ArticlePage({ page }: { page: WikiPage }) {
           <h1 className={styles.title}>{page.title}</h1>
           {page.subtitle && <p className={styles.subtitle}>{page.subtitle}</p>}
         </div>
-        {page.lead && <p className={styles.lead} dangerouslySetInnerHTML={{ __html: page.lead }} />}
-        <div className={`${styles.body} prose`} dangerouslySetInnerHTML={{ __html: page.html }} />
+        {page.lead && <p className={styles.lead} dangerouslySetInnerHTML={{ __html: applyBase(page.lead, import.meta.env.BASE_URL) }} />}
+        <div className={`${styles.body} prose`} dangerouslySetInnerHTML={{ __html: applyBase(page.html, import.meta.env.BASE_URL) }} />
         {islands.map((name) => (
           <Island key={name} name={name} props={ISLANDS[name].props(page)} />
         ))}
