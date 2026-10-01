@@ -1,0 +1,12 @@
+{
+  "slug": "e2e-model",
+  "locale": "en",
+  "title": "E2E Model",
+  "subtitle": "E2E",
+  "lead": "",
+  "html": "<h2 id=\"top\">Top</h2>\n<p>The viewer is far below this text.</p>\n<div style=\"height: 3000px\"></div>",
+  "order": 900,
+  "islands": ["model-viewer"],
+  "models": [{ "src": "/models/sample.glb", "poster": "/models/sample.png", "alt": "Sample milk truck" }],
+  "published": false
+}

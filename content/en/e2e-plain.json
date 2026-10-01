@@ -1,0 +1,11 @@
+{
+  "slug": "e2e-plain",
+  "locale": "en",
+  "title": "E2E Plain",
+  "subtitle": "E2E",
+  "lead": "",
+  "html": "<h2 id=\"plain\">Plain</h2>\n<p>A page without islands.</p>",
+  "order": 901,
+  "islands": [],
+  "published": false
+}
