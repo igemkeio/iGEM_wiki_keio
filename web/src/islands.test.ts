@@ -17,6 +17,12 @@ describe("ISLANDS", () => {
     expect(props(page())).toEqual({});
   });
 
+  it("model-viewerのpropsは/で始まるURLにだけbaseを付ける", () => {
+    const props = ISLANDS["model-viewer"].props;
+    const abs = { src: "https://static.igem.wiki/a.glb", poster: "//cdn.example/a.png", alt: "a" };
+    expect(props(page({ models: [abs] }))).toEqual(abs);
+  });
+
   it("modelsの既定値は空配列", () => {
     expect(page().models).toEqual([]);
   });
