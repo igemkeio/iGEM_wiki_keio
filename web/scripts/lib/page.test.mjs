@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { buildPage, normalizeSlug, serializePage } from "./page.mjs";
+import { buildPage, islandsFor, normalizeSlug, serializePage } from "./page.mjs";
 
 test("slugを小文字英数字とハイフンに正規化する", () => {
   assert.equal(normalizeSlug("Model"), "model");
@@ -36,4 +36,9 @@ test("islandsは空でないときだけ出し、orderの後ろに置く", () =>
   assert.deepEqual(buildPage({ ...base, islands: ["member-list"] }).islands, ["member-list"]);
   assert.equal("islands" in buildPage({ ...base, islands: [] }), false);
   assert.equal("islands" in buildPage(base), false);
+});
+
+test("islandsForはmembersで島の名前を返し、他のslugでは空配列を返す", () => {
+  assert.deepEqual(islandsFor("members"), ["member-list"]);
+  assert.deepEqual(islandsFor("home"), []);
 });

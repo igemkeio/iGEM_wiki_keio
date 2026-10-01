@@ -9,6 +9,13 @@ export function normalizeSlug(raw) {
     .replace(/^-|-$/g, "");
 }
 
+// slug ごとに、そのページで使う島の名前。web/src/islands.ts の ISLANDS のキーと手で揃える。
+const ISLANDS_BY_SLUG = { members: ["member-list"] };
+
+export function islandsFor(slug) {
+  return ISLANDS_BY_SLUG[slug] ?? [];
+}
+
 // content/README.md のフィールド順で JSON 用のオブジェクトを作る。任意フィールドは値があるときだけ入れる。
 export function buildPage({ slug, locale, title, subtitle, lead, html, order, islands }) {
   const page = { slug, locale, title };
