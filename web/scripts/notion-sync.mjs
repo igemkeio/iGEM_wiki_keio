@@ -1,6 +1,7 @@
 // Notion を CMS として使うための同期スクリプト。
 // Notion の Database（1行=1ページ）を取得し、本文 Markdown を HTML 化して
-// wiki/pages/<slug>.html（en）/ wiki/pages/ja/<slug>.html（ja）へ書き出す。
+// content/<locale>/<slug>.json へ書き出す（形式は content/README.md）。
+// NOTION_SYNC_LEGACY_HTML=1 のときは従来の wiki/pages/ も出す。
 //
 // 実行: NOTION_TOKEN=... NOTION_DATABASE_ID=... node scripts/notion-sync.mjs
 //   もしくは web/.env.local に上記を書いて `yarn notion:sync`
@@ -8,9 +9,11 @@
 // Database に必要なプロパティ:
 //   - slug   (Title)      … ページのスラッグ。例: home, description
 //   - locale (Select)     … "en" または "ja"
-//   - heading (Rich text) … <title> ブロックに入る文字列
+//   - heading (Rich text) … ページの見出し（JSON の title）
 //       （プロパティ名を "title" にすると Notion の title 型と名前衝突するため heading）
-//   - lead   (Rich text)  … lead ブロック（簡単な HTML 可）
+//   - lead   (Rich text)  … リード文（簡単な HTML 可）
+//   - order  (Number)     … 任意。ナビと Home のカードの並び順
+//   - subtitle (Rich text) … 任意。見出しの下の小見出し
 //   - published (Checkbox) … 任意。存在し false の行はスキップ。
 
 import fs from "node:fs";
@@ -19,11 +22,21 @@ import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { Client } from "@notionhq/client";
 import { NotionToMarkdown } from "notion-to-md";
-import { marked } from "marked";
+import {
+  renderMarkdown,
+  renderNote,
+  richTextToMarkdown,
+} from "./lib/markdown.mjs";
+import { collectImageSrcs, isIgemStatic, renderImage } from "./lib/figure.mjs";
+import { buildLegacyFile } from "./lib/legacy.mjs";
+import { buildPage, normalizeSlug, serializePage } from "./lib/page.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const WEB_DIR = path.join(__dirname, "..");
 const PAGES_DIR = path.join(WEB_DIR, "..", "wiki", "pages");
+const CONTENT_DIR = path.join(WEB_DIR, "..", "content");
+const LOCALES = ["en", "ja"];
+const LEGACY_HTML = process.env.NOTION_SYNC_LEGACY_HTML === "1";
 // Notion 本文の画像を保存する場所（暫定方式）。/notion-images/ で配信される。
 // ※ iGEM 本番では static.igem.wiki へ移す必要あり（Issue #13）。
 const IMAGES_DIR = path.join(WEB_DIR, "public", "notion-images");
@@ -145,19 +158,31 @@ async function localizeImage(url) {
 }
 
 // image ブロックのカスタム変換。Notion アップロード画像（一時URL）は
-// リポジトリに取り込み、外部の恒久URLはそのまま通す。
+// リポジトリに取り込み、外部の URL（static.igem.wiki など）はそのまま通す。
+// キャプションがあれば Figure カードの HTML にする。
 n2m.setCustomTransformer("image", async (block) => {
   const img = block.image;
   const caption = (img.caption ?? []).map((t) => t.plain_text).join("");
-  const srcUrl = img.type === "external" ? img.external.url : img.file.url;
 
-  // 外部URLで static.igem.wiki 等の恒久URLならそのまま。
+  let src;
   if (img.type === "external") {
-    return `![${caption}](${srcUrl})`;
+    src = img.external.url;
+  } else {
+    src = await localizeImage(img.file.url);
+    if (!src) return `<!-- 画像をスキップしました -->`;
   }
-  // Notion アップロード画像は一時URLなのでリポジトリへ取り込む。
-  const localPath = await localizeImage(srcUrl);
-  return localPath ? `![${caption}](${localPath})` : `<!-- 画像をスキップしました -->`;
+  return renderImage({ src, caption });
+});
+
+// callout ブロックのカスタム変換。本文と子ブロックを Note の HTML にする。アイコンは捨てる。
+n2m.setCustomTransformer("callout", async (block) => {
+  const parts = [richTextToMarkdown(block.callout.rich_text)];
+  if (block.has_children) {
+    const children = await listChildren(block.id);
+    const mdBlocks = await n2m.blocksToMarkdown(children);
+    parts.push(n2m.toMarkdownString(mdBlocks).parent ?? "");
+  }
+  return renderNote(parts.join("\n\n").trim());
 });
 
 // Notion のプロパティ値から素のテキストを取り出すヘルパ。
@@ -169,6 +194,13 @@ function plainText(prop) {
   if (prop.type === "select") return prop.select?.name ?? "";
   if (prop.type === "checkbox") return prop.checkbox;
   return "";
+}
+
+// Number プロパティの値。無い、または空なら undefined。
+function numberValue(prop) {
+  return prop?.type === "number" && typeof prop.number === "number"
+    ? prop.number
+    : undefined;
 }
 
 // Database 全行を取得（ページネーション対応）。
@@ -186,6 +218,20 @@ async function queryAllRows(databaseId) {
     cursor = res.has_more ? res.next_cursor : undefined;
   } while (cursor);
   return rows;
+}
+
+// ブロックの子を全件取得する。
+async function listChildren(blockId) {
+  const blocks = [];
+  let cursor = undefined;
+  do {
+    const res = await withRetry(`blocks.children.list(${blockId})`, () =>
+      notion.blocks.children.list({ block_id: blockId, start_cursor: cursor })
+    );
+    blocks.push(...res.results);
+    cursor = res.has_more ? res.next_cursor : undefined;
+  } while (cursor);
+  return blocks;
 }
 
 // Notion の本文とは別に、slug ごとに末尾へ固定で差し込む生 HTML。
@@ -214,39 +260,51 @@ const FIXED_BLOCKS = {
 `,
 };
 
-// 1行ぶんを wiki/pages 形式の HTML 文字列に組み立てる。
-async function buildPageFile(row) {
+// 1行ぶんを JSON 用のページに組み立てる。
+async function buildPageData(row) {
   const props = row.properties;
-  const slug = plainText(props.slug).trim();
-  const locale = (plainText(props.locale) || "en").trim();
-  const title = plainText(props.heading).trim();
-  const lead = plainText(props.lead).trim();
+  const rawSlug = plainText(props.slug).trim();
+  const slug = normalizeSlug(rawSlug);
+  const locale = (plainText(props.locale) || "en").trim().toLowerCase();
 
   // 本文 Markdown → HTML。
   const mdBlocks = await withRetry(`pageToMarkdown(${row.id})`, () =>
     n2m.pageToMarkdown(row.id)
   );
   const md = n2m.toMarkdownString(mdBlocks).parent ?? "";
-  const contentHtml = marked.parse(md, { async: false }).trim();
-  const fixed = FIXED_BLOCKS[slug] ?? "";
+  const fixed = (FIXED_BLOCKS[slug] ?? "").trim();
+  const html = [renderMarkdown(md), fixed].filter(Boolean).join("\n");
 
-  const file = `{% extends "layout.html" %}
-
-{% block title %}${title}{% endblock %}
-{% block lead %}${lead}{% endblock %}
-
-{% block page_content %}
-
-${contentHtml}
-${fixed}
-{% endblock %}
-`;
-  return { slug, locale, file };
+  return {
+    rawSlug,
+    page: buildPage({
+      slug,
+      locale,
+      title: plainText(props.heading).trim(),
+      subtitle: plainText(props.subtitle).trim(),
+      lead: plainText(props.lead).trim(),
+      html,
+      order: numberValue(props.order),
+    }),
+  };
 }
 
-async function main() {
-  const rows = await queryAllRows(NOTION_DATABASE_ID);
-  let written = 0;
+// DB に無くなったページの JSON を消す。README.md など .json 以外には触れない。
+function removeStaleJson(keep) {
+  for (const locale of LOCALES) {
+    const dir = path.join(CONTENT_DIR, locale);
+    if (!fs.existsSync(dir)) continue;
+    for (const name of fs.readdirSync(dir)) {
+      if (!name.endsWith(".json") || keep.has(`${locale}/${name}`)) continue;
+      fs.rmSync(path.join(dir, name));
+      console.log(`[notion-sync] removed ${locale}/${name}`);
+    }
+  }
+}
+
+// 全ページをメモリ上で組み立てる。ここで例外が出ても content/ には何も書かない。
+async function collectPages(rows) {
+  const pages = new Map();
   let skipped = 0;
 
   for (const row of rows) {
@@ -257,27 +315,85 @@ async function main() {
       continue;
     }
 
-    const { slug, locale, file } = await buildPageFile(row);
-    if (!slug) {
-      console.warn("[notion-sync] slug 未設定の行をスキップしました。");
-      skipped++;
-      continue;
-    }
     // __ 接頭辞は制御用の行（__build__ など）。ページ生成しない。
-    if (slug.startsWith("__")) {
+    if (plainText(props.slug).trim().startsWith("__")) {
       skipped++;
       continue;
     }
 
-    const outDir = locale === "ja" ? path.join(PAGES_DIR, "ja") : PAGES_DIR;
-    fs.mkdirSync(outDir, { recursive: true });
-    const outPath = path.join(outDir, `${slug}.html`);
-    fs.writeFileSync(outPath, file, "utf8");
-    console.log(`[notion-sync] wrote ${locale}/${slug}.html`);
-    written++;
+    const { rawSlug, page } = await buildPageData(row);
+    if (!page.slug) {
+      console.warn("[notion-sync] slug が空（または使える文字が無い）行をスキップしました。");
+      skipped++;
+      continue;
+    }
+    if (!LOCALES.includes(page.locale)) {
+      console.warn(`[notion-sync] locale "${page.locale}" は未対応のためスキップ: ${rawSlug}`);
+      skipped++;
+      continue;
+    }
+    if (rawSlug !== page.slug) {
+      console.log(`[notion-sync] slug を正規化: "${rawSlug}" -> "${page.slug}"`);
+    }
+
+    const name = `${page.locale}/${page.slug}.json`;
+    if (pages.has(name)) {
+      console.warn(`[notion-sync] ${name} が重複しています。後の行で上書きします。`);
+    }
+    pages.set(name, page);
+  }
+  return { pages, skipped };
+}
+
+function writeOutputs(pages) {
+  const imagesTodo = [];
+
+  for (const [name, page] of pages) {
+    fs.mkdirSync(path.join(CONTENT_DIR, page.locale), { recursive: true });
+    fs.writeFileSync(path.join(CONTENT_DIR, name), serializePage(page), "utf8");
+    console.log(`[notion-sync] wrote content/${name}`);
+
+    for (const src of collectImageSrcs(page.html)) {
+      if (!isIgemStatic(src)) {
+        imagesTodo.push({ slug: page.slug, locale: page.locale, src });
+      }
+    }
+
+    if (LEGACY_HTML) {
+      const outDir = page.locale === "ja" ? path.join(PAGES_DIR, "ja") : PAGES_DIR;
+      fs.mkdirSync(outDir, { recursive: true });
+      fs.writeFileSync(path.join(outDir, `${page.slug}.html`), buildLegacyFile(page), "utf8");
+      console.log(`[notion-sync] wrote wiki/pages ${page.locale}/${page.slug}.html`);
+    }
   }
 
-  console.log(`[notion-sync] 完了: ${written} 件書き出し / ${skipped} 件スキップ。`);
+  removeStaleJson(new Set(pages.keys()));
+  fs.writeFileSync(
+    path.join(CONTENT_DIR, "images-todo.json"),
+    serializePage(imagesTodo),
+    "utf8"
+  );
+  return imagesTodo.length;
+}
+
+async function main() {
+  const rows = await queryAllRows(NOTION_DATABASE_ID);
+  // 取得が 0 件のときに全 JSON を消さないよう、何も書かずに止める。
+  if (rows.length === 0) {
+    console.error("[notion-sync] DB から 1 行も取得できませんでした。何も書き出さずに終了します。");
+    process.exit(1);
+  }
+
+  const { pages, skipped } = await collectPages(rows);
+  if (pages.size === 0) {
+    console.error("[notion-sync] 書き出せるページが 0 件でした。何も書き出さずに終了します。");
+    process.exit(1);
+  }
+  const imageCount = writeOutputs(pages);
+
+  console.log(
+    `[notion-sync] 完了: ${pages.size} 件書き出し / ${skipped} 件スキップ / static.igem.wiki 以外の画像 ${imageCount} 件。`
+  );
 }
 
 main().catch((err) => {
