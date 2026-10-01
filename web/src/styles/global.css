@@ -1,6 +1,8 @@
 @layer reset, tokens, prose, components;
 
 @import "./tokens.css" layer(tokens);
+@import "katex/dist/katex.min.css" layer(prose);
+@import "./prose.css" layer(prose);
 
 @media (prefers-reduced-motion: no-preference) {
   @view-transition {
@@ -65,7 +67,4 @@
       scroll-margin-top: var(--size-topbar);
     }
   }
-}
-
-@layer prose {
 }
