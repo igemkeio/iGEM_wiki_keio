@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - feature/vite-mpa
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  test-scripts:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run test:sync
+      - run: npm run test:check
+
+  build-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - name: Vercel 想定(base は /)
+        run: WIKI_BASE=/ npm run build && WIKI_BASE=/ npm run check
+      - name: GitLab Pages 想定(base は /keio/)
+        run: WIKI_BASE=/keio/ npm run build && WIKI_BASE=/keio/ npm run check
+
+  # ruleset の必須チェックはこのジョブだけにする。
+  # E2E のジョブ(#37)を足すときは、ジョブを追加して下の needs に e2e を加える。
+  ci-passed:
+    if: always()
+    needs:
+      - typecheck
+      - test
+      - test-scripts
+      - build-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: 依存ジョブがすべて成功したか確認する
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          echo "$RESULTS"
+          echo "$RESULTS" | jq -e 'all(.[]; .result == "success")' > /dev/null

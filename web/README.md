@@ -37,6 +37,22 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 - ソースの画像URLの先頭は目印の`__WIKI_IMAGE_BASE__`で、`vite.config.ts`のプラグイン(フォントの目印と同じもの)が環境変数`WIKI_IMAGE_BASE`に置き換える。未指定なら配信パスを付けた`/images`。末尾のスラッシュは落とす。
 - 本番では`WIKI_IMAGE_BASE=https://static.igem.wiki/teams/<id>/images npm run build`とし、`public/images/`の中身を同じ場所へ人がアップロードする。
 
+## CIと配信
+
+| 場所 | 設定 | 内容 |
+| --- | --- | --- |
+| GitHub Actions | `.github/workflows/ci.yml` | PRと`feature/vite-mpa`、`main`へのpushで、`typecheck`、`test`、`test-scripts`、`build-check`を並列に流し、`ci-passed`が結果を集約する。`build-check`は`WIKI_BASE=/`と`WIKI_BASE=/keio/`の2回、`npm run build && npm run check`を流す |
+| GitLab Pages | `.gitlab-ci.yml` | 既定ブランチだけで`node:24`の上で`web/`をビルドし、`npm run check`のあと`dist/`を`public/`に移す |
+| Vercel | `vercel.json` | PRのプレビュー。Root Directoryが`web`なので、そこでビルドと`npm run check`を流し、`dist`を配信する |
+
+- `ci-passed`を`main`の必須チェックにする予定(rulesetはメインセッションが設定する)。E2Eのジョブ(#37)を足すときは、`ci.yml`の`ci-passed`の`needs`に加える。
+- GitLabのキャッシュはnpmのキャッシュ`web/.npm/`(`npm ci --cache .npm --prefer-offline`)で、キーは`web/package-lock.json`のハッシュ。
+- GitLabでは`WIKI_BASE=/$CI_PROJECT_NAME/`としている。前提は、iGEMのwikiが`https://2026.igem.wiki/<team>/`で配信され、GitLabのプロジェクト名(URLの末尾)が`<team>`と一致していること。違っていたら`.gitlab-ci.yml`の`WIKI_BASE`の2か所(buildとcheck)を実際の配信パスに直す。
+- `WIKI_FONT_BASE`と`WIKI_IMAGE_BASE`は、`static.igem.wiki`のURLが決まるまで未指定にしてある(baseを付けた`/fonts`と`/images`になる)。決まったら`.gitlab-ci.yml`のbuildに足す。
+- Vercelは、プロジェクト設定のRoot Directoryが`web`であることを前提にしている(`vercel.json`はリポジトリ直下に置いたまま読まれる)。コマンドは`web`の中で実行されるので`cd web`は付けず、`outputDirectory`は`dist`にしてある。Root Directoryをリポジトリ直下に変えるときは、`cd web`を付け、`outputDirectory`を`web/dist`にする。
+- VercelのプロジェクトのNode.js Versionは24.xを選ぶ。
+- GitLabのURLが決まったら確認すること: プロジェクト名と`WIKI_BASE`が一致していること、GitLabのPagesの設定(公開範囲とURL)、`pages`ジョブが既定ブランチで緑になること、公開されたページのCSSとリンクが404にならないこと。
+
 ## 配信パス
 
 `WIKI_BASE`で配信パスを切り替える。既定は`/`。GitLab Pagesでは`WIKI_BASE=/keio/ npm run build`とすると、CSS、JS、リンクがすべて`/keio/`から始まる。
