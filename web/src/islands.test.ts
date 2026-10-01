@@ -23,6 +23,13 @@ describe("ISLANDS", () => {
     expect(props(page({ models: [abs] }))).toEqual(abs);
   });
 
+  it("attribution-formはafterBodyで、固定のsrcをpropsに渡す", () => {
+    expect(ISLANDS["attribution-form"]?.place).toBe("afterBody");
+    expect(ISLANDS["attribution-form"].props(page())).toEqual({
+      src: "https://teams.igem.org/wiki/5539/attributions",
+    });
+  });
+
   it("modelsの既定値は空配列", () => {
     expect(page().models).toEqual([]);
   });

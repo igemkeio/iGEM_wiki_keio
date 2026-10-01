@@ -75,6 +75,7 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 ## レイアウト
 
 - `src/components/PageShell.tsx`が全ページ共通の枠(Sidebar、children、Footer)を作る。`ArticlePage.tsx`がh1、subtitle、lead、本文と目次を描き、`Page.tsx`が`ArticlePage`を`PageShell`の子に入れる。本文を包む要素にはハッシュの付かないクラス`prose`を付けてあり、本文の幅は#29で子要素に当てる。
+- 本文のスタイルは`src/styles/prose.css`にあり、KaTeXのCSSは`global.css`から`@layer prose`に読む。Figureカードの2カラムは`.prose`の幅(コンテナクエリ)が720px以上のときで、目次のある幅では本文列が約848pxになり、Figmaの1088pxには届かない。Figmaでは図版の下にあるキャプション(`figure-card__label`)は、同期側のHTMLの形を変えないため右カラムの先頭に置く。
 - `slug`が`home`のページは`Page.tsx`が`HomePage.tsx`を使う。ヒーロー(ロゴ、曲線と円の装飾、キャッチ、紹介)とContentsのカードを持ち、`lead`がキャッチ(`<b>`は青)、`subtitle`と`html`が右下の紹介になる。カードは現在の言語のhome以外のページを`order`順に並べる。装飾のアニメーションはCSSだけで、`prefers-reduced-motion: reduce`では止まる。
 - 見た目の値は`src/styles/tokens.css`、リセットと`@layer`の宣言は`src/styles/global.css`にある。
 - 部品のCSSは`*.module.css`で、`@layer components`の中に書く。SSRでしか参照されないため、`vite.config.ts`の`keep-css-modules`がtree-shakeで捨てられないようにし、`src/main.tsx`の`import.meta.glob`でクライアント側のCSSに束ねる。`global.css`を先に読むのは、`@layer`の宣言を最初に置くため。

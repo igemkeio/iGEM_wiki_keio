@@ -56,7 +56,7 @@ Notion同期とプリレンダーをつなぐ唯一の約束事。`content/<loca
 
 - ビルド時は`<div data-island="member-list" data-props="...">`という器だけを出す。
 - `src/islands.tsx`が器を見つけて`createRoot`で起動する。島の名前と部品の対応表はこのファイルに置く。
-- 島の一覧: `member-list`(メンバーのモーダル)、`model-viewer`(3Dモデルの表示)。増えたらここに足す。
+- 島の一覧: `member-list`(メンバーのモーダル)、`model-viewer`(3Dモデルの表示)、`attribution-form`(iGEMの貢献者フォーム)。増えたらここに足す。
 - 島の中でも、状態を持たない動き(ホバー、フェードイン、スクロールで現れる)はCSSとBootstrapに任せ、Reactを使わない。
 
 ## 状態の永続化

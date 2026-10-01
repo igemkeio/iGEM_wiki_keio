@@ -38,6 +38,11 @@ export function createRenderer() {
   return new Marked({ async: false, extensions: mathExtensions });
 }
 
+// 本文中のh1をh2にする。h1はページの見出しが使うので、本文には置かない。
+function demoteH1(html) {
+  return html.replace(/<h1(\s[^>]*)?>([\s\S]*?)<\/h1>/g, (_, attrs = "", inner) => `<h2${attrs}>${inner}</h2>`);
+}
+
 // 見出しidを付けない本文変換。HTMLブロックの中に埋め込む断片に使う。
 function renderFragment(md) {
   return createRenderer().parse(md).trim();
@@ -47,7 +52,7 @@ function renderFragment(md) {
 const BLANK_MARK = "<!--blank-->";
 
 export function renderMarkdown(md) {
-  return addHeadingIds(renderFragment(md)).replaceAll(BLANK_MARK, "");
+  return addHeadingIds(demoteH1(renderFragment(md))).replaceAll(BLANK_MARK, "");
 }
 
 // Notionのcalloutの本文(Markdown)を Note の HTML にする。

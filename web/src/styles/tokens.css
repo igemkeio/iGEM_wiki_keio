@@ -41,6 +41,15 @@
   --size-hero-title: 48px;
   --size-hero-text: 448px;
 
+  --size-figure-max: 1088px;
+  --color-rule: rgba(13, 15, 18, 0.12);
+  --color-code-bg: rgba(13, 15, 18, 0.06);
+  --color-watermark: #b3b9c2;
+  --color-note-dot: #f43a1f;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --space-paragraph: 12.8px;
+  --radius-media: 14.4px;
+
   --space-frame-x: 56px;
   --space-sidebar-x: 56px;
   --space-nav-gap: 2px;

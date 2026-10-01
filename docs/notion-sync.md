@@ -12,7 +12,7 @@ Notion（Markdown 執筆）→ API 取得 → Markdown 化 → HTML 化 → cont
 > `content/**/*.json` は同期で上書きされ、Notion に無くなったページの JSON は削除されるため、
 > 直接編集しないでください。`content/README.md` は削除されません。
 
-ページで使う島(`islands`)は Notion には持たせず、`web/scripts/lib/page.mjs` の `ISLANDS_BY_SLUG`(slug から島の名前の配列を引く表)で決め、JSON の `islands` に出す。島の名前は `web/src/islands.ts` の `ISLANDS` のキーと手で揃える。
+ページで使う島(`islands`)は Notion には持たせず、`web/scripts/lib/page.mjs` の `ISLANDS_BY_SLUG`(slug から島の名前の配列を引く表)で決め、JSON の `islands` に出す。島の名前は `web/src/islands.ts` の `ISLANDS` のキーと手で揃える。attributionsには島`attribution-form`(iGEMの貢献者フォームのiframe)を付け、本文にはHTMLを差し込まない。
 
 ## 1. Notion Integration を作る
 
@@ -54,6 +54,7 @@ Database ID は DB の URL に含まれる 32 文字の英数字。
 
 | Notion のブロック | 出力 |
 | --- | --- |
+| 見出し1 | `<h2 id="...">`。ページのh1はtitleが使うので、本文の見出し1は見出し2として出す |
 | 見出し 2、見出し 3 | `<h2 id="...">`、`<h3 id="...">`。id は見出しの文字列を小文字化し、空白をハイフンに、句読点と記号を除いたもの（日本語は残す）。重複は `-2`、`-3` |
 | equation（ブロック数式）、文中の数式 | KaTeX で描画した HTML |
 | callout | `<aside class="note"><p class="note__label">Note</p>...</aside>`。アイコンは捨てる |
