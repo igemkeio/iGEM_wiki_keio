@@ -1,0 +1,23 @@
+$schema: ./web/node_modules/lefthook/schema.json
+
+pre-commit:
+  jobs:
+    # oxlint --fix は整形を崩すことがあるので、oxlint のあとに oxfmt を流して整形を最終形にする。
+    # 同じファイルを書き換えるため並列にせず直列で流す。
+    # 設定側で除外したファイルだけがステージされたときに落ちないよう、
+    # 両方に --no-error-on-unmatched-pattern を付ける。
+    - name: oxlint
+      root: web/
+      glob: "*.{ts,tsx,mjs}"
+      run: npx oxlint --fix {staged_files} --no-error-on-unmatched-pattern
+      stage_fixed: true
+    - name: oxfmt
+      root: web/
+      glob: "*.{ts,tsx,mjs,css,json,md}"
+      run: npx oxfmt --write {staged_files} --no-error-on-unmatched-pattern
+      stage_fixed: true
+    # tsc はファイルを指定できないので、.ts と .tsx が含まれるときだけプロジェクト全体を検査する。
+    - name: typecheck
+      root: web/
+      glob: "*.{ts,tsx}"
+      run: npm run typecheck

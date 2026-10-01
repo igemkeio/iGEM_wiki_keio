@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": {
-    "node": ">=24"
-  },
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "build": "vite build && node scripts/prerender.mjs",
@@ -19,7 +16,10 @@
     "test:e2e:ui": "playwright test -c e2e --ui",
     "notion:sync": "node scripts/notion-sync.mjs",
     "fonts:subset": "node scripts/fonts-subset.mjs",
-    "test:sync": "node --test \"scripts/lib/*.test.mjs\""
+    "test:sync": "node --test \"scripts/lib/*.test.mjs\"",
+    "check:code": "ultracite check",
+    "fix": "ultracite fix",
+    "prepare": "lefthook install || echo \"lefthook install に失敗したため省きました(core.hooksPath が設定されている場合など)。web/README.md の pre-commit の節を参照\""
   },
   "dependencies": {
     "@google/model-viewer": "^4.3.1",
@@ -39,10 +39,17 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5",
-    "subset-font": "^2.9.0",
     "happy-dom": "^20.14.5",
+    "lefthook": "^2.1.15",
+    "oxfmt": "^0.71.0",
+    "oxlint": "^1.86.0",
+    "subset-font": "^2.9.0",
     "typescript": "^5",
+    "ultracite": "^7.12.2",
     "vite": "^7",
     "vitest": "^5.0.2"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }
