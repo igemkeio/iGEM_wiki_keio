@@ -17,6 +17,11 @@ iGEM 公式テンプレート由来の Flask、Jinja、Bootstrap と、Next.js �
 - `docs/notion-sync.md` の旧形式の記述
 - `.gitlab-ci.yml` は #38 で書き換えるので触らない
 
+## 足すもの(同じファイルを触るのでここで行う)
+
+- `web/scripts/notion-sync.mjs` に、slug から `islands` を決める表 `ISLANDS_BY_SLUG = { members: ["member-list"] }` を足し、JSON の `islands` に出す。#31 で手置きした `content/*/members.json` が同期で上書きされても島が消えないようにするため。`web/scripts/lib/page.mjs` の `buildPage` に `islands` を通し、テストを足す。`docs/notion-sync.md` に表の場所を書く
+- `web/src/islands.ts`(#31)の名前と `ISLANDS_BY_SLUG` の名前が一致していることを `npm run check`(#36)で検査するのは別 Issue とし、ここでは README に手で揃える旨を書く
+
 ## 触らないもの
 
 - `web/src/`、`content/`、`vercel.json`、`.github/`、`notion-trigger/`、`README.md`(#41)
