@@ -21,6 +21,10 @@ test("h2とh3にidが付き、h4には付かない", () => {
   assert.equal(html, '<h2 id="b-c">B c</h2>\n<h3 id="d">D</h3>\n<h4>E</h4>');
 });
 
+test("属性付きのh1も属性を残してh2にする", () => {
+  assert.equal(renderMarkdown('<h1 class="x">A</h1>'), '<h2 class="x">A</h2>');
+});
+
 test("本文のh1はh2として出し、idを付ける", () => {
   const html = renderMarkdown("# A\n\n## B\n\n### C");
   assert.equal(html, '<h2 id="a">A</h2>\n<h2 id="b">B</h2>\n<h3 id="c">C</h3>');

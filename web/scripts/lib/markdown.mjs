@@ -40,7 +40,7 @@ export function createRenderer() {
 
 // 本文中のh1をh2にする。h1はページの見出しが使うので、本文には置かない。
 function demoteH1(html) {
-  return html.replace(/<h1>([\s\S]*?)<\/h1>/g, "<h2>$1</h2>");
+  return html.replace(/<h1(\s[^>]*)?>([\s\S]*?)<\/h1>/g, (_, attrs = "", inner) => `<h2${attrs}>${inner}</h2>`);
 }
 
 // 見出しidを付けない本文変換。HTMLブロックの中に埋め込む断片に使う。
