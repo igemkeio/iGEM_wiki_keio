@@ -23,8 +23,12 @@ export async function mountIslands(root: ParentNode = document) {
         return;
       }
       el.setAttribute("data-island-mounted", "");
-      const { default: Comp } = await load();
-      createRoot(el).render(<Comp {...props} />);
+      try {
+        const { default: Comp } = await load();
+        createRoot(el).render(<Comp {...props} />);
+      } catch (error) {
+        console.warn(`島${name}を起動できません`, error);
+      }
     },
   );
   await Promise.all(tasks);
