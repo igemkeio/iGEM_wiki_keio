@@ -1,6 +1,6 @@
-# wiki の技術構成
+# wikiの技術構成
 
-iGEM Keio の wiki を構成する仕組みと、その判断理由をまとめる。開発ルールはCONTRIBUTING.mdとAGENTS.mdに、Notion連携の手順はnotion-sync.mdにある。
+iGEM Keioのwikiを構成する仕組みと、その判断理由をまとめる。開発ルールはAGENTS.mdに、参加の手順はCONTRIBUTING.mdに、Notion連携の手順はnotion-sync.mdにある。
 
 ## 全体像
 
@@ -57,7 +57,7 @@ Notion同期とプリレンダーをつなぐ唯一の約束事。`content/<loca
 - ビルド時は`<div data-island="member-list" data-props="...">`という器だけを出す。
 - `src/islands.tsx`が器を見つけて`createRoot`で起動する。島の名前と部品の対応表はこのファイルに置く。
 - 島の一覧: `member-list`(メンバーのモーダル)、`model-viewer`(3Dモデルの表示)、`attribution-form`(iGEMの貢献者フォーム)。増えたらここに足す。
-- 島の中でも、状態を持たない動き(ホバー、フェードイン、スクロールで現れる)はCSSとBootstrapに任せ、Reactを使わない。
+- 島の中でも、状態を持たない動き(ホバー、フェードイン、スクロールで現れる)はCSSに任せ、Reactを使わない。
 
 ## 状態の永続化
 
@@ -78,14 +78,14 @@ MPAではページを移るとJSのメモリが消えるので、状態はブラ
 | 種類 | 実現方法 |
 |---|---|
 | ホバー、フェードイン | CSSの`transition`と`@keyframes` |
-| スクロールに反応 | `IntersectionObserver`を使う短いJS、またはBootstrapのScrollspy |
+| スクロールに反応 | `IntersectionObserver`を使う短いJS |
 | 状態を持つ対話 | 島 |
 | ページ遷移 | View Transitions API(`@view-transition { navigation: auto; }`)。非対応のブラウザでは通常の遷移になる |
 
 ## 3Dモデル
 
-- Blenderで作り、glTF(.glb)で書き出す。1モデル2〜5MB以下を目安にする。Draco圧縮とKTX2テクスチャは、デコーダーを`static.igem.wiki`か`public/models/decoders/`に置くまで使わない。`<model-viewer>`の既定ではデコーダーをgstatic.comから取りに行くため、`ModelViewer`はその既定値を自前の場所に差し替えている。
-- .glbは画像と同じ扱いで`static.igem.wiki`に置く。リポジトリには入れない。
+- Blenderで作り、glTF(.glb)で書き出す。1モデル2〜5MB以下を目安にする。Draco圧縮とKTX2テクスチャは、デコーダーを`public/models/decoders/`に置くまで使わない。`<model-viewer>`の既定ではデコーダーをgstatic.comから取りに行くため、`ModelViewer`はその既定値を自前の場所に差し替えている。
+- .glbは画像と同じ扱いで`static.igem.wiki`に置く。リポジトリには入れない。暫定のサンプルだけ`public/models/`にあり、本番の配信前に消す。
 - 表示は`<model-viewer>`を島として包む。画面に入ってから読み込み、読み込み前とWebGL非対応時はレンダリング済みの静止画を出す。
 - カメラや演出を自分で組む必要が出たら、React Three Fiberの島を別に作る。
 
@@ -111,14 +111,18 @@ Figmaのデザイン案(iGEM Keio 2026 Wiki Pages)を正とする。
 
 ## 配信パス
 
-GitLab Pagesは`https://2026.igem.wiki/keio/`のようにサブパスで配信される。Vercelはルート。Viteの`base`を環境変数で切り替え、リンクは`base`を付けるヘルパー経由で書く。
+GitLab Pagesは`https://2026.igem.wiki/keio/`のようにサブパスで配信される。Vercelはルート。Viteの`base`を環境変数`WIKI_BASE`で切り替え、リンクは`base`を付けるヘルパー経由で書く。
+
+- GitLabでは`WIKI_BASE=/$CI_PROJECT_NAME/`としている。iGEMのwikiが`https://2026.igem.wiki/<team>/`で配信され、GitLabのプロジェクト名が`<team>`と一致していることが前提。
+- Vercelはプロジェクト設定のRoot Directoryを`web`にし、`vercel.json`の`outputDirectory`は`dist`にしてある。詳細は`web/README.md`のCIと配信の節にある。
+- CIのbuild-checkが、`/`と`/keio/`の両方でbuildとcheckを流す。
 
 ## ツールチェーン
 
 - Node 24(Active LTS)に固定する。`.node-version`と`package.json`の`engines`に書く。
 - npmを使う。
 - TypeScriptは`strict: true`。
-- LintとFormatはUltracite経由のoxlintとoxfmt。lefthookのpre-commitで自動修正する。
+- LintとFormatはUltracite経由のoxlintとoxfmt。lefthookのpre-commitで自動修正し、型検査も流す。
 - CSSは素のCSSとCSS Modulesで書く。Tailwindなどのフレームワークは入れない。
   - トークン(色、フォント、余白、本文の幅)は`src/styles/tokens.css`の`:root`にカスタムプロパティで置く。
   - 部品ごとの見た目は、部品と同じ場所の`.module.css`に書く。
@@ -131,14 +135,15 @@ GitLab Pagesは`https://2026.igem.wiki/keio/`のようにサブパスで配信�
 | 層 | 道具 | 検査するもの |
 |---|---|---|
 | 型 | `tsc --noEmit` | Node側とブラウザ側の境界 |
-| ユニット | Vitest | `toc.ts`、`routes.ts`、`usePersistedState`、Notion同期の変換 |
-| コンポーネント | Vitest、Testing Library、happy-dom | `Header`、`Toc`、各島 |
+| ユニット | Vitest | `toc.ts`、`routes.ts`、`usePersistedState`、`applyBase` |
+| スクリプト | `node:test` | Notion同期の変換、`check`の検査関数 |
+| コンポーネント | Vitest、Testing Library、happy-dom | `Sidebar`、`Toc`、各島 |
 | プリレンダー | Vitest | サンプルJSONからのHTML生成をスナップショットで固定 |
 | 出力の検査 | `npm run check` | ページ数の一致、外部URL、リンク切れ、`alt`の欠落 |
-| E2E | Playwright(chromium、mobile-chromium 375px) | ページをまたぐ状態の保持、島の動作、島のないページでReactが読まれないこと、3Dの遅延読み込み |
+| E2E | Playwright(chromium、mobile-chromium 375px、`/keio/`配信のchromium-base) | ページをまたぐ状態の保持、島の動作、島のないページでReactが読まれないこと、3Dの遅延読み込み |
 | ビジュアル回帰 | Playwrightのスクリーンショット比較 | 主要ページを2つの幅で撮る |
 
-- CIは全件を流す。型、Vitest、build、checkを並列に、そのあとE2E、最後に集約ジョブ1本を必須チェックにする。
+- CIは全件を流す。lint、型、Vitest、スクリプトのテスト、build-checkを並列に、そのあとE2E、最後に集約ジョブ`ci-passed`1本を必須チェックにする。
 - ローカルでは変更範囲に対応するE2Eスモークだけを流す。対応表は`e2e/README.md`にある。
 - 探索的な確認(見た目、操作感)はagent-browserで行う。
 
@@ -146,7 +151,7 @@ GitLab Pagesは`https://2026.igem.wiki/keio/`のようにサブパスで配信�
 
 - `main`は保護し、PR経由でだけ変える。
 - Notion同期はGitHub Actionsが毎日と手動で走り、差分があればPRを作る。Notionのボタンからは`notion-trigger/`(独立したVercel関数)経由で起動する。
-- 運用ルールの本体はAGENTS.mdに置き、CLAUDE.mdはそれを読み込むだけにする。
+- 運用ルールの本体はAGENTS.mdに置き、CLAUDE.mdはそれを読み込むだけにする。人向けの手順はCONTRIBUTING.mdに置く。
 
 ## 範囲外
 
