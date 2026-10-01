@@ -3,7 +3,7 @@
 // content/<locale>/<slug>.json へ書き出す（形式は content/README.md）。
 //
 // 実行: NOTION_TOKEN=... NOTION_DATABASE_ID=... node scripts/notion-sync.mjs
-//   もしくは web/.env.local に上記を書いて `yarn notion:sync`
+//   もしくは web/.env.local に上記を書いて `npm run notion:sync`
 //
 // Database に必要なプロパティ:
 //   - slug   (Title)      … ページのスラッグ。例: home, description

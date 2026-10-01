@@ -1,66 +1,48 @@
-# Team Example 2025 Wiki
+# iGEM Keio 2026 Wiki
 
-This repository **MUST** contain all coding assets to generate your team's wiki (HTML, CSS, JavaScript, TypeScript, Python, etc).
+iGEM 2026に出場するKeioチームのwiki。ViteとReactで、`content/`の原稿JSONからページごとの静的HTMLを書き出す。原稿はNotionで書き、同期スクリプトがJSONにする。
 
-Images, photos, icons and fonts **MUST** be stored on `static.igem.wiki` using [tools.igem.org](https://tools.igem.org), and Videos **must** be embedded from [iGEM Video Universe](https://video.igem.org).
+## クイックスタート
 
-For up-to-date requirements, resources, help and guidance, visit [competition.igem.org/deliverables/team-wiki](https://competition.igem.org/deliverables/team-wiki).
+Node 24(`.node-version`)とnpmが要る。
 
-## Getting started
-
-You should probably only edit the files inside folders `static`, `wiki` and `wiki > pages`.
-1. Open the Web IDE
-2. Make the changes on the files you wish:
-    * For the menu, change the file [menu.html](wiki/menu.html)
-    * For the layout, change the file [layout.html](wiki/layout.html)
-    * For the pages, change the corresponding file in the foler [pages](wiki/pages)
-3. Review the changes you made
-4. Once you are done, save the changes by **committing** them to the *main branch* of the repository 
-5. An automated script will build, test and deploy your wiki, which should take less than 30 seconds.
-
-## About this Template
-
-### Files
-
-The static assets are in the `static` directory. The layout and templates are in the `wiki` directory, and the pages live in the `wiki > pages` directory. Unless you are an experienced and/or adventurous human, you probably shouldn't change other files.
-
-    |__ static/             -> static assets (CSS and JavaScript files only)
-    |__ wiki/               -> Main directory for the pages and layouts
-        |__ footer.html     -> Footer that will appear in all the pages
-        |__ layout.html     -> Main layout of your wiki. All the pages will follow its structure
-        |__ menu.html       -> Menu that will appear in all the pages
-        |__ pages/          -> Directory for all the pages
-            |__ *.html      -> Actual pages of your wiki
-    |__ .gitignore          -> Tells GitLab which files/directories should not be uploaded to the repository
-    |__ .gitlab-ci.yml      -> Automated flow for building, testing and deploying your website.
-    |__ LICENSE             -> License CC-by-4.0, all wikis are required to have this license - DO NOT MODIFY
-    |__ README.md           -> File containing the text you are reading right now
-    |__ app.py              -> Python code managing your wiki
-    |__ dependencies.txt    -> Software dependencies from the Python code
-
-### Technologies
-
-  * [GitLab Pages](https://docs.gitlab.com/ee/user/project/pages/)
-  * [Python](https://www.python.org): Programming language
-  * [Flask](https://palletsprojects.com/projects/flask): Python framework
-  * [Fronzen-Flask](https://pypi.org/project/Frozen-Flask): Library that builds the wiki to be deployed as a static website
-  * [Bootstrap](https://getbootstrap.com/docs/5.3/components): CSS and JS components used
-
-### Building locally (advanced users)
-
-To work locally with this project, follow the steps below:
-
-#### Install
-```bash
-git clone https://gitlab.igem.org/2025/example.git
-cd example
-python3 -m venv venv
-. venv/bin/activate # on Linux, MacOS; or
-. venv\Scripts\activate # on Windows
-pip install -r dependencies.txt
+```sh
+cd web
+npm ci
+npm run dev
 ```
 
-#### Execute
-```bash
-python app.py
-```
+起動時に表示されるURLを開く。`web/src/`と`content/`を保存すると再ビルドされる。コマンドの一覧は`web/README.md`にある。
+
+## ディレクトリ構成
+
+| ディレクトリ | 内容 |
+| --- | --- |
+| `web/` | ViteとReactのプロジェクト。開発対象はここ |
+| `content/` | 原稿JSON(`content/<locale>/<slug>.json`)。Notion同期が書く |
+| `docs/` | 設計メモ、Notion連携の手順、実装の経緯(`tasks/`) |
+| `notion-trigger/` | Notionのボタンから同期を起動するVercel関数 |
+
+## 文書
+
+| 文書 | 内容 |
+| --- | --- |
+| `AGENTS.md` | 運用ルール(ブランチ、コミット、PR、コードの約束、テスト、iGEMの規定) |
+| `CONTRIBUTING.md` | 環境構築、PRの出し方、レビューの受け方 |
+| `docs/architecture.md` | 技術構成と選定の理由 |
+| `docs/notion-sync.md` | Notion連携の手順 |
+| `content/README.md` | 原稿JSONの形式 |
+| `web/README.md` | コマンド、ビルドと配信、仕組み |
+| `web/e2e/README.md` | E2Eとビジュアル回帰 |
+
+## 配信
+
+- PRのプレビューはVercel。
+- iGEMへの提出はGitLab Pages(`.gitlab-ci.yml`)。
+- 画像、フォント、3Dモデルは`static.igem.wiki`に、動画はiGEM Video Universeに置く。規定と置き場所は`AGENTS.md`にある。
+
+iGEMの要件は[competition.igem.org/deliverables/team-wiki](https://competition.igem.org/deliverables/team-wiki)で確認する。
+
+## ライセンス
+
+[CC BY 4.0](LICENSE)。iGEMのwikiはすべてこのライセンスにする必要があり、`LICENSE`は変更しない。
