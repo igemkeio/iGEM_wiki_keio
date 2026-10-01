@@ -42,16 +42,13 @@
   --size-hero-text: 448px;
 
   --size-figure-max: 1088px;
-  --size-figure-media: 434px;
-  --color-surface-note: #eef0f3;
   --color-rule: rgba(13, 15, 18, 0.12);
   --color-code-bg: rgba(13, 15, 18, 0.06);
-  --color-dashed: rgba(13, 15, 18, 0.2);
-  --color-note-dot: #ff3b1f;
+  --color-watermark: #b3b9c2;
+  --color-note-dot: #f43a1f;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
   --space-paragraph: 12.8px;
-  --radius-media: 12px;
-  --radius-note: 16px;
+  --radius-media: 14.4px;
 
   --space-frame-x: 56px;
   --space-sidebar-x: 56px;
