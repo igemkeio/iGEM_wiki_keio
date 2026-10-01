@@ -1,0 +1,8 @@
+{
+  "slug": "entrepreneurship",
+  "locale": "ja",
+  "title": "アントレプレナーシップ",
+  "lead": "アントレプレナーシップ賞は、ビジネスケースを構築し、iGEMプロジェクトを商業化する優れた努力を認識します。",
+  "html": "<h3 id=\"最優秀アントレプレナーシップ賞\">最優秀アントレプレナーシップ賞</h3>\n<p>最優秀アントレプレナーシップ賞は、ビジネスケースを構築し、iGEMプロジェクトを商業化する優れた努力を認識します。この賞は新しいプロジェクト、またはチームが商業化を目指した以前のプロジェクトに授与されることがあります。成功するチームは、(1)顧客のニーズと実現可能性に関する専門知識に基づいてビジネスプランを構築し、(2)最小限の実行可能な製品を作成します。</p>\n<p>詳細については<a href=\"https://competition.igem.org/judging/special-prizes\">特別賞ページ</a>をご覧ください。</p>\n<h2 id=\"インスピレーション\">インスピレーション</h2>\n<ul>\n<li><a href=\"https://2024.igem.wiki/utoronto/entrepreneurship\">2024 UToronto</a></li>\n<li><a href=\"https://2024.igem.wiki/ionis-paris/entrepreneurship\">2024 Ionis-Paris</a></li>\n<li><a href=\"https://2023.igem.wiki/leiden/entrepreneurship\">2023 Leiden</a></li>\n</ul>",
+  "order": 160
+}

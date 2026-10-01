@@ -1,11 +1,11 @@
 {
   "slug": "members",
   "locale": "en",
-  "title": "Members",
-  "subtitle": "メンバー",
-  "lead": "",
-  "html": "<h2 id=\"team\">Team</h2>\n<p>Select a member to read more.</p>",
-  "order": 80,
-  "islands": ["member-list"],
-  "published": true
+  "title": "Meet Our Team",
+  "lead": "This page is dedicated to introducing the individuals who made our iGEM project possible. Here, you'll\nfind information about our team members, instructors, and advisors.",
+  "html": "<h2 id=\"what-should-this-page-contain\">What Should this Page Contain?</h2>\n<ul>\n<li>Include pictures of your teammates, don&#39;t forget instructors and advisors!</li>\n<li>You can add a small biography or a few words from each team member, to tell us what you like, and what motivated you to participate in iGEM.</li>\n<li>Present your lab environment, your institution, and perhaps glimpses of your city or region.</li>\n<li>Showcase the expertise and guidance of your instructors and advisors.</li>\n</ul>\n<p><strong>Important:</strong> Remember that your wiki will be archived and remain publicly accessible. Be mindful of the personal information you share. Avoid posting sensitive details. Be sure everyone shown in pictures agree to them being shown.</p>\n<h2 id=\"inspirations\">Inspirations</h2>\n<ul>\n<li><a href=\"https://2024.igem.wiki/waseda-tokyo/members\">2024 Waseda-Tokyo</a></li>\n<li><a href=\"https://2024.igem.wiki/aachen/team\">2024 Aachen</a></li>\n<li><a href=\"https://2024.igem.wiki/patras/team\">2024 Patras</a></li>\n<li><a href=\"https://2024.igem.wiki/dtu-denmark/team\">2024 DTU-Denmark</a></li>\n<li><a href=\"https://2024.igem.wiki/fudan/team\">2024 Fudan</a></li>\n</ul>",
+  "order": 130,
+  "islands": [
+    "member-list"
+  ]
 }

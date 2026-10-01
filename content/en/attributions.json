@@ -1,0 +1,11 @@
+{
+  "slug": "attributions",
+  "locale": "en",
+  "title": "Attributions",
+  "lead": "Accurate attribution is essential in the iGEM Competition. It ensures that the judges can properly\nassess your team's contributions and recognize the support provided by external collaborators. This page is dedicated to\nfulfilling the Attributions requirement for judging.",
+  "html": "<h3 id=\"bronze-medal-criterion-2\">Bronze Medal Criterion #2</h3>\n<p>Describe what work your team members did and what other people did for your project using the standardized Project Attributions Form.</p>\n<p>Visit the <a href=\"https://competition.igem.org/judging/medals\">Medals page</a> for more information.</p>\n<h2 id=\"what-should-this-page-contain\">What Should this Page Contain?</h2>\n<ul>\n<li>The standard navigation menu of your wiki</li>\n<li>The standard footer of your wiki</li>\n<li>The embedded iframe containing your standardized team&#39;s Project Attribution form.</li>\n<li>Nothing else</li>\n</ul>\n<h2 id=\"tips-for-success\">Tips for Success</h2>\n<p>Teams must use the official Attributions form. This form clearly delineates the work conducted by your team members and the support received from others. Carefully review the instructions and requirements of this deliverable on the <a href=\"https://competition.igem.org/deliverables/project-attribution\">Project Attribution page</a>. Please note:</p>\n<ul>\n<li>Teams must use the standard form. Do not create your own form.</li>\n<li>The standard Attributions Form must be filled out completely, accurately and honestly.</li>\n<li>For the best results, we recommend teams start filling out the Attributions Form early in the season and updating it often.</li>\n</ul>",
+  "order": 110,
+  "islands": [
+    "attribution-form"
+  ]
+}

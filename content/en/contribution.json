@@ -1,0 +1,8 @@
+{
+  "slug": "contribution",
+  "locale": "en",
+  "title": "Contribution",
+  "lead": "Make a useful contribution for future iGEM teams and document it on this page.",
+  "html": "<h3 id=\"bronze-medal-criterion-3\">Bronze Medal Criterion #3</h3>\n<p>Make a useful contribution for future iGEM teams and document it on this page.</p>\n<p>Visit the <a href=\"https://competition.igem.org/judging/medals\">Medals page</a> for more information.</p>\n<h2 id=\"what-should-this-page-contain\">What Should this Page Contain?</h2>\n<p>Teams must document their contribution and explain why their effort is a contribution to fellow iGEMers. There is no single definition of what a contribution should be. We invite teams to be creative and generous in the knowledge, data or tools they may provide to the community.</p>\n<p>A few examples of contributions are:</p>\n<ul>\n<li>Creating a new BioBrick part or significantly improving an existing one in the iGEM Registry.</li>\n<li>Developing software, tools, or resources that can considerably assist future iGEM teams.</li>\n<li>Sharing optimized protocols, experimental techniques, or methodologies.</li>\n<li>Any other contributions that provide a clear benefit to future iGEM teams.</li>\n</ul>",
+  "order": 120
+}
