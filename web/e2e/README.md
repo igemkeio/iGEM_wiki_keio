@@ -98,21 +98,22 @@ npx playwright show-report e2e/playwright-report
 | `Sidebar`、`PageShell`、ナビ | `nav`、`mobile/sidebar`、`locale` |
 | `src/client/`(島の起動、保存、言語) | `islands`、`locale` |
 | `Island`、`islands.ts`、`Page.tsx`の`<script>`の出し分け | `islands`、`model-viewer` |
-| `MemberList` | `islands`、`visual` |
+| `MemberList` | `islands` |
 | `ModelViewer` | `model-viewer` |
-| `prose.css`、`ArticlePage`、`HomePage`、`tokens.css`、`global.css` | `prose`、`visual` |
+| `prose.css`、`ArticlePage`、`tokens.css`、`global.css`、`Sidebar`、`Footer` | `prose`、`visual` |
+| `HomePage` | `nav`(Homeのカード) |
 | `vite.config.ts`、`base.ts`、`prerender.mjs` | 全件(特に`chromium-base`) |
-| `content/`のページの増減 | `nav`、`mobile/sidebar`、`visual`(Homeのカード) |
+| `content/`のページの増減 | `nav`、`mobile/sidebar` |
 
 ## ビジュアル回帰
 
-`tests/visual.e2e.ts`が`/`、`/members/`、`prose-sample`を1280pxと375pxで撮る。`auto-rotate`で動く3Dのページは撮らない。アニメーションは止めて(`animations: "disabled"`)、フォントの読み込みを待ってから撮る。
+`tests/visual.e2e.ts`が`prose-sample`と`e2e-plain`を1280pxと375pxで撮る。どちらもリポジトリ側で原稿を固定した確認用ページで、Notionの原稿が変わっても画像は変わらない。homeとmembersは原稿で見た目が変わるので撮らない。`auto-rotate`で動く3Dのページは撮らない。アニメーションは止めて(`animations: "disabled"`)、フォントの読み込みを待ってから撮る。
 
 - 基準画像は`tests/visual.e2e.ts-snapshots/`にあり、git管理に入れる。ファイル名にOSを含めず、どの環境でも同じ画像と比べる。
 - 比較は`maxDiffPixelRatio: 0.02`で緩める。LinuxのCIとmacOSでは字形のずれがわずかに出るため。
 - 基準にするのはLinuxのCIで撮った画像。ローカルで`--update-snapshots`をかけて、そのまま上書きしない。
 - 現在の基準画像はmacOSでローカルに生成した暫定のもの。
-- homeの画像には、ナビとContentsカードに並ぶE2E用ページ(`PRERENDER_ALL=1`で出る)が写り込む。E2E用ページや`prose-sample`を足したときは、homeの画像も撮り直す。
+- サイドバーのナビにはE2E用ページを含む全ページが並ぶ(`PRERENDER_ALL=1`で出る)ので、E2E用ページを足したときは画像を撮り直す。
 
 ### 基準画像の作り直し
 
