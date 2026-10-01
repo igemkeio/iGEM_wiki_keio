@@ -75,6 +75,8 @@
   }
 
   .name {
+    max-width: 320px;
+    margin-left: auto;
     font-family: var(--font-heading);
     font-size: var(--size-hero-title);
     line-height: 1.15;
@@ -98,6 +100,69 @@
   .description :is(ul, ol) {
     padding-left: 0;
     list-style-position: inside;
+  }
+
+  .contents {
+    padding-top: 8px;
+  }
+
+  .contentsTitle {
+    font-family: var(--font-heading);
+    font-size: var(--size-h1);
+    font-weight: 400;
+    line-height: var(--size-h1-leading);
+    letter-spacing: var(--size-h1-tracking);
+    text-transform: uppercase;
+  }
+
+  .contentsSubtitle {
+    padding-top: 8px;
+    color: var(--color-muted);
+    font-size: var(--size-subtitle);
+    line-height: var(--size-subtitle-leading);
+    letter-spacing: var(--size-subtitle-tracking);
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    padding: 32px 0 0;
+    list-style: none;
+  }
+
+  .card {
+    display: block;
+    min-height: var(--size-card-height);
+    height: 100%;
+    padding: var(--space-card);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    text-decoration: none;
+  }
+
+  .cardTitle {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 24px;
+    line-height: 28px;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+  }
+
+  .cardSubtitle {
+    display: block;
+    padding-top: 4px;
+    color: var(--color-muted);
+    font-size: var(--size-subtitle);
+    line-height: var(--size-subtitle-leading);
+  }
+
+  .cardLead {
+    display: block;
+    padding-top: 16px;
+    font-size: 14px;
+    line-height: 20px;
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -162,7 +227,22 @@
     }
 
     .name {
+      max-width: none;
       font-size: 36px;
+    }
+
+    .contentsTitle {
+      font-size: 44px;
+      line-height: 1.05;
+      letter-spacing: 0.44px;
+    }
+
+    .cards {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .card {
+      padding: 24px;
     }
   }
 }
