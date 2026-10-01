@@ -36,6 +36,21 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
 
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run check:code
+
   test:
     runs-on: ubuntu-latest
     defaults:
@@ -131,6 +146,7 @@ jobs:
   ci-passed:
     if: always()
     needs:
+      - lint
       - typecheck
       - test
       - test-scripts
