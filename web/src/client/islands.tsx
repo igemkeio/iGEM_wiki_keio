@@ -1,22 +1,31 @@
 import type { ComponentType } from "react";
 import { createRoot } from "react-dom/client";
-import { MemberList } from "../components/MemberList";
 
-// 島の名前と部品の対応表。新しい島はここに足す。
-const islands: Record<string, ComponentType<any>> = {
-  "member-list": MemberList,
+// 島の名前と部品の遅延ローダー。キーはislands.tsのISLANDSと揃える。
+const loaders: Record<string, () => Promise<{ default: ComponentType<any> }>> = {
+  "member-list": () => import("../components/MemberList"),
 };
 
-export function mountIslands(root: ParentNode = document) {
-  for (const el of root.querySelectorAll<HTMLElement>("[data-island]")) {
-    const name = el.dataset.island ?? "";
-    const Comp = islands[name];
-    if (!Comp) {
-      console.warn(`未登録の島です: ${name}`);
-      continue;
-    }
-    createRoot(el).render(<Comp {...JSON.parse(el.dataset.props || "{}")} />);
-  }
+export async function mountIslands(root: ParentNode = document) {
+  const tasks = [...root.querySelectorAll<HTMLElement>("[data-island]:not([data-island-mounted])")].map(
+    async (el) => {
+      const name = el.dataset.island ?? "";
+      const load = loaders[name];
+      if (!load) {
+        console.warn(`未登録の島です: ${name}`);
+        return;
+      }
+      let props: Record<string, unknown>;
+      try {
+        props = JSON.parse(el.dataset.props || "{}");
+      } catch (error) {
+        console.warn(`島${name}のdata-propsを読めません`, error);
+        return;
+      }
+      el.setAttribute("data-island-mounted", "");
+      const { default: Comp } = await load();
+      createRoot(el).render(<Comp {...props} />);
+    },
+  );
+  await Promise.all(tasks);
 }
-
-mountIslands();
