@@ -1,0 +1,11 @@
+{
+  "slug": "members",
+  "locale": "ja",
+  "title": "私たちのチーム",
+  "lead": "このページは、私たちのiGEMプロジェクトを可能にした人々を紹介することに特化しています。ここでは、チームメンバー、指導者、アドバイザーに関する情報をご覧いただけます。",
+  "html": "<h2 id=\"このページに含むべき内容は\">このページに含むべき内容は？</h2>\n<ul>\n<li>チームメイトの写真を含める。指導者やアドバイザーも忘れずに！</li>\n<li>各チームメンバーからの小さな略歴や一言を追加して、何が好きで、何がiGEMへの参加の動機となったかを教えてください。</li>\n<li>ラボ環境、所属機関、そして都市や地域の様子を紹介する。</li>\n<li>指導者やアドバイザーの専門知識と指導を紹介する。</li>\n</ul>\n<p><strong>重要：</strong> あなたのwikiはアーカイブされ、公開されたままになることを覚えておいてください。共有する個人情報について注意深く考えてください。機密情報の投稿は避けてください。写真に写っている全ての人が表示に同意していることを確認してください。</p>\n<h2 id=\"インスピレーション\">インスピレーション</h2>\n<ul>\n<li><a href=\"https://2024.igem.wiki/waseda-tokyo/members\">2024 Waseda-Tokyo</a></li>\n<li><a href=\"https://2024.igem.wiki/aachen/team\">2024 Aachen</a></li>\n<li><a href=\"https://2024.igem.wiki/patras/team\">2024 Patras</a></li>\n<li><a href=\"https://2024.igem.wiki/dtu-denmark/team\">2024 DTU-Denmark</a></li>\n<li><a href=\"https://2024.igem.wiki/fudan/team\">2024 Fudan</a></li>\n</ul>",
+  "order": 130,
+  "islands": [
+    "member-list"
+  ]
+}

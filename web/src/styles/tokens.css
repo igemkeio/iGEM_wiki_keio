@@ -1,0 +1,56 @@
+:root {
+  --color-ink: #0d0f12;
+  --color-muted: #5d646e;
+  --color-nav: rgba(13, 15, 18, 0.7);
+  --color-line: rgba(13, 15, 18, 0.24);
+  --color-page: #dfe4ea;
+  --color-surface: #ffffff;
+  --color-accent-orange: #ffb347;
+  --color-accent-blue: #2962ff;
+  --color-curve: rgba(13, 15, 18, 0.144);
+
+  --font-heading: "Montserrat", "Noto Sans JP", sans-serif;
+  --font-body: "Noto Sans JP", sans-serif;
+
+  --size-h1: 92.8px;
+  --size-h1-leading: 90.944px;
+  --size-h1-tracking: 0.928px;
+  --size-subtitle: 12px;
+  --size-subtitle-leading: 16px;
+  --size-subtitle-tracking: 0.3px;
+  --size-lead: 18px;
+  --size-lead-leading: 29.25px;
+  --size-body: 16px;
+  --size-body-leading: 31.2px;
+  --size-nav: 15.2px;
+  --size-nav-leading: 14.896px;
+  --size-nav-tracking: 0.152px;
+  --size-prose: 672px;
+  --size-lead-max: 576px;
+  --size-frame: 1200px;
+  --size-sidebar: 300px;
+  --size-topbar: 56px;
+  --size-toc: 200px;
+  --size-card-height: 178px;
+  --space-card: 48px;
+  --radius-card: 24px;
+  --size-hero: 993px;
+  --size-logo-width: 632px;
+  --size-logo-height: 228px;
+  --size-catch: 32px;
+  --size-hero-title: 48px;
+  --size-hero-text: 448px;
+
+  --size-figure-max: 1088px;
+  --color-rule: rgba(13, 15, 18, 0.12);
+  --color-code-bg: rgba(13, 15, 18, 0.06);
+  --color-watermark: #b3b9c2;
+  --color-note-dot: #f43a1f;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --space-paragraph: 12.8px;
+  --radius-media: 14.4px;
+
+  --space-frame-x: 56px;
+  --space-sidebar-x: 56px;
+  --space-nav-gap: 2px;
+}

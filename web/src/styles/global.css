@@ -1,0 +1,70 @@
+@layer reset, tokens, prose, components;
+
+@import "./tokens.css" layer(tokens);
+@import "katex/dist/katex.min.css" layer(prose);
+@import "./prose.css" layer(prose);
+
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+@font-face {
+  font-family: "Montserrat";
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  src: url("__WIKI_FONT_BASE__/montserrat.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Noto Sans JP";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("__WIKI_FONT_BASE__/noto-sans-jp-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Noto Sans JP";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("__WIKI_FONT_BASE__/noto-sans-jp-700.woff2") format("woff2");
+}
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  * {
+    margin: 0;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  body {
+    background: var(--color-page);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: var(--size-body);
+    line-height: var(--size-body-leading);
+  }
+
+  a {
+    color: inherit;
+  }
+
+  @media (max-width: 767px) {
+    h2,
+    h3 {
+      scroll-margin-top: var(--size-topbar);
+    }
+  }
+}

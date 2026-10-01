@@ -16,4 +16,4 @@ assignees: []
 
 ## 補足 / Notes
 
-<!-- 関連 Issue / 参考リンク -->
+<!-- 関連Issue / 参考リンク -->

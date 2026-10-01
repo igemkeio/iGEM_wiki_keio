@@ -1,127 +1,122 @@
-"use client";
+import { useEffect, useId, useRef, useState } from "react";
 
-import { useState } from "react";
-import membersData from "@/data/members.json";
-import type { Locale } from "@/lib/wiki";
+import type { Locale } from "../content";
+import members from "../data/members.json";
 
-type LocalizedText = { ja: string; en: string };
+import styles from "./MemberList.module.css";
 
-type Member = {
+interface Localized {
+  ja: string;
+  en: string;
+}
+
+interface Member {
   id: string;
-  name: LocalizedText;
+  name: Localized;
   role: string;
-  department: LocalizedText;
+  department: Localized;
   year: number;
-  status?: Partial<LocalizedText>;
-  tags?: string[];
-  bio: LocalizedText;
-};
+  tags: string[];
+  bio: Localized;
+  // static.igem.wikiのURL。無ければ写真を出さない。
+  photo?: string;
+}
 
-const members = membersData as Member[];
-
-// 表示用の文言。Homepage 版は日本語決め打ちだが、wiki は en / ja 両方あるので切り替える。
-const LABELS = {
-  ja: { heading: "メンバー", detail: "学年・学科", close: "閉じる", photoAlt: "の写真" },
-  en: { heading: "Members", detail: "Year / Department", close: "Close", photoAlt: "'s photo" },
+const labels = {
+  en: { close: "Close", year: (n: number) => `Year ${n}` },
+  ja: { close: "閉じる", year: (n: number) => `${n}年` },
 } as const;
 
-function focusText(member: Member, locale: Locale): string {
-  const status = member.status?.[locale] ? ` ${member.status[locale]}` : "";
-  const year = locale === "ja" ? `${member.year}年` : `Year ${member.year}`;
-  return `${year}${status} / ${member.department[locale]}`;
-}
-
-function profileImage(memberId: string): string {
-  return `/people/${memberId}/profile.jpg`;
-}
-
-export default function MemberList({ locale }: { locale: Locale }) {
+// メンバーの一覧と、クリックで開く詳細のモーダル。
+export function MemberList({
+  locale = "en",
+  list = members as Member[],
+}: {
+  locale?: Locale;
+  list?: Member[];
+}) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const [selected, setSelected] = useState<Member | null>(null);
-  const t = LABELS[locale];
-  const closeModal = () => setSelected(null);
+  const t = labels[locale];
+
+  const titleId = useId();
+  // mousedownがdialog自身で始まったときだけ、続くclickをオーバーレイのクリックとみなす。
+  const pressedOnBackdrop = useRef(false);
+
+  useEffect(() => {
+    if (selected && !dialogRef.current?.open) {
+      dialogRef.current?.showModal();
+    }
+  }, [selected]);
+
+  const open = (member: Member) => setSelected(member);
+  const close = () => dialogRef.current?.close();
 
   return (
-    <section className="member-section">
-      <h2>{t.heading}</h2>
-      <div className="member-grid">
-        {members.map((member) => (
-          <button
-            className="member-card"
-            key={member.id}
-            type="button"
-            onClick={() => setSelected(member)}
-          >
-            <div
-              className="member-card__avatar"
-              aria-hidden="true"
-              style={{ backgroundImage: `url(${profileImage(member.id)})` }}
-            />
-            <div className="member-card__body">
-              <p className="member-card__role">{member.role}</p>
-              <h4 className="member-card__name">{member.name[locale]}</h4>
-              <p className="member-card__focus">{focusText(member, locale)}</p>
-              {member.tags && (
-                <div className="member-card__tags">
-                  {member.tags.map((tag) => (
-                    <span className="member-card__tag" key={tag}>
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </button>
-        ))}
-      </div>
-
-      {selected && (
-        <div className="member-modal" role="dialog" aria-modal="true">
-          <div className="member-modal__backdrop" onClick={closeModal} />
-          <div className="member-modal__content">
-            <button className="member-modal__close" onClick={closeModal} aria-label={t.close}>
-              ×
-            </button>
-            <div className="member-modal__header">
-              <div
-                className="member-card__avatar"
-                aria-hidden="true"
-                style={{ backgroundImage: `url(${profileImage(selected.id)})` }}
-              />
-              <div>
-                <p className="member-card__role">{selected.role}</p>
-                <h3 className="member-modal__name">{selected.name[locale]}</h3>
-              </div>
-            </div>
-            <div className="member-modal__layout">
-              <div className="member-modal__info">
-                <dl className="member-modal__details">
-                  <div>
-                    <dt>{t.detail}</dt>
-                    <dd>{focusText(selected, locale)}</dd>
-                  </div>
-                </dl>
-                <p className="member-modal__bio">{selected.bio[locale]}</p>
-                {selected.tags && (
-                  <div className="member-card__tags">
-                    {selected.tags.map((tag) => (
-                      <span className="member-card__tag" key={tag}>
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div className="member-modal__photo">
+    <section className={styles.root}>
+      <ul className={styles.list}>
+        {list.map((member) => (
+          <li key={member.id}>
+            <button
+              type="button"
+              className={styles.card}
+              onClick={() => open(member)}
+            >
+              {member.photo && (
                 <img
-                  src={profileImage(selected.id)}
-                  alt={`${selected.name[locale]}${t.photoAlt}`}
+                  className={styles.photo}
+                  src={member.photo}
+                  alt=""
                   loading="lazy"
                 />
-              </div>
-            </div>
+              )}
+              <span className={styles.name}>{member.name[locale]}</span>
+              <span className={styles.role}>{member.role}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+      {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions -- 背景のクリックで閉じる。キーボードはEscと閉じるボタンで閉じられる */}
+      <dialog
+        ref={dialogRef}
+        className={styles.dialog}
+        aria-labelledby={selected ? titleId : undefined}
+        onMouseDown={(event) => {
+          pressedOnBackdrop.current = event.target === event.currentTarget;
+        }}
+        onClick={(event) => {
+          if (
+            pressedOnBackdrop.current &&
+            event.target === event.currentTarget
+          ) {
+            close();
+          }
+          pressedOnBackdrop.current = false;
+        }}
+        onClose={() => setSelected(null)}
+      >
+        {selected && (
+          <div className={styles.panel}>
+            <button type="button" className={styles.close} onClick={close}>
+              {t.close}
+            </button>
+            {selected.photo && (
+              <img className={styles.photo} src={selected.photo} alt="" />
+            )}
+            <h2 id={titleId} className={styles.dialogName}>
+              {selected.name[locale]}
+            </h2>
+            <p className={styles.meta}>
+              {selected.role} / {selected.department[locale]} /{" "}
+              {t.year(selected.year)}
+            </p>
+            <p className={styles.tags}>{selected.tags.join(" / ")}</p>
+            <p className={styles.bio}>{selected.bio[locale]}</p>
           </div>
-        </div>
-      )}
+        )}
+      </dialog>
     </section>
   );
 }
+
+export default MemberList;

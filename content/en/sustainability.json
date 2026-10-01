@@ -1,0 +1,8 @@
+{
+  "slug": "sustainability",
+  "locale": "en",
+  "title": "Sustainability",
+  "lead": "Describe how you have evaluated your project ideas against one or more of the SDGs.",
+  "html": "<h3 id=\"best-sustainable-development-impact\">Best Sustainable Development Impact</h3>\n<p>The Sustainable Development Goals (SDGs) are a call to action to integrally address global environmental, social, and economic challenges. iGEM teams can answer this call with this prize. Demonstrate how you have evaluated your project ideas against one or more of the SDGs, how you’ve consulted with SDG stakeholders, and how you’ve begun to form collaborations with other iGEM teams around the SDGs. You’re encouraged to look back at previous iGEM projects to evaluate them against the SDGs, and build upon them.</p>\n<p>Visit the <a href=\"https://competition.igem.org/judging/special-prizes\">Special Prizes page</a> for more information.</p>\n<h2 id=\"inspirations\">Inspirations</h2>\n<ul>\n<li><a href=\"https://2024.igem.wiki/hangzhou-biox/sustainable\">2024 Hangzhou-BioX</a></li>\n<li><a href=\"https://2024.igem.wiki/uzurich/sustainable\">2024 UZurich</a></li>\n<li><a href=\"https://2024.igem.wiki/ulink-sz/sustainable\">2024 Ulink-SZ</a></li>\n<li><a href=\"https://2024.igem.wiki/gec-beijing/sustainable\">2024 GEC-Beijing</a></li>\n<li><a href=\"https://2023.igem.wiki/thessaloniki/sustainable\">2023 Thessaloniki</a></li>\n</ul>",
+  "order": 210
+}

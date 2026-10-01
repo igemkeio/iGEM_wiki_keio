@@ -1,0 +1,7 @@
+{
+  "slug": "notion-image-test",
+  "locale": "en",
+  "title": "Image Test",
+  "lead": "画像取り込みのテスト。",
+  "html": "<p>下に赤い画像が表示されれば成功です。</p>\n<img src=\"/notion-images/ca96adb50da6a5f6.png\" alt=\"\" />"
+}

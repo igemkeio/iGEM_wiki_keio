@@ -1,7 +1,7 @@
 name: Notion Sync
 
-# Notion の Database を取得し wiki/pages/*.html を更新する。
-# 差分があればコミットして PR を作成する（main 直 push はしない）。
+# Notion の Database を取得し content/<locale>/<slug>.json を更新する。
+# ビルドと check が通れば、差分をコミットして PR を作成する（main 直 push はしない）。
 
 on:
   workflow_dispatch: # 手動実行
@@ -29,30 +29,53 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 24
-
-      - name: Enable corepack (yarn)
-        run: corepack enable
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: web/package-lock.json
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: npm ci
 
       - name: Run Notion sync
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
-        run: yarn notion:sync
+        run: npm run notion:sync
+
+      # images-todo.json は gitignore 済みで PR に入らないため、件数と先頭10件をサマリーに出す。
+      - name: Summarize images-todo
+        run: |
+          FILE=../content/images-todo.json
+          {
+            echo "## images-todo"
+            if [ -f "$FILE" ]; then
+              echo "static.igem.wiki 以外を指す画像: $(jq length "$FILE") 件"
+              echo
+              echo '```'
+              jq -r '.[:10][] | "\(.locale)/\(.slug): \(.src)"' "$FILE"
+              echo '```'
+            else
+              echo "images-todo.json が生成されませんでした。"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # 壊れた原稿を PR にしないよう、ここで落ちたら PR を作らずにジョブを失敗させる。
+      - name: Build and check
+        run: npm run build && npm run check
 
       - name: Create Pull Request on changes
         id: cpr
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.NOTION_SYNC_PAT || github.token }}
-          commit-message: "chore: Notion の最新内容を反映するため wiki ページを同期。"
+          add-paths: |
+            content/**
+            web/public/notion-images/**
+          commit-message: "chore: Notion の最新内容を反映するため content を同期。"
           branch: chore/notion-sync
-          title: "chore: Notion 同期による wiki ページ更新"
+          title: "chore: Notion 同期による content 更新"
           body: |
-            Notion Database の内容を `wiki/pages/*.html` に同期しました（自動生成）。
+            Notion Database の内容を `content/<locale>/<slug>.json` に同期しました（自動生成）。
           delete-branch: true
 
       # PR が作られた場合のみ、Preview URL / PR URL / 実行時刻を Notion の __build__ 行へ書き戻す。
