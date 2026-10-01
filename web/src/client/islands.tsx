@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 
 // 島の名前と部品の遅延ローダー。キーはislands.tsのISLANDSと揃える。
 const loaders: Record<string, () => Promise<{ default: ComponentType<any> }>> = {
+  "attribution-form": () => import("../components/AttributionForm"),
   "member-list": () => import("../components/MemberList"),
   "model-viewer": () => import("../components/ModelViewer"),
 };
