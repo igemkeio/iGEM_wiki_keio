@@ -19,6 +19,7 @@ export type RawWikiPage = {
   islands?: string[];
   models?: Model[];
   published?: boolean;
+  source?: "notion" | "local";
 };
 
 export type WikiPage = Required<RawWikiPage>;
@@ -51,5 +52,6 @@ export function readPage(raw: unknown, source?: string): WikiPage {
     islands: page.islands ?? [],
     models: page.models ?? [],
     published: page.published ?? true,
+    source: page.source ?? "notion",
   };
 }
