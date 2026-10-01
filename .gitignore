@@ -1,7 +1,4 @@
-env
-venv
 .vscode
-__pycache__
 public
 !web/public
 !web/public/**
