@@ -44,16 +44,16 @@ Notionの同期を手元で試すときの設定は`docs/notion-sync.md`にあ�
 
 ## レビューを受ける
 
-- 最低1人の承認が要る。CIの`ci-passed`が緑になっていることもマージの条件。
+- レビューを受けてからマージする。承認数の強制は無いが、PRとCIの`ci-passed`が緑であることは必須。
 - 指摘には、直したらその旨を返信し、直さないなら理由を書く。
 - コンフリクトはPRの作成者が解消する。
-- 承認されたらSquash and mergeでマージし、ブランチを消す。
+- レビューが済んだらマージコミット(Create a merge commit)でマージし、ブランチを消す。履歴を残すため、squashはしない。
 
 ## 配信の確認
 
 PRを出すとVercelがプレビューURLを発行する。iGEMへの提出用の配信はGitLab Pagesで、設定は`web/README.md`のCIと配信の節にある。
 
-最終のwikiはiGEMのGitLabに置く必要がある。GitHubからiGEMのGitLabへ反映する手順は未確定で、決まったらこの節に書く。
+最終のwikiはiGEMのGitLabに置く必要がある。GitLabのリポジトリに`main`をpushすると、`.gitlab-ci.yml`によってPagesが公開される。公開URLは未確定。
 
 ## PRを出す前のチェックリスト
 

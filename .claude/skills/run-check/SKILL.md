@@ -12,7 +12,7 @@ web/ の変更を、変更範囲に合わせた最小の検査で確かめる。
 ## 1. 変更範囲を決める
 
 ```sh
-git diff --name-only origin/feature/vite-mpa...HEAD
+git diff --name-only origin/main...HEAD
 git status --short
 ```
 

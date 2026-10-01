@@ -111,7 +111,7 @@ npx playwright show-report e2e/playwright-report
 - 基準画像は`tests/visual.e2e.ts-snapshots/`にあり、git管理に入れる。ファイル名にOSを含めず、どの環境でも同じ画像と比べる。
 - 比較は`maxDiffPixelRatio: 0.02`で緩める。LinuxのCIとmacOSでは字形のずれがわずかに出るため。
 - 基準にするのはLinuxのCIで撮った画像。ローカルで`--update-snapshots`をかけて、そのまま上書きしない。
-- 現在の基準画像はmacOSでローカルに生成した暫定のもの。
+- 基準画像はCI(Linux)で生成する。更新手順は下記。
 - homeの画像には、ナビとContentsカードに並ぶE2E用ページ(`PRERENDER_ALL=1`で出る)が写り込む。E2E用ページや`prose-sample`を足したときは、homeの画像も撮り直す。
 
 ### 基準画像の作り直し

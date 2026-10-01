@@ -29,7 +29,7 @@ iGEM Keioチームのwiki。`content/`の原稿JSONから、ViteとReactで静�
 - Node 24とnpmを使う。コマンドは`web/`で実行する。一覧は`web/README.md`。
 - `main`への直接pushは禁止。ブランチを切ってPRを出す。1ブランチは1つの目的に絞る。
 - ブランチ名は`<type>/<短い説明>`。typeは`feature`、`fix`、`docs`、`refactor`、`style`、`chore`。説明は英語のkebab-case。
-- 移行作業中の統合先は`feature/vite-mpa`。PRの向き先はIssueの指示に従う。
+- PRの向き先は`main`。
 
 ### コミット
 
@@ -53,7 +53,7 @@ iGEM Keioチームのwiki。`content/`の原稿JSONから、ViteとReactで静�
 ### PR
 
 - タイトルはコミットと同じ形式。本文はPRテンプレートを埋める。対応するIssueは`Closes #N`で紐付ける。
-- 小さく保ち、作業中はDraftにする。マージはSquash and merge。
+- 小さく保ち、作業中はDraftにする。マージはマージコミット(Create a merge commit)で、履歴を残す。
 - `ci-passed`が`main`の必須チェック。CIは`.github/workflows/ci.yml`で、型、lint、Vitest、スクリプトのテスト、build-check、E2Eを流し、`ci-passed`が結果を集約する。
 
 ### lefthook
