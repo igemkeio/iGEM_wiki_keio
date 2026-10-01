@@ -16,7 +16,7 @@ assignees: []
 
 ## 対象範囲 / Scope
 
-- 対象ディレクトリ: <!-- 例: web/src/app/[slug] -->
+- 対象ディレクトリ: <!-- 例: web/src/components -->
 - 対象ページ:
 
 ## 完了条件 / Done when
