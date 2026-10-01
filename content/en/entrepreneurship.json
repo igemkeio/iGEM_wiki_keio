@@ -1,0 +1,8 @@
+{
+  "slug": "entrepreneurship",
+  "locale": "en",
+  "title": "Entrepreneurship",
+  "lead": "The entrepreneurship prize recognizes exceptional effort to build a business case and commercialize an\niGEM project.",
+  "html": "<h3 id=\"best-entrepreneurship\">Best Entrepreneurship</h3>\n<p>The Best Entrepreneurship Prize recognizes exceptional effort to build a business case and commercialize an iGEM project. This award can go to a new project, or to a previous project that a team has aimed to commercialize. Successful teams will (1) construct a business plan based on customer needs and expert knowledge on feasibility and (2) create a minimum viable product.</p>\n<p>Visit the <a href=\"https://competition.igem.org/judging/special-prizes\">Special Prizes page</a> for more information.</p>\n<h2 id=\"inspirations\">Inspirations</h2>\n<ul>\n<li><a href=\"https://2024.igem.wiki/utoronto/entrepreneurship\">2024 UToronto</a></li>\n<li><a href=\"https://2024.igem.wiki/ionis-paris/entrepreneurship\">2024 Ionis-Paris</a></li>\n<li><a href=\"https://2023.igem.wiki/leiden/entrepreneurship\">2023 Leiden</a></li>\n</ul>",
+  "order": 160
+}

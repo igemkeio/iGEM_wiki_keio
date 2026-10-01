@@ -1,0 +1,8 @@
+{
+  "slug": "notebook",
+  "locale": "en",
+  "title": "Notebook",
+  "lead": "This serves as a chronological record of your team's progress throughout the season. It documents your\ndaily activities, experiments, discussions, and decisions.",
+  "html": "<h2 id=\"what-should-this-page-contain\">What Should this Page Contain?</h2>\n<ul>\n<li>Record all activities in chronological order, with each entry clearly dated.</li>\n<li>Provide sufficient detail for each activity, including:</li>\n<li>Purpose of the activity.</li>\n<li>Methods and procedures used.</li>\n<li>Results obtained.</li>\n<li>Observations and notes.</li>\n<li>Document all experiments, protocols, data analysis, meetings, brainstorming sessions, and other project-related activities.</li>\n<li>Include photos, videos, and diagrams to illustrate your progress.</li>\n<li>Indicate which team members participated in each activity.</li>\n</ul>\n<h2 id=\"inspirations\">Inspirations</h2>\n<ul>\n<li><a href=\"https://2024.igem.wiki/epfl/notebook\">2024 EPFL</a></li>\n<li><a href=\"https://2024.igem.wiki/ju-krakow/notebook\">2024 JU-Krakow</a></li>\n</ul>",
+  "order": 100
+}
