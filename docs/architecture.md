@@ -84,7 +84,7 @@ MPAではページを移るとJSのメモリが消えるので、状態はブラ
 
 ## 3Dモデル
 
-- Blenderで作り、glTF(.glb)で書き出す。Draco圧縮を有効にし、1モデル2〜5MB以下を目安にする。
+- Blenderで作り、glTF(.glb)で書き出す。1モデル2〜5MB以下を目安にする。Draco圧縮とKTX2テクスチャは、デコーダーを`static.igem.wiki`か`public/models/decoders/`に置くまで使わない。`<model-viewer>`の既定ではデコーダーをgstatic.comから取りに行くため、`ModelViewer`はその既定値を自前の場所に差し替えている。
 - .glbは画像と同じ扱いで`static.igem.wiki`に置く。リポジトリには入れない。
 - 表示は`<model-viewer>`を島として包む。画面に入ってから読み込み、読み込み前とWebGL非対応時はレンダリング済みの静止画を出す。
 - カメラや演出を自分で組む必要が出たら、React Three Fiberの島を別に作る。

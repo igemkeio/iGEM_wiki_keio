@@ -15,6 +15,10 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 | `npm run build` | `vite build`のあとに`scripts/prerender.mjs`を実行し、`dist/`に全ページのHTMLを書く |
 | `npm run preview` | `dist/`を配信する |
 | `npm run typecheck` | `tsc --noEmit` |
+| `npm run check` | `dist/`のHTMLとCSSを検査する。`npm run build`の後に実行する |
+| `npm run test:check` | `check`の検査関数のテスト(`node:test`) |
+| `npm test` | Vitestを1回流す |
+| `npm run test:watch` | Vitestをwatchモードで流す |
 | `npm run notion:sync` | Notionの原稿を書き出す(#27で`content/`向けに更新予定) |
 | `npm run notion:import` | 既存の`wiki/pages/*.html`をNotionへ取り込む(初期移行用) |
 
@@ -56,3 +60,29 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 - 768px未満ではSidebarが上部のバーになり、`<details>`でナビを開閉する。デスクトップでナビを常に見せるために`::details-content`を使い、非対応のブラウザではデスクトップでもトグルを出して開閉式にする。
 - Tocは`lib/toc.ts`が`html`のh2とh3から作り、見出しのないページでは出さない。1440px以上で本文の右に置く。
 - Sidebarには`view-transition-name: sidebar`が付き、ページ遷移のアニメーションは`prefers-reduced-motion: no-preference`のときだけ有効。
+
+## 出力の検査
+
+`npm run check`は`dist/`を走査し、違反を`ファイル: 理由`の1行ずつ出す。1件でもあれば終了コード1。`WIKI_BASE`を読むので、`WIKI_BASE=/keio/ npm run build`で作った`dist/`は`WIKI_BASE=/keio/ npm run check`で検査する。
+
+- ページの対応: `content/`の`published`なJSONから決まるパスの集合と、`dist/**/index.html`の集合が一致する。対応のない`index.html`と、`index.html`のない原稿を、それぞれ違反として出す。`content/`が読めないときと、JSONが壊れているときは、ファイル名付きで終了コード1にする。
+- 外部URL: `<a>`と`<area>`の`href`を除くすべてのタグの`src`、`href`、`data`、`poster`、`srcset`、`imagesrcset`(候補ごと)、SVGの`xlink:href`、`<meta>`の`content`と、`style`属性、`<style>`、CSSの`url(...)`と`@import`は、ブラウザと同じ規則でURLを解釈して外部ホストを指す場合に、ホストが`static.igem.wiki`、`video.igem.org`、`igem.org`と`igem.wiki`(サブドメインを含む)のどれかであること。`<a href>`の外部リンクは対象外。
+- 内部リンク: `/`で始まる`href`と`src`(`<a>`を含む)は、`base`を除いたパスが`dist/`のファイルか、`index.html`を持つディレクトリを指すこと。`base`の外を指すリンクも違反。`#`だけの`href`と`mailto:`は見ない。
+- 構造: 各HTMLに`<title>`(SVGの中は数えない)と`<h1>`が1つずつあり、`<img>`に`alt`属性がある(空文字は可)。
+- `<html lang>`が`en`か`ja`。
+- `islands`が空のページに`<script>`がない。
+
+検査するのは`dist/`のHTMLと、`dist/assets/`配下のCSSだけ。`web/public/`由来のディレクトリ(`static/`、`people/`、`notion-images/`)のHTMLとCSSは読まない。HTMLの解析は正規表現で行い、依存は増やさない。検査の関数は`scripts/lib/check/`にあり、`npm run test:check`でテストする。
+## テスト
+
+- Vitestは`src/**/*.test.{ts,tsx}`を対象にする。環境はhappy-domで、`src/test/setup.ts`でjest-domのmatcherを登録している。
+- `vitest.config.ts`は`vite.config.ts`を`mergeConfig`で継承する。`import.meta.glob`などのpluginの設定は引き継ぐが、Vitestは`base`を`/`に固定するので、テストでは`WIKI_BASE`を指定しても常に`/`になる。
+- `routes.ts`のテストは、`import.meta.glob`の結果を受け取る`buildRoutes`に入力を渡して書く。
+- `Page.test.tsx`はプリレンダーのHTMLをスナップショットで固定する。スナップショットは`src/__snapshots__/`に置く。
+- `Page`やマークアップを意図して変えたときは、差分を確認してからスナップショットを更新する。
+
+```sh
+npx vitest run -u
+```
+
+- `scripts/lib/*.test.mjs`は`node:test`で書かれており、Vitestの対象外。

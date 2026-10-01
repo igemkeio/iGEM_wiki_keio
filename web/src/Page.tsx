@@ -3,6 +3,7 @@ import { ArticlePage } from "./components/ArticlePage";
 import { HomePage } from "./components/HomePage";
 import { PageShell } from "./components/PageShell";
 import type { WikiPage } from "./content";
+import { ISLANDS } from "./islands";
 import type { Route } from "./routes";
 
 export type Assets = {
@@ -35,7 +36,7 @@ export function Page({
         <PageShell page={page} routes={routes}>
           {page.slug === "home" ? <HomePage page={page} routes={routes} /> : <ArticlePage page={page} />}
         </PageShell>
-        {page.islands.length > 0 && (
+        {page.islands.some((name) => name in ISLANDS) && (
           <script type="module" src={withBase(`/${assets.js}`)} />
         )}
       </body>

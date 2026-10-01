@@ -1,0 +1,24 @@
+// slug を小文字英数字とハイフンだけにする。空白とアンダースコアはハイフンにし、それ以外の文字は除く。
+export function normalizeSlug(raw) {
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_]+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+// content/README.md のフィールド順で JSON 用のオブジェクトを作る。任意フィールドは値があるときだけ入れる。
+export function buildPage({ slug, locale, title, subtitle, lead, html, order }) {
+  const page = { slug, locale, title };
+  if (subtitle) page.subtitle = subtitle;
+  if (lead) page.lead = lead;
+  page.html = html;
+  if (typeof order === "number") page.order = order;
+  return page;
+}
+
+export function serializePage(page) {
+  return `${JSON.stringify(page, null, 2)}\n`;
+}
