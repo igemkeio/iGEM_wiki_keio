@@ -28,6 +28,7 @@ Notion同期とプリレンダーをつなぐ受け渡し形式。同期スク�
 - `home`は`order: 0`にする。
 - `slug`と`locale`の組がURLになる。`en`は`/model/`、`ja`は`/ja/model/`。
 - `html`は同期時にMarkdownから変換済みで、見出しには`id`が付いている。
+- `html`と`lead`の中の`/`で始まるURL(`/notion-images/...`など)は、ビルド時に`src`、`href`、`poster`、`srcset`の先頭へbaseが付く。`//`で始まるURLと絶対URLは変えない。
 
 ## models
 

@@ -1,5 +1,6 @@
 import { withBase } from "../base";
 import type { Locale, WikiPage } from "../content";
+import { applyBase } from "../lib/applyBase";
 import type { Route } from "../routes";
 
 import styles from "./HomePage.module.css";
@@ -80,7 +81,9 @@ export function HomePage({
         {page.lead && (
           <p
             className={styles.catch}
-            dangerouslySetInnerHTML={{ __html: page.lead }}
+            dangerouslySetInnerHTML={{
+              __html: applyBase(page.lead, import.meta.env.BASE_URL),
+            }}
           />
         )}
         <div className={styles.about}>
@@ -90,7 +93,9 @@ export function HomePage({
             <div
               data-testid="home-description"
               className={styles.description}
-              dangerouslySetInnerHTML={{ __html: page.html }}
+              dangerouslySetInnerHTML={{
+                __html: applyBase(page.html, import.meta.env.BASE_URL),
+              }}
             />
           )}
         </div>
@@ -110,7 +115,12 @@ export function HomePage({
                 )}
                 <span
                   className={styles.cardLead}
-                  dangerouslySetInnerHTML={{ __html: stripLinks(item.lead) }}
+                  dangerouslySetInnerHTML={{
+                    __html: applyBase(
+                      stripLinks(item.lead),
+                      import.meta.env.BASE_URL
+                    ),
+                  }}
                 />
               </a>
             </li>

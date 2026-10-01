@@ -1,5 +1,6 @@
 import type { WikiPage } from "../content";
 import { ISLANDS } from "../islands";
+import { applyBase } from "../lib/applyBase";
 import { buildToc } from "../lib/toc";
 import { Island } from "./Island";
 import { Toc } from "./Toc";
@@ -26,12 +27,16 @@ export function ArticlePage({ page }: { page: WikiPage }) {
         {page.lead && (
           <p
             className={styles.lead}
-            dangerouslySetInnerHTML={{ __html: page.lead }}
+            dangerouslySetInnerHTML={{
+              __html: applyBase(page.lead, import.meta.env.BASE_URL),
+            }}
           />
         )}
         <div
           className={`${styles.body} prose`}
-          dangerouslySetInnerHTML={{ __html: page.html }}
+          dangerouslySetInnerHTML={{
+            __html: applyBase(page.html, import.meta.env.BASE_URL),
+          }}
         />
         {islands.map((name) => (
           <Island key={name} name={name} props={ISLANDS[name].props(page)} />
