@@ -1,6 +1,7 @@
 {
   "slug": "model-sample",
   "locale": "en",
+  "source": "local",
   "title": "Model Sample",
   "subtitle": "3Dモデルのサンプル",
   "lead": "",

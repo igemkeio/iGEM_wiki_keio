@@ -29,12 +29,18 @@ describe("readPage", () => {
       order: Number.MAX_SAFE_INTEGER,
       islands: [],
       published: true,
+      source: "notion",
     });
   });
 
   it("指定した任意フィールドは上書きしない", () => {
     const page = readPage({ ...minimal, order: 3, islands: ["x"], published: false });
     expect(page).toMatchObject({ order: 3, islands: ["x"], published: false });
+  });
+
+  it("sourceはlocalを保ち、省略時はnotionになる", () => {
+    expect(readPage({ ...minimal, source: "local" }).source).toBe("local");
+    expect(readPage(minimal).source).toBe("notion");
   });
 
   it("未知のフィールドを落とさない", () => {

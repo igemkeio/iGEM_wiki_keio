@@ -16,6 +16,7 @@ const make = (slug: string, locale: Locale, extra: Partial<WikiPage> = {}): Rout
     islands: [],
     models: [],
     published: true,
+    source: "notion",
     ...extra,
   };
   return { page, path: pagePath(page) };

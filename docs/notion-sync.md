@@ -11,6 +11,7 @@ Notion（Markdown 執筆）→ API 取得 → Markdown 化 → HTML 化 → cont
 > 注意: この仕組みを使うと **Notion が正（source of truth）** になります。
 > `content/**/*.json` は同期で上書きされ、Notion に無くなったページの JSON は削除されるため、
 > 直接編集しないでください。`content/README.md` は削除されません。
+> リポジトリ側で置く確認用ページは JSON に `"source": "local"` を付けると、同期は消しません。
 
 ページで使う島(`islands`)は Notion には持たせず、`web/scripts/lib/page.mjs` の `ISLANDS_BY_SLUG`(slug から島の名前の配列を引く表)で決め、JSON の `islands` に出す。島の名前は `web/src/islands.ts` の `ISLANDS` のキーと手で揃える。attributionsには島`attribution-form`(iGEMの貢献者フォームのiframe)を付け、本文にはHTMLを差し込まない。
 
