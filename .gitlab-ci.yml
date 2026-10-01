@@ -7,10 +7,10 @@ pages:
       files:
         - web/package-lock.json
     paths:
-      - web/node_modules/
+      - web/.npm/
   script:
     - cd web
-    - npm ci
+    - npm ci --cache .npm --prefer-offline
     - WIKI_BASE=/$CI_PROJECT_NAME/ npm run build
     - WIKI_BASE=/$CI_PROJECT_NAME/ npm run check
     - mv dist ../public
