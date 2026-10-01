@@ -113,7 +113,6 @@ npx playwright show-report e2e/playwright-report
 - 基準にするのはLinuxのCIで撮った画像。ローカルで`--update-snapshots`をかけて、そのまま上書きしない。
 - 現在の基準画像はmacOSでローカルに生成した暫定のもの。
 - homeの画像には、ナビとContentsカードに並ぶE2E用ページ(`PRERENDER_ALL=1`で出る)が写り込む。E2E用ページや`prose-sample`を足したときは、homeの画像も撮り直す。
-- `prose-sample`は#29(prose)がマージされるまで`test.skip`にしている。
 
 ### 基準画像の作り直し
 
@@ -121,10 +120,6 @@ PRを作ったあとに、メインセッションが次の手順で行う。
 
 1. GitHub ActionsでCIを`workflow_dispatch`で実行し、入力`update_snapshots`をtrueにする。`e2e`ジョブが`npm run test:e2e -- --update-snapshots=all`を流し(テストが落ちてもジョブは落とさない)、`web/e2e/**/*-snapshots/`をartifact`e2e-snapshots`に上げる
 2. artifactの画像で`tests/visual.e2e.ts-snapshots/`を差し替えてコミットする
-
-## skipしているテスト
-
-- `prose.e2e.ts`と`visual.e2e.ts`の`prose-sample`: #29(prose)が未マージで、ページも`prose.css`も無い。マージ後に`test.skip`を外し、`content/{en,ja}/prose-sample.json`の有無を確認して基準画像を生成する。
 
 ## CI
 

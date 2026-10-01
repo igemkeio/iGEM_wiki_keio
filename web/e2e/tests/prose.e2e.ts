@@ -1,7 +1,6 @@
 import { expect, test } from "../fixtures";
 
-// #29(prose)がマージされ、prose-sampleのページとprose.cssが入るまで流さない。
-test.skip("prose-sampleで、FigureカードとNoteとKaTeXが描画される", async ({ page }) => {
+test("prose-sampleで、FigureカードとNoteとKaTeXが描画される", async ({ page }) => {
   await page.goto("prose-sample/");
   await expect(page.locator(".figure-card")).toBeVisible();
   await expect(page.locator(".note")).toBeVisible();
