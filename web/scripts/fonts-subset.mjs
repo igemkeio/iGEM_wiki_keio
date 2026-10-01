@@ -1,4 +1,4 @@
-// 元フォントをサブセット化して public/fonts/ に woff2 を書き出す。元のTTFは fonts-src/ に置き、無ければ google/fonts からダウンロードする。
+// 元フォントをサブセット化してpublic/fonts/にwoff2を書き出す。元のTTFはfonts-src/に置き、無ければgoogle/fontsからダウンロードする。
 import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
@@ -10,8 +10,6 @@ const srcDir = join(root, "fonts-src");
 const outDir = join(root, "public", "fonts");
 const contentDir = join(root, "..", "content");
 const rawBase = "https://github.com/google/fonts/raw/main/ofl";
-// 可変のままの Noto Sans JP が上限を超えたときは weight 400 と 700 の静的2本にする。
-const notoLimit = 1024 * 1024;
 
 const sources = {
   "NotoSansJP.ttf": `${rawBase}/notosansjp/NotoSansJP%5Bwght%5D.ttf`,
@@ -29,7 +27,7 @@ async function ensureSources() {
   }
 }
 
-// JIS X 0208 の区点を EUC-JP 経由で文字にする。1から8区が記号、ひらがな、カタカナなど、16から47区が第1水準漢字。
+// JIS X 0208の区点をEUC-JP経由で文字にする。1から8区が記号、ひらがな、カタカナなど、16から47区が第1水準漢字。
 function jisChars(rows) {
   const decoder = new TextDecoder("euc-jp");
   let out = "";
@@ -87,17 +85,13 @@ async function main() {
 
   const noto = await readFile(join(srcDir, "NotoSansJP.ttf"));
   const text = await notoText();
-  const variable = await subsetFont(noto, text, { targetFormat: "woff2" });
-  if (variable.length <= notoLimit) {
-    await write("noto-sans-jp.woff2", variable);
-  } else {
-    for (const weight of [400, 700]) {
-      const fixed = await subsetFont(noto, text, {
-        targetFormat: "woff2",
-        variationAxes: { wght: weight },
-      });
-      await write(`noto-sans-jp-${weight}.woff2`, fixed);
-    }
+  // global.cssがweight 400と700の静的2本を固定で読む。
+  for (const weight of [400, 700]) {
+    const fixed = await subsetFont(noto, text, {
+      targetFormat: "woff2",
+      variationAxes: { wght: weight },
+    });
+    await write(`noto-sans-jp-${weight}.woff2`, fixed);
   }
 
   const montserrat = await readFile(join(srcDir, "Montserrat.ttf"));

@@ -5,7 +5,7 @@ import { Footer } from "./Footer";
 import styles from "./PageShell.module.css";
 import { Sidebar } from "./Sidebar";
 
-// 全ページ共通の枠。中身は children に任せる。
+// 全ページ共通の枠。中身はchildrenに任せる。
 export function PageShell({
   page,
   routes,

@@ -29,7 +29,7 @@ function fontBase(base: string): Plugin {
     enforce: "pre",
     transform(code, id) {
       if (!id.split("?")[0].endsWith(".css") || !code.includes(marker)) return;
-      const dir = (process.env.WIKI_FONT_BASE ?? `${base.replace(/\/$/, "")}/fonts`).replace(/\/+$/, "");
+      const dir = (process.env.WIKI_FONT_BASE || `${base.replace(/\/$/, "")}/fonts`).replace(/\/+$/, "");
       return { code: code.replaceAll(marker, dir), map: null };
     },
   };
