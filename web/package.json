@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "notion:sync": "node scripts/notion-sync.mjs",
-    "notion:import": "node scripts/notion-import.mjs"
+    "notion:import": "node scripts/notion-import.mjs",
+    "fonts:subset": "node scripts/fonts-subset.mjs"
   },
   "dependencies": {
     "@notionhq/client": "^2.2.15",
@@ -28,6 +29,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5",
+    "subset-font": "^2.9.0",
     "typescript": "^5",
     "vite": "^7"
   }
