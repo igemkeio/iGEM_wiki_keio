@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { Locale } from "../content";
 import members from "../data/members.json";
 import styles from "./MemberList.module.css";
@@ -28,10 +28,15 @@ export function MemberList({ locale = "en", list = members as Member[] }: { loca
   const [selected, setSelected] = useState<Member | null>(null);
   const t = labels[locale];
 
-  const open = (member: Member) => {
-    setSelected(member);
-    dialogRef.current?.showModal();
-  };
+  const titleId = useId();
+  // mousedownがdialog自身で始まったときだけ、続くclickをオーバーレイのクリックとみなす。
+  const pressedOnBackdrop = useRef(false);
+
+  useEffect(() => {
+    if (selected && !dialogRef.current?.open) dialogRef.current?.showModal();
+  }, [selected]);
+
+  const open = (member: Member) => setSelected(member);
   const close = () => dialogRef.current?.close();
 
   return (
@@ -50,9 +55,13 @@ export function MemberList({ locale = "en", list = members as Member[] }: { loca
       <dialog
         ref={dialogRef}
         className={styles.dialog}
-        aria-label={selected?.name[locale]}
+        aria-labelledby={selected ? titleId : undefined}
+        onMouseDown={(event) => {
+          pressedOnBackdrop.current = event.target === event.currentTarget;
+        }}
         onClick={(event) => {
-          if (event.target === event.currentTarget) close();
+          if (pressedOnBackdrop.current && event.target === event.currentTarget) close();
+          pressedOnBackdrop.current = false;
         }}
         onClose={() => setSelected(null)}
       >
@@ -62,7 +71,7 @@ export function MemberList({ locale = "en", list = members as Member[] }: { loca
               {t.close}
             </button>
             {selected.photo && <img className={styles.photo} src={selected.photo} alt="" />}
-            <h2 className={styles.dialogName}>{selected.name[locale]}</h2>
+            <h2 id={titleId} className={styles.dialogName}>{selected.name[locale]}</h2>
             <p className={styles.meta}>
               {selected.role} / {selected.department[locale]} / {t.year(selected.year)}
             </p>
@@ -74,3 +83,5 @@ export function MemberList({ locale = "en", list = members as Member[] }: { loca
     </section>
   );
 }
+
+export default MemberList;
