@@ -1,32 +1,85 @@
-// @vitest-environment happy-dom
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import type { WikiPage } from "./content";
+import { readPage } from "./content";
 import { Page } from "./Page";
+import { pagePath, type Route } from "./routes";
 
-const base: WikiPage = {
+const assets = { css: ["assets/index-abc.css"], js: "assets/index-abc.js" };
+
+const en = readPage({
+  slug: "model",
+  locale: "en",
+  title: "Model",
+  subtitle: "Sub",
+  lead: "Lead",
+  html: "<h2>Section</h2>",
+});
+const ja = readPage({
+  slug: "model",
+  locale: "ja",
+  title: "モデル",
+  subtitle: "サブ",
+  lead: "リード",
+  html: "<h2>節</h2>",
+});
+const withIsland = readPage({
   slug: "members",
   locale: "en",
   title: "Members",
-  subtitle: "",
-  lead: "",
-  html: "<h2 id=\"a\">A</h2>",
-  order: 1,
-  islands: [],
-  published: true,
-};
-const assets = { css: [], js: "assets/index.js" };
-const render = (page: WikiPage) =>
-  renderToStaticMarkup(<Page page={page} routes={[{ page, path: "/members/" }] as never} assets={assets} />);
+  html: "<h2>Section</h2>",
+  islands: ["member-list"],
+});
+// 対応表に無い島の名前だけのページ。器も script も出ない。
+const withUnknownIsland = readPage({
+  slug: "model",
+  locale: "en",
+  title: "Model",
+  html: "<h2>Section</h2>",
+  islands: ["x"],
+});
+
+// ナビに出す一覧はテストごとに固定し、content/ の実データに依存させない。
+const routesFor = (...pages: (typeof en)[]): Route[] =>
+  pages.map((page) => ({ page, path: pagePath(page) }));
+const render = (p: typeof en) =>
+  renderToStaticMarkup(<Page page={p} routes={routesFor(en, ja)} assets={assets} />);
+const parse = (html: string) => new DOMParser().parseFromString(html, "text/html");
+const scripts = (doc: Document) => doc.querySelectorAll('script[type="module"]');
 
 describe("Page", () => {
-  it("島の無いページにはscriptを出さない", () => {
-    expect(render(base)).not.toContain("<script");
+  it("enのページ", () => {
+    const html = render(en);
+    expect(html).toMatchSnapshot();
+    const doc = parse(html);
+    expect(doc.documentElement.lang).toBe("en");
+    expect(doc.title).toBe("Model | iGEM Keio 2026");
+    expect(doc.querySelector("h1")?.textContent).toBe("Model");
+    expect(scripts(doc)).toHaveLength(0);
   });
 
-  it("島のあるページにはmodule scriptを1本と器を出す", () => {
-    const html = render({ ...base, islands: ["member-list"] });
-    expect(html.match(/<script type="module"/g)).toHaveLength(1);
-    expect(html).toContain('data-island="member-list"');
+  it("jaのページ", () => {
+    const html = render(ja);
+    expect(html).toMatchSnapshot();
+    const doc = parse(html);
+    expect(doc.documentElement.lang).toBe("ja");
+    expect(doc.title).toBe("モデル | iGEM Keio 2026");
+    expect(doc.querySelector("h1")?.textContent).toBe("モデル");
+    expect(scripts(doc)).toHaveLength(0);
+  });
+
+  it("islandsがあるページだけscriptを入れる", () => {
+    const html = render(withIsland);
+    expect(html).toMatchSnapshot();
+    const doc = parse(html);
+    const found = scripts(doc);
+    expect(found).toHaveLength(1);
+    expect(found[0].getAttribute("src")).toBe("/assets/index-abc.js");
+    expect(doc.querySelector('[data-island="member-list"]')).not.toBeNull();
+  });
+
+  it("対応表に無い島の名前だけならscriptも器も出さない", () => {
+    const doc = parse(render(withUnknownIsland));
+    expect(scripts(doc)).toHaveLength(0);
+    expect(doc.querySelector("[data-island]")).toBeNull();
   });
 });
