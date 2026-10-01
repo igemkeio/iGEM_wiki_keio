@@ -13,6 +13,7 @@ const base: WikiPage = {
   html: "<h2 id=\"a\">A</h2>",
   order: 1,
   islands: [],
+  models: [],
   published: true,
 };
 const assets = { css: [], js: "assets/index.js" };

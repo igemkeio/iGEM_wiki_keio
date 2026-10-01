@@ -1,5 +1,13 @@
 export type Locale = "en" | "ja";
 
+export type Model = {
+  // .glbのURL
+  src: string;
+  // 読み込み前とWebGL非対応時に出す静止画のURL
+  poster: string;
+  alt: string;
+};
+
 export type RawWikiPage = {
   slug: string;
   locale: Locale;
@@ -9,6 +17,7 @@ export type RawWikiPage = {
   lead?: string;
   order?: number;
   islands?: string[];
+  models?: Model[];
   published?: boolean;
 };
 
@@ -40,6 +49,7 @@ export function readPage(raw: unknown, source?: string): WikiPage {
     lead: page.lead ?? "",
     order: page.order ?? Number.MAX_SAFE_INTEGER,
     islands: page.islands ?? [],
+    models: page.models ?? [],
     published: page.published ?? true,
   };
 }

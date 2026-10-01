@@ -18,14 +18,29 @@ Notion同期とプリレンダーをつなぐ受け渡し形式。同期スク�
 | `html`      | string               | 必須 | 本文。見出しには`id`が付いている。空文字も許す                           |
 | `order`     | number               | 任意 | ナビとHomeのカードの並び順。省略時は末尾。同値はslugの辞書順             |
 | `islands`   | string[]             | 任意 | このページで使う島の名前。省略時は空配列                                 |
+| `models`    | `{ src, poster, alt }[]` | 任意 | 3Dモデルの一覧。省略時は空配列。`model-viewer`島は先頭の1件を表示する |
 | `published` | boolean              | 任意 | 省略時はtrue。falseのページはビルドから除く                              |
 
-- 任意フィールドの既定値は`readPage`が埋める。`WikiPage`型では`subtitle`と`lead`が空文字、`order`が`Number.MAX_SAFE_INTEGER`、`islands`が空配列、`published`がtrueになる。
+- 任意フィールドの既定値は`readPage`が埋める。`WikiPage`型では`subtitle`と`lead`が空文字、`order`が`Number.MAX_SAFE_INTEGER`、`islands`と`models`が空配列、`published`がtrueになる。
 - JSONを直接importすると`locale`がstringに広がるので、`readPage`を通して読む。
 - 未知のフィールドは無視する。将来の拡張のため、バリデーションで落とさない。
 - `home`は`order: 0`にする。
 - `slug`と`locale`の組がURLになる。`en`は`/model/`、`ja`は`/ja/model/`。
 - `html`は同期時にMarkdownから変換済みで、見出しには`id`が付いている。
+
+## models
+
+3Dモデルを表示するページに置く。`islands`に`model-viewer`も入れる。
+
+```json
+"islands": ["model-viewer"],
+"models": [{ "src": "https://static.igem.wiki/teams/xxxx/models/xxx.glb", "poster": "https://static.igem.wiki/teams/xxxx/models/xxx.png", "alt": "モデルの説明" }]
+```
+
+- `src`は.glbのURL、`poster`は読み込み前とWebGL非対応時に出す静止画のURL、`alt`は静止画の代替テキスト。
+- 本番では.glbとposterを`static.igem.wiki`に置く。暫定のサンプルは`web/public/models/`にある。
+- `model-viewer`島は`models`の先頭1件だけを表示する。`models`が空のページに島を指定すると、器だけが出て何も描かれない。
+- Notion同期(#27)がこのフィールドを出す対応は別Issueで扱う。それまでは原稿JSONを手で書く。
 
 ## 規定
 
