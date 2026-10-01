@@ -60,11 +60,15 @@ describe("MemberList", () => {
 
   it("オーバーレイ(dialog自身)のクリックで閉じる", () => {
     openIt();
-    act(() => dialog().click());
+    act(() => {
+      dialog().dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      dialog().click();
+    });
     expect(dialog().open).toBe(false);
   });
 
-  it("Escでcloseイベントが来ると閉じた状態になる", () => {
+  // Esc自体の確認は#37のE2Eで行う。ここではcloseイベントで状態が戻ることだけを見る。
+  it("closeイベントで閉じた状態に戻る", () => {
     openIt();
     act(() => dialog().close());
     expect(dialog().open).toBe(false);
