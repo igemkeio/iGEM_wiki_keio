@@ -21,16 +21,24 @@ function watchContent(): Plugin {
   };
 }
 
-// global.cssの@font-faceにある目印を、環境変数WIKI_FONT_BASE(未指定ならbaseを付けた/fonts)に置き換える。
-function fontBase(base: string): Plugin {
-  const marker = "__WIKI_FONT_BASE__";
+// 目印を本番の配信元に置き換える。global.cssの@font-faceにある__WIKI_FONT_BASE__は環境変数WIKI_FONT_BASE(未指定ならbaseを付けた/fonts)に、
+// ソース中の__WIKI_IMAGE_BASE__は環境変数WIKI_IMAGE_BASE(未指定ならbaseを付けた/images)にする。末尾のスラッシュは落とす。
+function assetBase(base: string): Plugin {
+  const prefix = base.replace(/\/$/, "");
+  const markers = [
+    { marker: "__WIKI_FONT_BASE__", dir: process.env.WIKI_FONT_BASE || `${prefix}/fonts`, ext: /\.css$/ },
+    { marker: "__WIKI_IMAGE_BASE__", dir: process.env.WIKI_IMAGE_BASE || `${prefix}/images`, ext: /\.[jt]sx?$/ },
+  ];
   return {
-    name: "font-base",
+    name: "asset-base",
     enforce: "pre",
     transform(code, id) {
-      if (!id.split("?")[0].endsWith(".css") || !code.includes(marker)) return;
-      const dir = (process.env.WIKI_FONT_BASE || `${base.replace(/\/$/, "")}/fonts`).replace(/\/+$/, "");
-      return { code: code.replaceAll(marker, dir), map: null };
+      const file = id.split("?")[0];
+      let out = code;
+      for (const { marker, dir, ext } of markers) {
+        if (ext.test(file) && out.includes(marker)) out = out.replaceAll(marker, dir.replace(/\/+$/, ""));
+      }
+      if (out !== code) return { code: out, map: null };
     },
   };
 }
@@ -50,7 +58,7 @@ const base = process.env.WIKI_BASE ?? "/";
 
 export default defineConfig({
   base,
-  plugins: [react(), watchContent(), fontBase(base), keepCssModules()],
+  plugins: [react(), watchContent(), assetBase(base), keepCssModules()],
   build: {
     manifest: true,
   },
