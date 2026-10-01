@@ -22,7 +22,7 @@
     position: absolute;
     top: 64px;
     left: 348px;
-    width: min(900px, calc(100vw - 720px));
+    width: clamp(640px, calc(100vw - 720px), 900px);
     height: 560px;
     overflow: hidden;
   }
@@ -53,7 +53,8 @@
     top: 112px;
     left: 0;
     width: var(--size-logo-width);
-    height: var(--size-logo-height);
+    height: auto;
+    aspect-ratio: 632 / 228;
   }
 
   .catch {
@@ -73,8 +74,8 @@
 
   .about {
     position: absolute;
+    top: 720px;
     right: 0;
-    bottom: 64px;
     width: var(--size-hero-text);
     max-width: 100%;
     text-align: right;
@@ -101,6 +102,10 @@
     color: var(--color-muted);
     font-size: 12px;
     line-height: 18px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 6;
+    overflow: hidden;
   }
 
   .description :is(ul, ol) {
@@ -197,7 +202,7 @@
     }
   }
 
-  @media (max-width: 767px) {
+  @media (max-width: 1043px) {
     .hero {
       display: flex;
       flex-direction: column;
@@ -219,12 +224,6 @@
     .logo {
       width: 100%;
       max-width: var(--size-logo-width);
-      height: auto;
-      aspect-ratio: 632 / 228;
-    }
-
-    .catch {
-      font-size: 24px;
     }
 
     .about {
@@ -234,6 +233,15 @@
 
     .name {
       max-width: none;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .catch {
+      font-size: 24px;
+    }
+
+    .name {
       font-size: 36px;
     }
 

@@ -52,7 +52,7 @@ export function HomePage({ page, routes }: { page: WikiPage; routes: Route[] }) 
         <div className={styles.about}>
           <p className={styles.name}>iGEM Keio 2026</p>
           {page.subtitle && <p className={styles.tagline}>{page.subtitle}</p>}
-          {page.html && <div className={styles.description} dangerouslySetInnerHTML={{ __html: page.html }} />}
+          {page.html && <div data-testid="home-description" className={styles.description} dangerouslySetInnerHTML={{ __html: page.html }} />}
         </div>
       </section>
       <section className={styles.contents}>

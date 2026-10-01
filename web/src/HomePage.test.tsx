@@ -46,8 +46,9 @@ describe("HomePage", () => {
   });
 
   it("htmlが空なら説明を出さず、あれば出す", () => {
-    expect(render()).not.toContain("_description_");
+    expect(render()).not.toContain("data-testid=\"home-description\"");
     const withBody = render({ ...home.page, html: "<p>本文</p>" });
+    expect(withBody).toContain("data-testid=\"home-description\"");
     expect(withBody).toContain("<p>本文</p>");
   });
 
