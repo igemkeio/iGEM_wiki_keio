@@ -1,7 +1,6 @@
 // Notion を CMS として使うための同期スクリプト。
 // Notion の Database（1行=1ページ）を取得し、本文 Markdown を HTML 化して
 // content/<locale>/<slug>.json へ書き出す（形式は content/README.md）。
-// NOTION_SYNC_LEGACY_HTML=1 のときは従来の wiki/pages/ も出す。
 //
 // 実行: NOTION_TOKEN=... NOTION_DATABASE_ID=... node scripts/notion-sync.mjs
 //   もしくは web/.env.local に上記を書いて `yarn notion:sync`
@@ -28,15 +27,12 @@ import {
   richTextToMarkdown,
 } from "./lib/markdown.mjs";
 import { collectImageSrcs, isIgemStatic, renderImage } from "./lib/figure.mjs";
-import { buildLegacyFile } from "./lib/legacy.mjs";
-import { buildPage, normalizeSlug, serializePage } from "./lib/page.mjs";
+import { buildPage, islandsFor, normalizeSlug, serializePage } from "./lib/page.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const WEB_DIR = path.join(__dirname, "..");
-const PAGES_DIR = path.join(WEB_DIR, "..", "wiki", "pages");
 const CONTENT_DIR = path.join(WEB_DIR, "..", "content");
 const LOCALES = ["en", "ja"];
-const LEGACY_HTML = process.env.NOTION_SYNC_LEGACY_HTML === "1";
 // Notion 本文の画像を保存する場所（暫定方式）。/notion-images/ で配信される。
 // ※ iGEM 本番では static.igem.wiki へ移す必要あり（Issue #13）。
 const IMAGES_DIR = path.join(WEB_DIR, "public", "notion-images");
@@ -285,6 +281,7 @@ async function buildPageData(row) {
       lead: plainText(props.lead).trim(),
       html,
       order: numberValue(props.order),
+      islands: islandsFor(slug),
     }),
   };
 }
@@ -357,13 +354,6 @@ function writeOutputs(pages) {
       if (!isIgemStatic(src)) {
         imagesTodo.push({ slug: page.slug, locale: page.locale, src });
       }
-    }
-
-    if (LEGACY_HTML) {
-      const outDir = page.locale === "ja" ? path.join(PAGES_DIR, "ja") : PAGES_DIR;
-      fs.mkdirSync(outDir, { recursive: true });
-      fs.writeFileSync(path.join(outDir, `${page.slug}.html`), buildLegacyFile(page), "utf8");
-      console.log(`[notion-sync] wrote wiki/pages ${page.locale}/${page.slug}.html`);
     }
   }
 

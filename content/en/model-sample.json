@@ -1,0 +1,11 @@
+{
+  "slug": "model-sample",
+  "locale": "en",
+  "title": "Model Sample",
+  "subtitle": "3Dモデルのサンプル",
+  "lead": "",
+  "html": "<h2 id=\"viewer\">Viewer</h2>\n<p>Drag to rotate the model.</p>",
+  "islands": ["model-viewer"],
+  "models": [{ "src": "/models/sample.glb", "poster": "/models/sample.png", "alt": "Sample milk truck" }],
+  "published": false
+}

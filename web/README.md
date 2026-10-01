@@ -20,7 +20,6 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 | `npm test` | Vitestを1回流す |
 | `npm run test:watch` | Vitestをwatchモードで流す |
 | `npm run notion:sync` | Notionの原稿を書き出す(#27で`content/`向けに更新予定) |
-| `npm run notion:import` | 既存の`wiki/pages/*.html`をNotionへ取り込む(初期移行用) |
 
 ## フォント
 
@@ -87,3 +86,32 @@ npx vitest run -u
 ```
 
 - `scripts/lib/*.test.mjs`は`node:test`で書かれており、Vitestの対象外。
+
+## 永続化と共有ストア
+
+MPAではページを移るとJSのメモリが消えるため、ページをまたぐ状態はブラウザの保存領域に置く。コードは`src/client/`にあり、ブラウザでしか動かない。
+
+| 置き場所 | 用途 | キー |
+| --- | --- | --- |
+| `localStorage` | ブラウザに残したいもの | `wiki:locale`(最後に選んだ言語。値はJSONで`"ja"`のように保存する) |
+| `sessionStorage` | タブを閉じるまでのもの | まだ無い |
+
+- `storage.ts`の`readStorage`と`writeStorage`が保存領域を包む。値はJSONで保存する。保存領域が例外を投げる環境(private modeや無効化)では、読みは`undefined`、書きは何もしない。壊れたJSONも`undefined`になる。
+- `usePersistedState(key, initial, kind = "local")`は`useState`と同じ戻り値で、変更のたびに保存する。保存が無い、読めない、壊れているときは`initial`になる。同じ`kind`と`key`を使う島は同じ値を見る。保存された値の型は検証しないので、使う側で形を確かめたいときは`initial`と同じ型だけを保存する。
+- `store.ts`の`createStore(initial)`は`get`、`set`、`subscribe`を返すモジュールスコープのストアで、`useStore(store)`が`useSyncExternalStore`で購読する。保存が要らない状態を島の間で共有するときに使う。状態管理ライブラリは入れない。
+- `locale.ts`の`rememberLocaleOnClick()`が、言語切り替えリンク(`a[hreflang]`)のクリックを`document`で受けて、移る先の言語を`wiki:locale`に保存する。島の中に描画されたリンクも拾う。保存した言語への自動遷移はしない。Sidebarはビルド時のコードでJSを持たないため、クリックの登録は`main.tsx`から行う。
+- `rememberLocale`は保存領域に直接書くので、同じページで`usePersistedState("wiki:locale")`を使う島があっても、そのメモリ上の値は更新されない。
+- 制約として、島のないページにはJSが配信されないので、言語の保存は島のあるページでしか動かない。全ページで保存したくなったら、数行の素のJSを`public/`に置く別Issueにする。
+
+## 3Dモデル
+
+`model-viewer`島が、`content/`の`models`フィールドの先頭1件を`<model-viewer>`(Googleのweb component、npmの`@google/model-viewer`)で表示する。フィールドの形は`content/README.md`を参照。
+
+- 島の中身は`src/components/ModelViewer.tsx`。WebGLが使え、島が画面の200px手前まで来てから`@google/model-viewer`を動的importし、別チャンクとして配る。それまでと、WebGLが無い環境では、`poster`の画像だけを出す。`<model-viewer>`は`loading="lazy"`なので、.glbは画面に入るまで取得されない。
+- Blenderからglb(glTF Binary)で書き出し、Draco圧縮を有効にする。1モデル2〜5MB以下を目安にする。テクスチャは2048px以下に縮める。
+- `ModelViewer`はDracoとKTX2のデコーダーの場所を`/models/decoders/draco/`と`/models/decoders/basis/`(baseを付ける)に向けていて、`gstatic.com`には出ない。デコーダーを`public/models/decoders/`か`static.igem.wiki`に置くまでは、Draco圧縮とKTX2テクスチャを使わない。
+- .glbとposterは画像と同じ扱いで`static.igem.wiki`に置く。リポジトリには入れない。`tools.igem.org`が.glbを受け付けるかは未確認で、人が確かめる。
+- posterはモデルを正面斜めから撮ったPNGで、100KB以下にする。
+- 暫定のサンプルとして`public/models/sample.glb`(約360KB)と`sample.png`を置いてある。`content/en/model-sample.json`が使う(`published: false`)。確認するときは`published`をtrueにしてビルドする。本番の配信前に消す。
+- サンプルのglbはKhronosのglTF-Sample-AssetsにあるCesiumMilkTruck(c) 2017 Cesium、CC BY 4.0。出典は`https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CesiumMilkTruck`、ライセンスは`https://creativecommons.org/licenses/by/4.0/`。
+- `models`の`src`と`poster`が`/`で始まり`//`で始まらないときは、`ISLANDS`の`props`がビルド時にbaseを付ける。`https://`のURLはそのまま使う。
