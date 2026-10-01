@@ -49,3 +49,18 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 - 768px未満ではSidebarが上部のバーになり、`<details>`でナビを開閉する。デスクトップでナビを常に見せるために`::details-content`を使い、非対応のブラウザではデスクトップでもトグルを出して開閉式にする。
 - Tocは`lib/toc.ts`が`html`のh2とh3から作り、見出しのないページでは出さない。1440px以上で本文の右に置く。
 - Sidebarには`view-transition-name: sidebar`が付き、ページ遷移のアニメーションは`prefers-reduced-motion: no-preference`のときだけ有効。
+
+## 永続化と共有ストア
+
+MPAではページを移るとJSのメモリが消えるため、ページをまたぐ状態はブラウザの保存領域に置く。コードは`src/client/`にあり、ブラウザでしか動かない。
+
+| 置き場所 | 用途 | キー |
+| --- | --- | --- |
+| `localStorage` | ブラウザに残したいもの | `wiki:locale`(最後に選んだ言語。値はJSONで`"ja"`のように保存する) |
+| `sessionStorage` | タブを閉じるまでのもの | まだ無い |
+
+- `storage.ts`の`readStorage`と`writeStorage`が保存領域を包む。値はJSONで保存する。保存領域が例外を投げる環境(private modeや無効化)では、読みは`undefined`、書きは何もしない。壊れたJSONも`undefined`になる。
+- `usePersistedState(key, initial, kind = "local")`は`useState`と同じ戻り値で、変更のたびに保存する。保存が無い、読めない、壊れているときは`initial`になる。同じ`kind`と`key`を使う島は同じ値を見る。保存された値の型は検証しないので、使う側で形を確かめたいときは`initial`と同じ型だけを保存する。
+- `store.ts`の`createStore(initial)`は`get`、`set`、`subscribe`を返すモジュールスコープのストアで、`useStore(store)`が`useSyncExternalStore`で購読する。保存が要らない状態を島の間で共有するときに使う。状態管理ライブラリは入れない。
+- `locale.ts`の`rememberLocaleOnClick()`が、言語切り替えリンク(`a[hreflang]`)のクリックで移る先の言語を`wiki:locale`に保存する。保存した言語への自動遷移はしない。Sidebarはビルド時のコードでJSを持たないため、クリックの登録は`main.tsx`から行う。
+- 制約として、島のないページにはJSが配信されないので、言語の保存は島のあるページでしか動かない。全ページで保存したくなったら、数行の素のJSを`public/`に置く別Issueにする。
