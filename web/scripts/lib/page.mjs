@@ -10,7 +10,10 @@ export function normalizeSlug(raw) {
 }
 
 // slug ごとに、そのページで使う島の名前。web/src/islands.ts の ISLANDS のキーと手で揃える。
-const ISLANDS_BY_SLUG = { members: ["member-list"] };
+const ISLANDS_BY_SLUG = {
+  members: ["member-list"],
+  attributions: ["attribution-form"],
+};
 
 export function islandsFor(slug) {
   return ISLANDS_BY_SLUG[slug] ?? [];
