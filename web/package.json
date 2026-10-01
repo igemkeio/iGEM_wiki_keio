@@ -16,6 +16,7 @@
     "fonts:subset": "node scripts/fonts-subset.mjs"
   },
   "dependencies": {
+    "@google/model-viewer": "^4.3.1",
     "@notionhq/client": "^2.2.15",
     "@tryfabric/martian": "^1.2.4",
     "marked": "^18.0.5",
