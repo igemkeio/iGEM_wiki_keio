@@ -95,9 +95,9 @@ npm run dev                        # 反映を確認
 
 - 手動実行（Actions タブの「Run workflow」）または毎日 00:00 UTC（09:00 JST）
 - `npm ci` のあと `npm run notion:sync` を実行し、`content/images-todo.json` の件数と
-  先頭 10 件をジョブのサマリーに出す
+  先頭10件をジョブのサマリーに出す
 - `npm run build && npm run check` を実行する。失敗したら PR を作らずにジョブを失敗させる
-- 差分があれば `chore/notion-sync` ブランチにコミットして **PR を自動作成**
+- 差分があれば `chore/notion-sync` ブランチにコミットして PR を自動作成
   （`main` へ直接 push はしない）。コミット対象は `content/` と `web/public/notion-images/` だけ
 
 ### 必要な Secrets
