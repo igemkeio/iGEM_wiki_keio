@@ -1,7 +1,7 @@
 {
   "version": 2,
   "framework": null,
-  "installCommand": "cd web && npm ci",
-  "buildCommand": "cd web && npm run build && npm run check",
-  "outputDirectory": "web/dist"
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build && npm run check",
+  "outputDirectory": "dist"
 }
