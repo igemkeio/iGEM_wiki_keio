@@ -3,31 +3,31 @@ import type { Locale, WikiPage } from "../content";
 import type { Route } from "../routes";
 import styles from "./Sidebar.module.css";
 
-// routes.tsを値としてimportすると原稿の実データが入るので、homeのURLパスはここで組む。
-const homePath = (locale: Locale): string => (locale === "en" ? "/" : "/ja/");
-
 const otherLocale = (locale: Locale): Locale => (locale === "en" ? "ja" : "en");
 
-// 相手の言語に同じslugがあればそのページ、なければ相手の言語のhomeのURLパスを返す。
-export function alternatePath(page: Pick<WikiPage, "locale" | "slug">, routes: Route[]): string {
+const homePath = (locale: Locale, routes: Route[]): string | undefined =>
+  routes.find((r) => r.page.locale === locale && r.page.slug === "home")?.path;
+
+// 相手の言語に同じslugがあればそのページ、なければ相手の言語のhomeのURLパスを返す。homeも無ければundefined。
+export function alternatePath(page: Pick<WikiPage, "locale" | "slug">, routes: Route[]): string | undefined {
   const locale = otherLocale(page.locale);
   const same = routes.find((r) => r.page.locale === locale && r.page.slug === page.slug);
-  return same ? same.path : homePath(locale);
+  return same ? same.path : homePath(locale, routes);
 }
 
 const labels = {
-  en: { menu: "Open menu", nav: "Main", lang: "Language" },
-  ja: { menu: "メニューを開く", nav: "メインメニュー", lang: "言語" },
+  en: { menu: "Menu", nav: "Main", lang: "Language" },
+  ja: { menu: "メニュー", nav: "メインメニュー", lang: "言語" },
 } as const;
 
 export function Sidebar({ page, routes }: { page: WikiPage; routes: Route[] }) {
   const label = labels[page.locale];
   const items = routes.filter((r) => r.page.locale === page.locale);
   const alternate = otherLocale(page.locale);
-  const locales: Locale[] = ["en", "ja"];
+  const alternateHref = alternatePath(page, routes);
   return (
     <header className={styles.root}>
-      <a className={styles.logo} href={withBase(homePath(page.locale))}>
+      <a className={styles.logo} href={withBase(homePath(page.locale, routes) ?? "/")}>
         <span>iGEM</span>
         <span className={styles.logoSub}>Keio 2026</span>
       </a>
@@ -48,25 +48,16 @@ export function Sidebar({ page, routes }: { page: WikiPage; routes: Route[] }) {
               </a>
             ))}
           </nav>
-          <div className={styles.lang} role="group" aria-label={label.lang}>
-            {locales.map((l) =>
-              l === page.locale ? (
-                <span key={l} className={styles.langCurrent} lang={l}>
-                  {l.toUpperCase()}
-                </span>
-              ) : (
-                <a
-                  key={l}
-                  className={styles.link}
-                  href={withBase(alternatePath(page, routes))}
-                  hrefLang={alternate}
-                  lang={l}
-                >
-                  {l.toUpperCase()}
-                </a>
-              ),
-            )}
-          </div>
+          {alternateHref && (
+            <div className={styles.lang} role="group" aria-label={label.lang}>
+              <span className={styles.langCurrent} lang={page.locale}>
+                {page.locale.toUpperCase()}
+              </span>
+              <a className={styles.link} href={withBase(alternateHref)} hrefLang={alternate} lang={alternate}>
+                {alternate.toUpperCase()}
+              </a>
+            </div>
+          )}
         </div>
       </details>
     </header>

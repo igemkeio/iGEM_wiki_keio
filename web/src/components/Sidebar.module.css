@@ -3,6 +3,7 @@
     position: fixed;
     inset: 0 auto 0 0;
     z-index: 10;
+    view-transition-name: sidebar;
     width: var(--size-sidebar);
     font-family: var(--font-heading);
     font-size: var(--size-nav);
@@ -54,6 +55,25 @@
     display: none;
   }
 
+  .bars,
+  .bars::before {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--color-ink);
+  }
+
+  .bars {
+    position: relative;
+    top: -3px;
+  }
+
+  .bars::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+  }
+
   .panel {
     position: absolute;
     bottom: 32px;
@@ -84,6 +104,25 @@
 
   .langCurrent {
     color: var(--color-ink);
+  }
+
+  @supports not selector(::details-content) {
+    @media (min-width: 768px) {
+      .menu {
+        display: block;
+      }
+
+      .toggle {
+        position: absolute;
+        top: 96px;
+        left: var(--space-sidebar-x);
+        display: flex;
+        align-items: center;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+      }
+    }
   }
 
   @media (max-width: 767px) {
@@ -128,25 +167,6 @@
       width: var(--size-topbar);
       height: var(--size-topbar);
       cursor: pointer;
-    }
-
-    .bars,
-    .bars::before {
-      display: block;
-      width: 20px;
-      height: 2px;
-      background: var(--color-ink);
-    }
-
-    .bars {
-      position: relative;
-      top: -3px;
-    }
-
-    .bars::before {
-      content: "";
-      position: absolute;
-      top: 8px;
     }
 
     .panel {
