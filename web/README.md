@@ -17,6 +17,8 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run check` | `dist/`のHTMLとCSSを検査する。`npm run build`の後に実行する |
 | `npm run test:check` | `check`の検査関数のテスト(`node:test`) |
+| `npm test` | Vitestを1回流す |
+| `npm run test:watch` | Vitestをwatchモードで流す |
 | `npm run notion:sync` | Notionの原稿を書き出す(#27で`content/`向けに更新予定) |
 | `npm run notion:import` | 既存の`wiki/pages/*.html`をNotionへ取り込む(初期移行用) |
 
@@ -45,3 +47,16 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 - `islands`が空のページに`<script>`がない。
 
 検査するのは`dist/`のHTMLと、`dist/assets/`配下のCSSだけ。`web/public/`由来のディレクトリ(`static/`、`people/`、`notion-images/`)のHTMLとCSSは読まない。HTMLの解析は正規表現で行い、依存は増やさない。検査の関数は`scripts/lib/check/`にあり、`npm run test:check`でテストする。
+## テスト
+
+- Vitestは`src/**/*.test.{ts,tsx}`を対象にする。環境はhappy-domで、`src/test/setup.ts`でjest-domのmatcherを登録している。
+- `vitest.config.ts`は`vite.config.ts`を`mergeConfig`で継承する。`import.meta.glob`などのpluginの設定は引き継ぐが、Vitestは`base`を`/`に固定するので、テストでは`WIKI_BASE`を指定しても常に`/`になる。
+- `routes.ts`のテストは、`import.meta.glob`の結果を受け取る`buildRoutes`に入力を渡して書く。
+- `Page.test.tsx`はプリレンダーのHTMLをスナップショットで固定する。スナップショットは`src/__snapshots__/`に置く。
+- `Page`やマークアップを意図して変えたときは、差分を確認してからスナップショットを更新する。
+
+```sh
+npx vitest run -u
+```
+
+- `scripts/lib/*.test.mjs`は`node:test`で書かれており、Vitestの対象外。

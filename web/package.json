@@ -13,6 +13,8 @@
     "typecheck": "tsc --noEmit",
     "check": "node scripts/check.mjs",
     "test:check": "node --test \"scripts/lib/check/*.test.mjs\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "notion:sync": "node scripts/notion-sync.mjs",
     "notion:import": "node scripts/notion-import.mjs"
   },
@@ -26,11 +28,16 @@
     "turndown": "^7.2.4"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5",
+    "happy-dom": "^20.14.5",
     "typescript": "^5",
-    "vite": "^7"
+    "vite": "^7",
+    "vitest": "^5.0.2"
   }
 }
