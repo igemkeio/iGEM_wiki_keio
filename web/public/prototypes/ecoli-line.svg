@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img"
+     aria-label="方向性をもつ大腸菌が一列に連なった図">
+  <title>DIRECTIONAL E. COLI — 一列に連なる方向性をもつ大腸菌</title>
+
+  <!-- 4色: 黄#FFD21E / 青#1142FF / 白#FFFFFF / 黒#06080F -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"    stop-color="#0B0E1A"/>
+      <stop offset="0.55" stop-color="#0A1E6E"/>
+      <stop offset="1"    stop-color="#06080F"/>
+    </linearGradient>
+    <linearGradient id="yel" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FFE87A"/>
+      <stop offset="1" stop-color="#FFD21E"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#1142FF" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#1142FF" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- 方向性をもつ大腸菌1匹（先頭=+x）。白いカプセル＋青縁＋黄の方向矢印 -->
+    <g id="cell">
+      <rect x="-90" y="-28" width="180" height="56" rx="28" fill="#FFFFFF"/>
+      <rect x="-90" y="-28" width="180" height="56" rx="28" fill="none" stroke="#1142FF" stroke-width="6"/>
+      <!-- 進行方向を示す黄色い矢印 -->
+      <path d="M-56,-9 H28 V-22 L60,0 L28,22 V9 H-56 Z" fill="url(#yel)"/>
+    </g>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <ellipse cx="800" cy="450" rx="720" ry="360" fill="url(#glow)"/>
+
+  <!-- 後端の鞭毛（線の最後尾＝左端から後方へ伸びる） -->
+  <g stroke="#E7EEFF" fill="none" stroke-linecap="round">
+    <path d="M380,450 C346,432 300,470 262,448 C300,476 348,440 384,462" stroke-width="3" opacity="0.85"/>
+    <path d="M382,466 C350,456 306,486 268,470" stroke-width="2.5" opacity="0.55"/>
+  </g>
+
+  <!-- 方向性をもつ大腸菌が一列に連結（同じ向きで頭→尾につながる） -->
+  <g>
+    <use href="#cell" transform="translate(470,450)"/>
+    <use href="#cell" transform="translate(635,450)"/>
+    <use href="#cell" transform="translate(800,450)"/>
+    <use href="#cell" transform="translate(965,450)"/>
+    <use href="#cell" transform="translate(1130,450)"/>
+  </g>
+
+  <!-- 連結部（分裂面のような青いくびれ）でつながりを強調 -->
+  <g stroke="#1142FF" stroke-width="5" stroke-linecap="round" opacity="0.9">
+    <line x1="552.5" y1="-22" x2="552.5" y2="22" transform="translate(0,450)"/>
+    <line x1="717.5" y1="-22" x2="717.5" y2="22" transform="translate(0,450)"/>
+    <line x1="882.5" y1="-22" x2="882.5" y2="22" transform="translate(0,450)"/>
+    <line x1="1047.5" y1="-22" x2="1047.5" y2="22" transform="translate(0,450)"/>
+  </g>
+
+  <!-- 先頭の進行方向ハイライト -->
+  <circle cx="1195" cy="450" r="7" fill="#FFD21E"/>
+
+  <!-- キャプション -->
+  <g font-family="Inter, 'Hiragino Kaku Gothic ProN', system-ui, sans-serif" text-anchor="middle">
+    <text x="800" y="250" fill="#FFD21E" font-size="26" font-weight="700"
+          letter-spacing="6">DIRECTIONAL E. COLI</text>
+    <text x="800" y="660" fill="#E7EEFF" font-size="30" font-weight="500"
+          letter-spacing="2" opacity="0.9">方向性をもつ大腸菌が、同じ向きで一列に連なる</text>
+  </g>
+</svg>

@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>案内標識ナビ 3Dプロトタイプ</title>
+<style>
+  :root {
+    --sky: #dfe8ee;
+    --sky-deep: #b9cbd6;
+    --pole: #f2f2f0;
+    --pole-shade: #9ea4a6;
+    --board: #ffffff;
+    --board-edge: #cfd4d6;
+    --ink: #1a1d1f;
+    --sub: #5a6368;
+    --pole-r: 11px;      /* 支柱の半径 */
+    --board-w: 300px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+    color: var(--ink);
+    background: linear-gradient(var(--sky), var(--sky-deep));
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px 16px;
+    overflow-x: hidden;
+  }
+
+  /* 奥行きの見え方はここで決まる。小さいほど強い遠近感 */
+  .scene {
+    width: min(760px, 100%);
+    height: 560px;
+    perspective: 1400px;
+    perspective-origin: 50% 35%;
+    cursor: grab;
+    user-select: none;
+    touch-action: pan-y;
+  }
+  .scene.dragging { cursor: grabbing; }
+
+  /* 回転する本体。支柱の中心軸が原点 */
+  .post {
+    position: relative;
+    width: 0;
+    height: 100%;
+    margin: 0 auto;
+    transform-style: preserve-3d;
+    transform: rotateX(var(--tilt, 0deg)) rotateY(var(--spin, 0deg));
+  }
+
+  /* 支柱: 細い板を円筒状に並べて立体にする。slatはJSで生成 */
+  .slat {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 7px;
+    margin-left: -3.5px;
+    background: var(--slat-color);
+    transform: rotateY(var(--a)) translateZ(var(--pole-r));
+    backface-visibility: hidden;
+  }
+  .cap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc(var(--pole-r) * 2);
+    height: calc(var(--pole-r) * 2);
+    margin-left: calc(var(--pole-r) * -1);
+    margin-top: calc(var(--pole-r) * -1);
+    border-radius: 50%;
+    background: var(--pole);
+    transform: rotateX(90deg);
+  }
+
+  /* 板: 支柱側を根元にして外へ伸ばす。向きは--aで決める */
+  .board {
+    position: absolute;
+    left: 0;
+    width: var(--board-w);
+    height: 64px;
+    transform-origin: 0 50%;
+    transform: rotateY(var(--a)) translateX(var(--pole-r));
+    transform-style: preserve-3d;
+    text-decoration: none;
+    color: inherit;
+  }
+  /* 表裏2枚の面。裏面は反転させて、後ろからも文字が読めるようにする */
+  .face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 26px 10px 14px;
+    text-align: right;
+    background: var(--board);
+    border: 1px solid var(--board-edge);
+    clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%);
+    backface-visibility: hidden;
+    box-shadow: 0 6px 14px rgba(20,30,40,.18);
+  }
+  .face.back {
+    transform: rotateY(180deg);
+    transform-origin: 50% 50%;
+    /* 裏面は矢印を左へ。鏡像にならないよう内容を左右反転で組み直す */
+    flex-direction: row;
+    text-align: left;
+    padding: 10px 14px 10px 26px;
+    clip-path: polygon(18px 0, 100% 0, 100% 100%, 18px 100%, 0 50%);
+  }
+  .face::after {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0; left: 0;
+    width: 6px;
+    background: var(--stripe);
+  }
+  .face.back::after { left: auto; right: 0; }
+
+  .board:hover .face, .board:focus-visible .face {
+    box-shadow: 0 12px 24px rgba(20,30,40,.3);
+    background: #fbfdff;
+  }
+  .board:focus-visible { outline: 3px solid var(--stripe); outline-offset: 4px; }
+
+  .arrow {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    background: var(--stripe);
+    color: #fff;
+    font-size: 24px;
+    line-height: 1;
+    border-radius: 4px;
+  }
+  .label { min-width: 0; }
+  .ja { display: block; font-size: 20px; font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
+  .en { display: block; font-size: 12px; color: var(--sub); letter-spacing: .04em; margin-top: 2px; }
+
+  .ground {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 420px;
+    height: 420px;
+    margin-left: -210px;
+    margin-bottom: -210px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(20,30,40,.22), rgba(20,30,40,0) 65%);
+    transform: rotateX(90deg);
+  }
+
+  .hint {
+    position: fixed;
+    bottom: 12px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 12px;
+    color: var(--sub);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .post { --spin: -25deg; }
+  }
+  @media (max-width: 560px) {
+    :root { --board-w: 220px; }
+    .scene { height: 460px; perspective: 1000px; }
+    .ja { font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+<div class="scene" id="scene">
+  <nav class="post" id="post" aria-label="サイト内の案内">
+    <div class="ground" aria-hidden="true"></div>
+    <div class="cap" aria-hidden="true"></div>
+
+    <a class="board" href="#project" style="--a:0deg; --stripe:#2a6fb4; top:70px" data-ja="プロジェクト" data-en="Project" data-arrow="→"></a>
+    <a class="board" href="#wetlab" style="--a:95deg; --stripe:#2a6fb4; top:160px" data-ja="ウェットラボ" data-en="Wet Lab" data-arrow="→"></a>
+    <a class="board" href="#human-practices" style="--a:200deg; --stripe:#7ab53a; top:250px" data-ja="ヒューマンプラクティス" data-en="Human Practices" data-arrow="→"></a>
+    <a class="board" href="#team" style="--a:285deg; --stripe:#e07a2f; top:340px" data-ja="チーム" data-en="Team" data-arrow="↗"></a>
+  </nav>
+</div>
+<p class="hint">ドラッグで回る。放すとゆっくり自動回転に戻る。</p>
+
+<script>
+  const post = document.getElementById('post');
+  const scene = document.getElementById('scene');
+
+  // 板の表裏を同じ内容で生成する
+  for (const b of post.querySelectorAll('.board')) {
+    const inner = `<span class="arrow" aria-hidden="true">${b.dataset.arrow}</span>
+      <span class="label"><span class="ja">${b.dataset.ja}</span><span class="en">${b.dataset.en}</span></span>`;
+    b.innerHTML = `<span class="face front">${inner}</span><span class="face back" aria-hidden="true">${inner}</span>`;
+    b.setAttribute('aria-label', `${b.dataset.ja} (${b.dataset.en})`);
+  }
+
+  // 支柱を24枚の細板で円筒にする。角度で明暗を付けて丸みを出す
+  const SLATS = 24;
+  for (let i = 0; i < SLATS; i++) {
+    const a = i * 360 / SLATS;
+    const light = 0.55 + 0.45 * Math.cos((a - 40) * Math.PI / 180);
+    const slat = document.createElement('div');
+    slat.className = 'slat';
+    slat.setAttribute('aria-hidden', 'true');
+    slat.style.setProperty('--a', a + 'deg');
+    slat.style.setProperty('--slat-color', `hsl(80 5% ${55 + light * 40}%)`);
+    post.appendChild(slat);
+  }
+
+  // 自動回転 + ドラッグ。ホバー中は止める
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let spin = -25, velocity = reduced ? 0 : 0.25, idleSpeed = velocity;
+  let dragging = false, hovering = false, lastX = 0, moved = 0;
+
+  function frame() {
+    if (!dragging) {
+      if (!hovering) {
+        // 放した直後は慣性、徐々に基準速度へ戻す
+        velocity += (idleSpeed - velocity) * 0.03;
+        spin += velocity;
+      }
+    }
+    post.style.setProperty('--spin', spin + 'deg');
+    post.style.setProperty('--tilt', '-6deg');
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  scene.addEventListener('pointerdown', e => {
+    dragging = true; moved = 0; lastX = e.clientX;
+    scene.classList.add('dragging');
+    scene.setPointerCapture(e.pointerId);
+  });
+  scene.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const dx = e.clientX - lastX;
+    lastX = e.clientX;
+    moved += Math.abs(dx);
+    spin += dx * 0.5;
+    velocity = dx * 0.5;
+  });
+  const release = e => {
+    dragging = false;
+    scene.classList.remove('dragging');
+  };
+  scene.addEventListener('pointerup', release);
+  scene.addEventListener('pointercancel', release);
+
+  // ドラッグ後のクリックでは遷移させない
+  scene.addEventListener('click', e => {
+    if (moved > 6) { e.preventDefault(); e.stopPropagation(); }
+  }, true);
+
+  post.addEventListener('pointerover', e => { if (e.target.closest('.board')) hovering = true; });
+  post.addEventListener('pointerout',  e => { if (e.target.closest('.board')) hovering = false; });
+</script>
+</body>
+</html>
