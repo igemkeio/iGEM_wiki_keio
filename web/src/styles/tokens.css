@@ -54,3 +54,21 @@
   --space-sidebar-x: 56px;
   --space-nav-gap: 2px;
 }
+
+:root[data-palette="a"] {
+  --color-accent-orange: #e83929;
+  --color-accent-blue: #00a3af;
+  --color-note-dot: #f5e56b;
+}
+
+:root[data-palette="b"] {
+  --color-accent-orange: #f39800;
+  --color-accent-blue: #1e50a2;
+  --color-note-dot: #d3381c;
+}
+
+:root[data-palette="c"] {
+  --color-accent-orange: #e2b540;
+  --color-accent-blue: #1c4286;
+  --color-note-dot: #ebd3a2;
+}
