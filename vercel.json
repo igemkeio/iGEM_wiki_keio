@@ -2,6 +2,6 @@
   "version": 2,
   "framework": null,
   "installCommand": "npm ci",
-  "buildCommand": "npm run build && npm run check",
+  "buildCommand": "sh -c 'if [ \"$VERCEL_ENV\" != production ]; then export WIKI_PALETTE_SWITCHER=1; fi; npm run build && npm run check'",
   "outputDirectory": "dist"
 }
