@@ -67,6 +67,13 @@ describe(HomePage, () => {
     expect(withBody).toContain("<p>本文</p>");
   });
 
+  it("ヒーローのイラストを空altのpictureで出し、1600px版をsourceに置く", () => {
+    const html = render();
+    expect(html).toMatch(
+      /<picture[^>]*><source media="\(max-width: 1600px\)" srcSet="[^"]*hero-ukiyoe-1600\.webp"\/><img src="[^"]*hero-ukiyoe\.webp" alt=""/u
+    );
+  });
+
   it("ロゴ画像にaltがあり、h1はtitleを持つ", () => {
     const html = render();
     expect(html).toMatch(/<img[^>]*alt="One Direction"/u);
