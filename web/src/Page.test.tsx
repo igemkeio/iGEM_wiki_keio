@@ -111,6 +111,8 @@ describe("Home", () => {
       <Page page={home} routes={routesFor(home, model)} assets={assets} />
     );
     expect(html).toContain("one-direction.png");
+    expect(html).toContain("<picture");
+    expect(html).toContain("hero-ukiyoe.webp");
     expect(html).toContain("Contents");
     expect(scripts(parse(html))).toHaveLength(0);
   });
@@ -120,6 +122,7 @@ describe("Home", () => {
       <Page page={model} routes={routesFor(home, model)} assets={assets} />
     );
     expect(html).not.toContain("one-direction.png");
+    expect(html).not.toContain("hero-ukiyoe");
   });
 });
 
