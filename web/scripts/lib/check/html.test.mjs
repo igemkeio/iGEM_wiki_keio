@@ -197,3 +197,26 @@ test("checkNoScriptはscriptの有無を見る", () => {
   );
   assert.deepEqual(checkNoScript(`<!-- <script></script> -->`), []);
 });
+
+test("checkNoScriptはdata-palette-switcherのインラインscriptだけを許す", () => {
+  assert.deepEqual(
+    checkNoScript(`<head><script data-palette-switcher>var a;</script></head>`),
+    []
+  );
+  assert.deepEqual(
+    checkNoScript(`<head><script data-palette-switcher="">a</script></head>`),
+    []
+  );
+  assert.deepEqual(
+    checkNoScript(
+      `<head><script data-palette-switcher src="/a.js"></script></head>`
+    ),
+    ["islandsが空のページに<script>があります"]
+  );
+  assert.deepEqual(
+    checkNoScript(
+      `<head><script data-palette-switcher>a</script><script>b</script></head>`
+    ),
+    ["islandsが空のページに<script>があります"]
+  );
+});

@@ -163,9 +163,13 @@ export function checkLang(html) {
   ];
 }
 
-// 島のないページにscriptがあれば違反。
+// 島のないページにscriptがあれば違反。許すのは、srcを持たず data-palette-switcher を持つインラインscriptだけ。
 export function checkNoScript(html) {
-  return parseTags(html).some((t) => t.name === "script")
+  return parseTags(html).some(
+    (t) =>
+      t.name === "script" &&
+      !(t.attrs.has("data-palette-switcher") && !t.attrs.has("src"))
+  )
     ? ["islandsが空のページに<script>があります"]
     : [];
 }
