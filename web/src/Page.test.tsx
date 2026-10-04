@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { readPage } from "./content";
 import { Page } from "./Page";
@@ -123,5 +123,36 @@ describe("Home", () => {
     );
     expect(html).not.toContain("one-direction.png");
     expect(html).not.toContain("hero-ukiyoe");
+  });
+});
+
+const found = (doc: Document) =>
+  doc.querySelectorAll("script[data-palette-switcher]");
+
+describe("パレット切り替え", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("環境変数がなければscriptを出さない", () => {
+    expect(found(parse(render(en)))).toHaveLength(0);
+  });
+
+  it("WIKI_PALETTE_SWITCHERが1ならスタイルシートより前にscriptを1本出す", () => {
+    vi.stubEnv("WIKI_PALETTE_SWITCHER", "1");
+    const html = render(en);
+    const list = found(parse(html));
+    expect(list).toHaveLength(1);
+    expect(list[0].hasAttribute("src")).toBe(false);
+    expect(list[0].textContent).toContain("wiki:palette");
+    expect(list[0].parentElement?.tagName).toBe("HEAD");
+    expect(html.indexOf("data-palette-switcher")).toBeLessThan(
+      html.indexOf('rel="stylesheet"')
+    );
+  });
+
+  it("1以外の値では出さない", () => {
+    vi.stubEnv("WIKI_PALETTE_SWITCHER", "0");
+    expect(found(parse(render(en)))).toHaveLength(0);
   });
 });

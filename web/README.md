@@ -56,6 +56,16 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 - VercelのプロジェクトのNode.js Versionは24.xを選ぶ。
 - GitLabのURLが決まったら確認すること: プロジェクト名と`WIKI_BASE`が一致していること、GitLabのPagesの設定(公開範囲とURL)、`pages`ジョブが既定ブランチで緑になること、公開されたページのCSSとリンクが404にならないこと。
 
+### パレットの切り替え
+
+デザインの比較用に、差し色の3パターンを同じサイトで切り替えられる。本番には出さず、Vercelのプレビューだけに出る。
+
+- トークン: `src/styles/tokens.css`の`:root`が既定。`:root[data-palette="a"]`、`"b"`、`"c"`が`--color-accent-orange`、`--color-accent-blue`、`--color-note-dot`を上書きする。背景、文字、`--color-curve`は共通。
+- 環境変数: `WIKI_PALETTE_SWITCHER=1`でビルドすると、全ページの`<head>`に`<script data-palette-switcher>`が1本入る。中身は`src/palette-switcher.ts`を`?raw`で読んだ文字列。未指定なら出さない。
+- Vercel: `vercel.json`の`buildCommand`が、`VERCEL_ENV`が`production`以外のときだけ`WIKI_PALETTE_SWITCHER=1`を付ける。
+- 見方: プレビューの右下に既定、a、b、cのボタンが出る。選択は`localStorage`の`wiki:palette`に残り、ページを移っても保たれる。`?palette=b`のクエリでも切り替わり、`?palette=default`で既定に戻る。ローカルでは`WIKI_PALETTE_SWITCHER=1 npm run build && npm run preview`で確認する。
+- JSが無い環境では既定の色で表示される。
+
 ### 出力の検査
 
 `npm run check`は`dist/`を走査し、違反を`ファイル: 理由`の1行ずつ出す。1件でもあれば終了コード1。`WIKI_BASE`を読むので、`WIKI_BASE=/keio/ npm run build`で作った`dist/`は`WIKI_BASE=/keio/ npm run check`で検査する。
@@ -65,7 +75,7 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 - 内部リンク: `/`で始まる`href`と`src`(`<a>`を含む)は、`base`を除いたパスが`dist/`のファイルか、`index.html`を持つディレクトリを指すこと。`base`の外を指すリンクも違反。`#`だけの`href`と`mailto:`は見ない。
 - 構造: 各HTMLに`<title>`(SVGの中は数えない)と`<h1>`が1つずつあり、`<img>`に`alt`属性がある(空文字は可)。
 - `<html lang>`が`en`か`ja`。
-- `islands`が空のページに`<script>`がない。
+- `islands`が空のページに`<script>`がない。ただし`data-palette-switcher`属性を持ち、`src`を持たないインラインのscriptは許す。
 
 検査するのは`dist/`のHTMLと、`dist/assets/`配下のCSSだけ。`web/public/`由来のファイル(`fonts/`、`images/`、`models/`、`notion-images/`)は読まない。HTMLの解析は正規表現で行い、依存は増やさない。検査の関数は`scripts/lib/check/`にあり、`npm run test:check`でテストする。
 

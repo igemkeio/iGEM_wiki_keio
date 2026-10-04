@@ -78,6 +78,11 @@ const base = process.env.WIKI_BASE ?? "/";
 
 export default defineConfig({
   base,
+  define: {
+    "import.meta.env.WIKI_PALETTE_SWITCHER": JSON.stringify(
+      process.env.WIKI_PALETTE_SWITCHER ?? ""
+    ),
+  },
   plugins: [react(), watchContent(), assetBase(base), keepCssModules()],
   build: {
     manifest: true,
