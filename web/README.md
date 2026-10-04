@@ -190,5 +190,6 @@ MPAではページを移るとJSのメモリが消えるため、ページをま
 ### 画像
 
 - `public/images/`にロゴなどの画像を置く。Homeのロゴは`public/images/one-direction.png`。Figma上でもラスター画像なのでSVGは無い。リポジトリに置くのは暫定で、本番は`WIKI_IMAGE_BASE`で`static.igem.wiki`に向ける。
+- Homeのヒーローのイラストは`public/images/hero-ukiyoe.webp`(2623×1415)と`hero-ukiyoe-1600.webp`(1600×863)。生成AI(Weave経由のNano Banana 2)で作った画像で、幅1600px以下の画面には1600版を出す。リポジトリに置くのは暫定で、本番は`WIKI_IMAGE_BASE`の先に同じ名前で置く。Attributionsに生成AIによる画像であることを明記する。
 - ソースの画像URLの先頭は目印の`__WIKI_IMAGE_BASE__`で、`vite.config.ts`のプラグイン(フォントの目印と同じもの)が環境変数`WIKI_IMAGE_BASE`に置き換える。未指定なら配信パスを付けた`/images`。末尾のスラッシュは落とす。
 - 本番では`WIKI_IMAGE_BASE=https://static.igem.wiki/teams/<id>/images npm run build`とし、`public/images/`の中身を同じ場所へ人がアップロードする。
