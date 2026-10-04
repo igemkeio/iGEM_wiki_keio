@@ -4,6 +4,7 @@ import { HomePage } from "./components/HomePage";
 import { PageShell } from "./components/PageShell";
 import type { WikiPage } from "./content";
 import { ISLANDS } from "./islands";
+import paletteSwitcher from "./palette-switcher.ts?raw";
 import type { Route } from "./routes";
 
 export interface Assets {
@@ -25,6 +26,12 @@ export function Page({
   return (
     <html lang={page.locale}>
       <head>
+        {import.meta.env.WIKI_PALETTE_SWITCHER === "1" && (
+          <script
+            data-palette-switcher=""
+            dangerouslySetInnerHTML={{ __html: paletteSwitcher }}
+          />
+        )}
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>{`${page.title} | iGEM Keio 2026`}</title>
