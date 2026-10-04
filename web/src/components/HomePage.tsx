@@ -8,26 +8,6 @@ import styles from "./HomePage.module.css";
 // ビルド時にvite.config.tsのプラグインが画像の配信元に置き換える。
 const imageBase = "__WIKI_IMAGE_BASE__";
 
-const curveProps = {
-  pathLength: 1,
-  className: styles.curve,
-  fill: "none",
-} as const;
-
-// ヒーローの装飾。原点はヒーロー内の(348, 64)で、曲線は描かれ、オレンジの円は上下に揺れる。
-function Decoration() {
-  return (
-    <div className={styles.decoration} aria-hidden="true">
-      <svg width="900" height="560" viewBox="0 0 900 560" focusable="false">
-        <path {...curveProps} d="M-60 520C220 380 520 470 940 120" />
-        <path {...curveProps} d="M-40 300C300 240 620 340 920 40" />
-        <circle className={styles.ring} cx="617" cy="208" r="14" />
-        <circle className={styles.orb} cx="534" cy="266" r="32" />
-      </svg>
-    </div>
-  );
-}
-
 const contentsSubtitle: Record<Locale, string> = {
   en: "コンテンツ",
   ja: "Contents",
@@ -70,7 +50,20 @@ export function HomePage({
     <main className={styles.main}>
       <h1 className={styles.visuallyHidden}>{page.title}</h1>
       <section className={styles.hero}>
-        <Decoration />
+        <picture className={styles.art}>
+          <source
+            media="(max-width: 1600px)"
+            srcSet={`${imageBase}/hero-ukiyoe-1600.webp`}
+          />
+          <img
+            src={`${imageBase}/hero-ukiyoe.webp`}
+            alt=""
+            width={2623}
+            height={1415}
+            loading="eager"
+            fetchPriority="high"
+          />
+        </picture>
         <img
           className={styles.logo}
           src={`${imageBase}/one-direction.png`}

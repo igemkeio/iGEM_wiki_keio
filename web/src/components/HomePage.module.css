@@ -14,43 +14,37 @@
   }
 
   .hero {
+    --hero-water-top: 48%;
+    --hero-water-left: 0;
+    --hero-water-right: 30%;
+    --hero-water-bottom: 0;
+
     position: relative;
     height: var(--size-hero);
-  }
-
-  .decoration {
-    position: absolute;
-    top: 64px;
-    left: 348px;
-    width: clamp(640px, calc(100vw - 720px), 900px);
-    height: 560px;
     overflow: hidden;
+    border-radius: 24px;
   }
 
-  .decoration svg {
+  .art,
+  .art img {
     display: block;
-    max-width: none;
-    overflow: visible;
+    width: 100%;
+    height: 100%;
   }
 
-  .curve {
-    stroke: var(--color-curve);
-    stroke-dasharray: 1;
-    stroke-dashoffset: 0;
+  .art {
+    position: absolute;
+    inset: 0;
   }
 
-  .ring {
-    fill: none;
-    stroke: var(--color-curve);
-  }
-
-  .orb {
-    fill: var(--color-accent-orange);
+  .art img {
+    object-fit: cover;
+    object-position: center bottom;
   }
 
   .logo {
     position: absolute;
-    top: 112px;
+    top: 144px;
     left: 0;
     width: var(--size-logo-width);
     height: auto;
@@ -59,8 +53,9 @@
 
   .catch {
     position: absolute;
-    top: 568px;
-    left: 0;
+    bottom: 56px;
+    left: 56px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
     font-family: var(--font-heading);
     font-size: var(--size-catch);
     line-height: 1.2;
@@ -74,16 +69,13 @@
 
   .about {
     position: absolute;
-    top: 720px;
-    right: 0;
-    width: var(--size-hero-text);
-    max-width: 100%;
+    top: calc(var(--hero-water-top) + 48px);
+    right: 30%;
+    width: min(var(--size-hero-text), calc(70% - 56px));
     text-align: right;
   }
 
   .name {
-    max-width: 320px;
-    margin-left: auto;
     font-family: var(--font-heading);
     font-size: var(--size-hero-title);
     line-height: 1.15;
@@ -99,12 +91,11 @@
 
   .description {
     padding-top: 12px;
-    color: var(--color-muted);
     font-size: 12px;
     line-height: 18px;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 6;
+    -webkit-line-clamp: 3;
     overflow: hidden;
   }
 
@@ -176,43 +167,25 @@
     line-height: 20px;
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    .curve {
-      animation: draw 8s ease-out 1 both;
-    }
-
-    .orb {
-      animation: float 6s ease-in-out infinite;
-    }
-  }
-
-  @keyframes draw {
-    from {
-      stroke-dashoffset: 1;
-    }
-
-    to {
-      stroke-dashoffset: 0;
-    }
-  }
-
-  @keyframes float {
-    50% {
-      transform: translateY(-14px);
-    }
-  }
-
   @media (max-width: 1043px) {
     .hero {
       display: flex;
       flex-direction: column;
       gap: 40px;
       height: auto;
-      padding: 48px 0 56px;
+      padding: 0 0 56px;
     }
 
-    .decoration {
-      display: none;
+    .art {
+      position: static;
+      aspect-ratio: 16 / 9;
+      height: auto;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .art img {
+      height: 100%;
     }
 
     .logo,
@@ -231,8 +204,9 @@
       text-align: left;
     }
 
-    .name {
-      max-width: none;
+    .description {
+      color: var(--color-muted);
+      -webkit-line-clamp: 6;
     }
   }
 
