@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>案内標識ヘッダー プロトタイプ</title>
+<style>
+  :root {
+    --sky: #dfe8ee;
+    --sky-deep: #b9cbd6;
+    --pole: #f2f2f0;
+    --pole-shade: #9ea4a6;
+    --board: #ffffff;
+    --board-edge: #cfd4d6;
+    --ink: #1a1d1f;
+    --sub: #5a6368;
+    --blue: #2a6fb4;
+    --tip: 14px;   /* 矢印の先端の長さ */
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+    color: var(--ink);
+    background: linear-gradient(var(--sky), var(--sky-deep)) fixed;
+    min-height: 100vh;
+  }
+
+  /* ヘッダー: 横に寝かせた支柱の上に板を吊るす */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 14px 16px 0;
+    background: linear-gradient(rgba(223,232,238,.95), rgba(223,232,238,.6) 80%, transparent);
+    backdrop-filter: blur(6px);
+  }
+  .rail {
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 18px;
+  }
+  /* 支柱 */
+  .rail::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 4px;
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(var(--pole-shade), var(--pole) 35%, var(--pole) 65%, var(--pole-shade));
+    box-shadow: 0 4px 8px rgba(20,30,40,.18);
+  }
+  /* 支柱の両端のキャップ */
+  .rail::after {
+    content: "";
+    position: absolute;
+    right: -4px;
+    bottom: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--pole);
+    box-shadow: inset -3px 0 4px rgba(0,0,0,.15);
+  }
+
+  .brand {
+    position: relative;
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--ink);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    letter-spacing: .06em;
+    border-radius: 3px;
+    box-shadow: 0 6px 12px rgba(20,30,40,.2);
+  }
+  .brand small { font-weight: 400; opacity: .7; letter-spacing: .1em; font-size: 11px; }
+
+  .nav {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+    overflow-x: auto;
+    padding: 6px 2px 10px;
+    scrollbar-width: none;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+
+  /* 矢印板。右向き。現在地だけ下向きの矢印にして、ここだと示す */
+  .plate {
+    --stripe: var(--blue);
+    position: relative;
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px calc(var(--tip) + 10px) 6px 12px;
+    background: var(--board);
+    border: 1px solid var(--board-edge);
+    clip-path: polygon(0 0, calc(100% - var(--tip)) 0, 100% 50%, calc(100% - var(--tip)) 100%, 0 100%);
+    text-decoration: none;
+    color: inherit;
+    line-height: 1.1;
+    box-shadow: 0 5px 10px rgba(20,30,40,.16);
+    transition: transform .15s ease, background .15s ease;
+  }
+  /* clip-pathで影が切れるので、影は包むspanに逃がす */
+  .plate-wrap {
+    position: relative;
+    flex: none;
+    filter: drop-shadow(0 5px 6px rgba(20,30,40,.2));
+  }
+  .plate::before {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0; left: 0;
+    width: 5px;
+    background: var(--stripe);
+  }
+  .plate:hover { transform: translateY(-2px); background: #fbfdff; }
+  .plate:focus-visible { outline: 3px solid var(--stripe); outline-offset: 2px; }
+
+  .plate .mark {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    background: var(--stripe);
+    color: #fff;
+    border-radius: 3px;
+  }
+  .plate .ja { font-size: 14px; font-weight: 700; white-space: nowrap; }
+  .plate .en { display: block; font-size: 9.5px; color: var(--sub); letter-spacing: .06em; margin-top: 2px; white-space: nowrap; }
+
+  /* 現在地: 板を色で塗り、矢印を下向きにする */
+  .plate[aria-current="page"] {
+    background: var(--stripe);
+    color: #fff;
+    border-color: transparent;
+  }
+  .plate[aria-current="page"] .en { color: rgba(255,255,255,.8); }
+  .plate[aria-current="page"] .mark { background: #fff; color: var(--stripe); }
+  .plate[aria-current="page"]::before { background: rgba(255,255,255,.5); }
+
+  /* ページ本文 (ダミー) */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 16px 80px;
+  }
+  section {
+    min-height: 70vh;
+    padding: 24px 0;
+    border-top: 1px dashed rgba(20,30,40,.25);
+  }
+  section:first-child { border-top: 0; }
+  h1 { font-size: clamp(28px, 5vw, 44px); letter-spacing: .02em; margin: 0 0 8px; }
+  h2 { font-size: 22px; margin: 0 0 8px; }
+  p { max-width: 36em; line-height: 1.8; color: var(--sub); }
+
+  @media (max-width: 720px) {
+    .brand small { display: none; }
+    .plate .en { display: none; }
+    .plate { padding-top: 8px; padding-bottom: 8px; }
+  }
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="rail">
+    <a class="brand" href="#top">iGEM <small>2026</small></a>
+    <nav class="nav" aria-label="主要ナビゲーション" id="nav">
+      <span class="plate-wrap"><a class="plate" href="#project" style="--stripe:#2a6fb4" aria-current="page">
+        <span class="mark" aria-hidden="true">→</span>
+        <span><span class="ja">プロジェクト</span><span class="en">PROJECT</span></span>
+      </a></span>
+      <span class="plate-wrap"><a class="plate" href="#wetlab" style="--stripe:#2a6fb4">
+        <span class="mark" aria-hidden="true">→</span>
+        <span><span class="ja">ウェットラボ</span><span class="en">WET LAB</span></span>
+      </a></span>
+      <span class="plate-wrap"><a class="plate" href="#drylab" style="--stripe:#2a6fb4">
+        <span class="mark" aria-hidden="true">→</span>
+        <span><span class="ja">ドライラボ</span><span class="en">DRY LAB</span></span>
+      </a></span>
+      <span class="plate-wrap"><a class="plate" href="#human-practices" style="--stripe:#7ab53a">
+        <span class="mark" aria-hidden="true">→</span>
+        <span><span class="ja">ヒューマンプラクティス</span><span class="en">HUMAN PRACTICES</span></span>
+      </a></span>
+      <span class="plate-wrap"><a class="plate" href="#team" style="--stripe:#e07a2f">
+        <span class="mark" aria-hidden="true">→</span>
+        <span><span class="ja">チーム</span><span class="en">TEAM</span></span>
+      </a></span>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section id="project"><h1>プロジェクト</h1><p>ここに概要が入る。スクロールすると上のヘッダーの現在地が切り替わる。</p></section>
+  <section id="wetlab"><h2>ウェットラボ</h2><p>実験の記録。</p></section>
+  <section id="drylab"><h2>ドライラボ</h2><p>モデリングとソフトウェア。</p></section>
+  <section id="human-practices"><h2>ヒューマンプラクティス</h2><p>社会との対話。</p></section>
+  <section id="team"><h2>チーム</h2><p>メンバー紹介。</p></section>
+</main>
+
+<script>
+  // スクロール位置に合わせて現在地の板を切り替え、矢印を下向きにする
+  const plates = [...document.querySelectorAll('.plate')];
+  const byId = Object.fromEntries(plates.map(p => [p.getAttribute('href').slice(1), p]));
+  function setCurrent(id) {
+    for (const p of plates) {
+      const on = p === byId[id];
+      p.toggleAttribute('aria-current', on);
+      if (on) p.setAttribute('aria-current', 'page');
+      p.querySelector('.mark').textContent = on ? '↓' : '→';
+    }
+    byId[id]?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+  }
+  const io = new IntersectionObserver(entries => {
+    const hit = entries.filter(e => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+    if (hit) setCurrent(hit.target.id);
+  }, { rootMargin: '-30% 0px -55% 0px', threshold: [0, .2, .5, 1] });
+  document.querySelectorAll('main section').forEach(s => io.observe(s));
+  setCurrent('project');
+</script>
+</body>
+</html>

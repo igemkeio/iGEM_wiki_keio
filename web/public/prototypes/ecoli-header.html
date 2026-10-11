@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E. coli Nav Prototype</title>
+<style>
+  /* ecoli-line.svgの4色をそのまま使う */
+  :root {
+    --yellow: #FFD21E;
+    --yellow-hi: #FFE87A;
+    --blue: #1142FF;
+    --white: #FFFFFF;
+    --black: #06080F;
+    --navy: #0A1E6E;
+    --ink: #E7EEFF;
+    --sub: rgba(231,238,255,.7);
+    --cell-h: 44px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Inter, "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+    color: var(--ink);
+    background: linear-gradient(135deg, #0B0E1A, var(--navy) 55%, var(--black)) fixed;
+    min-height: 100vh;
+  }
+
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 14px 16px 10px;
+    background: linear-gradient(rgba(6,8,15,.85), rgba(6,8,15,.4) 80%, transparent);
+    backdrop-filter: blur(6px);
+  }
+  .bar {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .brand {
+    flex: none;
+    color: var(--white);
+    text-decoration: none;
+    font-weight: 800;
+    letter-spacing: .08em;
+    font-size: 15px;
+  }
+  .brand small { color: var(--yellow); font-weight: 600; margin-left: 4px; }
+
+  /* 大腸菌の連なり。尾(左)に鞭毛、頭(右)に黄色い点 */
+  .chain {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    overflow-x: auto;
+    padding: 8px 12px 8px 0;
+    scrollbar-width: none;
+  }
+  .chain::-webkit-scrollbar { display: none; }
+
+  .flagella {
+    flex: none;
+    width: 46px;
+    height: var(--cell-h);
+    margin-right: -6px;
+    overflow: visible;
+  }
+
+  /* 1匹 = 1項目。白いカプセル、青の縁、黄色の進行矢印 */
+  .cell {
+    position: relative;
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: var(--cell-h);
+    padding: 0 18px 0 16px;
+    background: var(--white);
+    border: 3px solid var(--blue);
+    border-radius: 999px;
+    color: var(--black);
+    text-decoration: none;
+    line-height: 1.1;
+    transition: transform .15s ease, background .15s ease;
+  }
+  /* 隣の個体と重ねて、連結しているように見せる */
+  .cell + .cell { margin-left: -3px; }
+  /* 連結部の青いくびれ */
+  .cell + .cell::before {
+    content: "";
+    position: absolute;
+    left: -5px;
+    top: 4px;
+    bottom: 4px;
+    width: 4px;
+    border-radius: 2px;
+    background: var(--blue);
+  }
+  .cell:hover { transform: translateY(-2px); }
+  .cell:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+
+  /* 進行矢印。ecoli-line.svgのpathを流用 */
+  .cell svg {
+    flex: none;
+    width: 30px;
+    height: 12px;
+    display: block;
+  }
+  .cell .label { font-size: 14px; font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
+
+  /* 現在地: 黄色に光る個体 */
+  .cell[aria-current="page"] {
+    background: linear-gradient(90deg, var(--yellow-hi), var(--yellow));
+    box-shadow: 0 0 0 4px rgba(255,210,30,.25), 0 0 18px rgba(255,210,30,.5);
+  }
+  .cell[aria-current="page"] svg path { fill: var(--blue); }
+
+  .head {
+    flex: none;
+    width: 12px;
+    height: 12px;
+    margin-left: 8px;
+    border-radius: 50%;
+    background: var(--yellow);
+    box-shadow: 0 0 10px var(--yellow);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse { 50% { transform: scale(1.35); opacity: .8; } }
+  @media (prefers-reduced-motion: reduce) { .head { animation: none; } }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 40px 16px 80px; }
+  section { min-height: 70vh; padding: 24px 0; border-top: 1px dashed rgba(231,238,255,.2); }
+  section:first-child { border-top: 0; }
+  h1 { font-size: clamp(28px, 5vw, 44px); margin: 0 0 8px; color: var(--white); }
+  h2 { font-size: 22px; margin: 0 0 8px; color: var(--white); }
+  p { max-width: 36em; line-height: 1.8; color: var(--sub); }
+  .ref { margin-top: 24px; max-width: 520px; border-radius: 12px; overflow: hidden; }
+  .ref img { display: block; width: 100%; }
+
+  @media (max-width: 720px) {
+    :root { --cell-h: 38px; }
+    .cell .label { font-size: 13px; }
+    .cell { padding: 0 14px 0 12px; }
+    .cell svg { width: 22px; }
+  }
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="bar">
+    <a class="brand" href="#top">iGEM KEIO<small>2026</small></a>
+    <nav class="chain" aria-label="Main navigation" id="nav">
+      <svg class="flagella" viewBox="0 0 130 56" aria-hidden="true" stroke="#E7EEFF" fill="none" stroke-linecap="round">
+        <path d="M128,28 C94,10 48,48 10,26 C48,54 96,18 132,40" stroke-width="3" opacity="0.85"/>
+        <path d="M130,44 C98,34 54,64 16,48" stroke-width="2.5" opacity="0.55"/>
+      </svg>
+      <a class="cell" href="#project" aria-current="page"><svg viewBox="-56 -22 116 44"><path d="M-56,-9 H28 V-22 L60,0 L28,22 V9 H-56 Z" fill="#FFD21E"/></svg><span class="label">Project</span></a>
+      <a class="cell" href="#wetlab"><svg viewBox="-56 -22 116 44"><path d="M-56,-9 H28 V-22 L60,0 L28,22 V9 H-56 Z" fill="#FFD21E"/></svg><span class="label">Wet Lab</span></a>
+      <a class="cell" href="#drylab"><svg viewBox="-56 -22 116 44"><path d="M-56,-9 H28 V-22 L60,0 L28,22 V9 H-56 Z" fill="#FFD21E"/></svg><span class="label">Dry Lab</span></a>
+      <a class="cell" href="#human-practices"><svg viewBox="-56 -22 116 44"><path d="M-56,-9 H28 V-22 L60,0 L28,22 V9 H-56 Z" fill="#FFD21E"/></svg><span class="label">Human Practices</span></a>
+      <a class="cell" href="#team"><svg viewBox="-56 -22 116 44"><path d="M-56,-9 H28 V-22 L60,0 L28,22 V9 H-56 Z" fill="#FFD21E"/></svg><span class="label">Team</span></a>
+      <span class="head" aria-hidden="true"></span>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section id="project">
+    <h1>Project</h1>
+    <p>The header nav is a chain of directional E. coli taken from ecoli-line.svg. Each cell is one page, and the cell for the current page glows yellow. The tail has flagella and the head carries a direction marker.</p>
+    <div class="ref"><img src="./ecoli-line.svg" alt="Source illustration"></div>
+  </section>
+  <section id="wetlab"><h2>Wet Lab</h2><p>Experimental records.</p></section>
+  <section id="drylab"><h2>Dry Lab</h2><p>Modeling and software.</p></section>
+  <section id="human-practices"><h2>Human Practices</h2><p>Dialogue with society.</p></section>
+  <section id="team"><h2>Team</h2><p>Meet the members.</p></section>
+</main>
+
+<script>
+  const cells = [...document.querySelectorAll('.cell')];
+  const byId = Object.fromEntries(cells.map(c => [c.getAttribute('href').slice(1), c]));
+  function setCurrent(id) {
+    for (const c of cells) {
+      if (c === byId[id]) c.setAttribute('aria-current', 'page');
+      else c.removeAttribute('aria-current');
+    }
+    byId[id]?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+  }
+  const io = new IntersectionObserver(entries => {
+    const hit = entries.filter(e => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+    if (hit) setCurrent(hit.target.id);
+  }, { rootMargin: '-30% 0px -55% 0px', threshold: [0, .2, .5, 1] });
+  document.querySelectorAll('main section').forEach(s => io.observe(s));
+</script>
+</body>
+</html>
