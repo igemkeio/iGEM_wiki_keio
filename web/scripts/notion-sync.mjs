@@ -41,7 +41,7 @@ import {
   normalizeSlug,
   serializePage,
 } from "./lib/page.mjs";
-import { hasSignedUrl } from "./lib/signed-url.mjs";
+import { hasSignedUrl, signedUrlSummary } from "./lib/signed-url.mjs";
 import { staleJsonFiles } from "./lib/stale.mjs";
 
 const __dirname = import.meta.dirname;
@@ -440,13 +440,23 @@ async function collectPages(rows) {
   return { pages, skipped };
 }
 
+// GitHub Actions の Step Summary に追記する。Actions の外（変数が無いとき）は何もしない。
+function appendStepSummary(markdown) {
+  const file = process.env.GITHUB_STEP_SUMMARY;
+  if (file && markdown) {
+    fs.appendFileSync(file, markdown, "utf-8");
+  }
+}
+
 function writeOutputs(pages) {
   const imagesTodo = [];
+  const signedUrlPages = [];
 
   for (const [name, page] of pages) {
     fs.mkdirSync(path.join(CONTENT_DIR, page.locale), { recursive: true });
     const serialized = serializePage(page);
     if (hasSignedUrl(serialized)) {
+      signedUrlPages.push(name);
       console.warn(
         `[notion-sync] ${name} にNotionの署名付きURL(prod-files-secure)が残っています。1時間で切れるうえ、gitleaksに止められます。`
       );
@@ -461,6 +471,7 @@ function writeOutputs(pages) {
     }
   }
 
+  appendStepSummary(signedUrlSummary(signedUrlPages));
   removeStaleJson(new Set(pages.keys()));
   fs.writeFileSync(
     path.join(CONTENT_DIR, "images-todo.json"),

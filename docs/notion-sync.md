@@ -59,6 +59,8 @@ Notionにアップロードしたfile・pdfブロックは、同期時に`web/pu
 
 videoブロックは、外部URLならそのまま通す。Notionにアップロードされた動画は同期のログに警告を出し、何も出力しない。iGEMの規定で動画はリポジトリに入れないため、iGEM Video Universe(video.igem.org)にアップロードしてから、Notionの動画ブロックを外部URLに差し替える。file・pdfブロックでも、ファイル名の拡張子が動画(mp4、mov、webmなど)なら同じ扱いで、ダウンロードせず警告を出す。
 
+書き出すcontentにNotionの署名付きURL(prod-files-secure)が残ったときは、ページ名を添えてログに警告する。環境変数`GITHUB_STEP_SUMMARY`があるとき(Actions上)は、そのファイルにも一覧を追記する。ジョブは失敗させない。
+
 添付ファイルの置き場所は画像と同じ暫定方式で、本番の提出前に`static.igem.wiki`へ移す([Issue #13](https://github.com/igemkeio/iGEM_wiki_keio/issues/13))。
 
 ### 画像の扱い(暫定)
