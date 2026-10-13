@@ -25,6 +25,14 @@ function Flagella() {
   );
 }
 
+// リンク先がいまのページ自身なら"page"、同じ分類の別ページなら"true"。
+function currentValue(inCategory: boolean, isPage: boolean) {
+  if (!inCategory) {
+    return;
+  }
+  return isPage ? "page" : "true";
+}
+
 // 大腸菌の連なり。1匹が1分類で、いまのページの分類の1匹を強調する。JSは使わない。
 export function EcoliNav({
   page,
@@ -48,7 +56,10 @@ export function EcoliNav({
               <a
                 className={styles.cell}
                 href={withBase(items[0].path)}
-                aria-current={category.id === current ? "true" : undefined}
+                aria-current={currentValue(
+                  category.id === current,
+                  items[0].page.slug === page.slug
+                )}
               >
                 <Arrow />
                 <span className={styles.label}>{category.label}</span>
