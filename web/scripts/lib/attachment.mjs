@@ -45,6 +45,13 @@ function escapeLinkText(text) {
   return text.replaceAll(/[[\]\\]/gu, (c) => `\\${c}`);
 }
 
+// ブロックに name があればそれを、無ければURLのパスから元のファイル名を得る。
+function originalNameOf(body) {
+  return typeof body.name === "string" && body.name.trim()
+    ? body.name.trim()
+    : fileNameFromUrl(body.file.url);
+}
+
 // file / pdf / video ブロックのカスタム変換。
 // save(url) はダウンロードして保存し、配信用パスを返す(失敗時は null)。
 // 戻り値が文字列ならその内容に置き換え、false なら notion-to-md の既定変換に任せる。
@@ -56,14 +63,14 @@ export async function transformAttachment(block, save, warn) {
       return false;
     }
     warn(
-      `Notionにアップロードされた動画は出力しません。外部URLに差し替えてください: ${fileNameFromUrl(body.file.url)}`
+      `Notionにアップロードされた動画は出力しません。外部URLに差し替えてください: ${originalNameOf(body)}`
     );
     return "";
   }
   if (body.type !== "file") {
     return false;
   }
-  const name = fileNameFromUrl(body.file.url);
+  const name = originalNameOf(body);
   const href = await save(body.file.url, name);
   if (!href) {
     return `<!-- ファイルをスキップしました -->`;

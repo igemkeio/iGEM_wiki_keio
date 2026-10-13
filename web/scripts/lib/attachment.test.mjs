@@ -114,3 +114,19 @@ test("外部URLの動画は既定の変換に任せる", async () => {
     false
   );
 });
+
+test("ブロックの name があればURLのファイル名より優先する", async () => {
+  const block = fileBlock("pdf");
+  block.pdf.name = "ポスター最終版.pdf";
+  const saved = [];
+  const md = await transformAttachment(
+    block,
+    (_url, name) => {
+      saved.push(name);
+      return Promise.resolve("/notion-files/h-x.pdf");
+    },
+    assert.fail
+  );
+  assert.deepEqual(saved, ["ポスター最終版.pdf"]);
+  assert.ok(md.includes("ポスター最終版.pdf"));
+});
