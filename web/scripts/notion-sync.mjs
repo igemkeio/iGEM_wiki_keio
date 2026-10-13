@@ -24,6 +24,11 @@ import { Client } from "@notionhq/client";
 import heicConvert from "heic-convert";
 import { NotionToMarkdown } from "notion-to-md";
 
+import {
+  attachmentFileName,
+  attachmentHref,
+  transformAttachment,
+} from "./lib/attachment.mjs";
 import { collectImageSrcs, isIgemStatic, renderImage } from "./lib/figure.mjs";
 import {
   renderMarkdown,
@@ -46,6 +51,9 @@ const LOCALES = ["en", "ja"];
 // ※ iGEM 本番では static.igem.wiki へ移す必要あり（Issue #13）。
 const IMAGES_DIR = path.join(WEB_DIR, "public", "notion-images");
 const IMAGES_URL_PREFIX = "/notion-images";
+// PDF などの添付ファイルを保存する場所。/notion-files/ で配信される。
+const FILES_DIR = path.join(WEB_DIR, "public", "notion-files");
+const FILES_URL_PREFIX = "/notion-files";
 
 // web/.env.local があれば最小パースで読み込む（dotenv 非依存）。
 function loadEnvLocal() {
@@ -192,6 +200,39 @@ async function localizeImage(url) {
     console.warn(`[notion-sync] 画像取得失敗のためスキップ: ${error.message}`);
     return null;
   }
+}
+
+// 添付ファイルをダウンロードして web/public/notion-files に保存し、配信用パスを返す。
+// Notion の署名付きURLは1時間で切れるため、リンクは保存したファイルに向ける。失敗時は null。
+async function localizeFile(url, originalName) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+    const buf = Buffer.from(await res.arrayBuffer());
+    const fileName = attachmentFileName(buf, originalName);
+    const outPath = path.join(FILES_DIR, fileName);
+    if (!fs.existsSync(outPath)) {
+      fs.mkdirSync(FILES_DIR, { recursive: true });
+      fs.writeFileSync(outPath, buf);
+      console.log(`[notion-sync] file saved ${fileName} (${buf.length} bytes)`);
+    }
+    return attachmentHref(FILES_URL_PREFIX, fileName);
+  } catch (error) {
+    console.warn(
+      `[notion-sync] ファイル取得失敗のためスキップ: ${error.message}`
+    );
+    return null;
+  }
+}
+
+for (const type of ["file", "pdf", "video"]) {
+  n2m.setCustomTransformer(type, (block) =>
+    transformAttachment(block, localizeFile, (message) =>
+      console.warn(`[notion-sync] ${message}`)
+    )
+  );
 }
 
 // image ブロックのカスタム変換。Notion アップロード画像（一時URL）は
