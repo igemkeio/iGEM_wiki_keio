@@ -164,6 +164,17 @@
     background: var(--color-page);
   }
 
+  .figure-card__media:has(.video-embed) {
+    aspect-ratio: auto;
+  }
+
+  .video-embed {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 0;
+  }
+
   .figure-card__media img {
     display: block;
     width: 100%;
