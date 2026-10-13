@@ -76,6 +76,7 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 - 構造: 各HTMLに`<title>`(SVGの中は数えない)と`<h1>`が1つずつあり、`<img>`に`alt`属性がある(空文字は可)。
 - `<html lang>`が`en`か`ja`。
 - `islands`が空のページに`<script>`がない。ただし`data-palette-switcher`属性を持ち、`src`を持たないインラインのscriptは許す。
+- 警告(違反に数えず、終了コードも変えない): `src/data/nav-categories.json`の分類に載っていない公開ページを`警告: <ファイル>: ...`の形で出す。
 
 検査するのは`dist/`のHTMLと、`dist/assets/`配下のCSSだけ。`web/public/`由来のファイル(`fonts/`、`images/`、`models/`、`notion-images/`)は読まない。HTMLの解析は正規表現で行い、依存は増やさない。検査の関数は`scripts/lib/check/`にあり、`npm run test:check`でテストする。
 
@@ -146,6 +147,7 @@ GIT_CONFIG_GLOBAL=/dev/null npx lefthook install
 - `slug`が`home`のページは`Page.tsx`が`HomePage.tsx`を使う。ヒーロー(ロゴ、曲線と円の装飾、キャッチ、紹介)とContentsのカードを持ち、`lead`がキャッチ(`<b>`は青)、`subtitle`と`html`が右下の紹介になる。カードは現在の言語のhome以外のページを`order`順に並べる。装飾のアニメーションはCSSだけで、`prefers-reduced-motion: reduce`では止まる。
 - 見た目の値は`src/styles/tokens.css`、リセットと`@layer`の宣言は`src/styles/global.css`にある。
 - 部品のCSSは`*.module.css`で、`@layer components`の中に書く。SSRでしか参照されないため、`vite.config.ts`の`keep-css-modules`がtree-shakeで捨てられないようにし、`src/main.tsx`の`import.meta.glob`でクライアント側のCSSに束ねる。`global.css`を先に読むのは、`@layer`の宣言を最初に置くため。
+- `src/components/EcoliNav.tsx`が本文の上に大腸菌の連なりのヘッダーを描く。1匹が1分類で、リンク先はその分類の`order`が最小のページ、いまのページの分類の1匹には`aria-current="true"`が付いて差し色になる(色は`--color-accent-*`)。分類とslugの対応は`src/data/nav-categories.json`で、組み立ては`src/lib/navGroups.ts`。分類の表示名は日英とも英語。375pxでは折り返して5分類すべてを見せる。Sidebarは、いまのページと同じ分類のページを`order`順に並べ、Homeでは全分類を見出し付きで並べる(homeは一覧に出ない)。対応表にないページはProjectの末尾に入る。どちらもJSを持たない。
 - 768px未満ではSidebarが上部のバーになり、`<details>`でナビを開閉する。デスクトップでナビを常に見せるために`::details-content`を使い、非対応のブラウザではデスクトップでもトグルを出して開閉式にする。
 - Tocは`lib/toc.ts`が`html`のh2とh3から作り、見出しのないページでは出さない。1440px以上で本文の右に置く。
 - Sidebarには`view-transition-name: sidebar`が付き、ページ遷移のアニメーションは`prefers-reduced-motion: no-preference`のときだけ有効。
