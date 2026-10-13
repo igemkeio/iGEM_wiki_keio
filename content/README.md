@@ -16,7 +16,7 @@ Notion同期とプリレンダーをつなぐ受け渡し形式。同期スク�
 | `subtitle`  | string               | 任意 | 見出しの下の小見出し。enのページでは日本語(例: 結果)、jaのページでは英語 |
 | `lead`      | string               | 任意 | リード文。簡単なHTMLを含んでよい                                         |
 | `html`      | string               | 必須 | 本文。見出しには`id`が付いている。空文字も許す                           |
-| `order`     | number               | 任意 | ナビとHomeのカードの並び順。省略時は末尾。同値はslugの辞書順             |
+| `order`     | number               | 任意 | Homeのカードの並び順。ナビでは`web/src/data/nav-categories.json`にないページだけがこの順に並ぶ。省略時は末尾。同値はslugの辞書順 |
 | `islands`   | string[]             | 任意 | このページで使う島の名前。省略時は空配列                                 |
 | `models`    | `{ src, poster, alt }[]` | 任意 | 3Dモデルの一覧。省略時は空配列。`model-viewer`島は先頭の1件を表示する |
 | `published` | boolean              | 任意 | 省略時はtrue。falseのページはビルドから除く                              |
