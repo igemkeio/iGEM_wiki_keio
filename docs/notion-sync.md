@@ -53,6 +53,12 @@ Database IDはDBのURLに含まれる32文字の英数字。
 
 HTMLの形は[`../content/README.md`](../content/README.md)のFigureカードとNoteのHTMLの形の節にある。
 
+### 添付ファイルの扱い
+
+Notionにアップロードしたfile・pdfブロックは、同期時に`web/public/notion-files/<内容のsha256先頭16桁>-<元のファイル名>`に保存され、リンクは`/notion-files/...`になる。NotionのAPIが返す署名付きURLは1時間で切れるため、そのまま埋め込まない。ハッシュで同じファイルの二重保存を避け、元のファイル名はダウンロード時の名前を読めるように残す。
+
+videoブロックは、外部URLならそのまま通す。Notionにアップロードされた動画は同期のログに警告を出し、何も出力しない。外部の動画サービスにアップロードしてから、Notionの動画ブロックを外部URLに差し替える。
+
 ### 画像の扱い(暫定)
 
 Notionの本文に貼った画像は、同期時に`web/public/notion-images/<ハッシュ>.<拡張子>`に取り込まれ(内容ハッシュで重複を排除する)、`/notion-images/...`として配信される。外部URL(例: `static.igem.wiki`の画像を埋め込みで貼った場合)はそのまま通す。
@@ -79,7 +85,7 @@ npm run dev                        # 反映を確認
 - 手動実行(Actionsタブのworkflowを実行)か、毎日0時(UTC。日本時間の9時)に起動する。
 - `npm ci`のあと`npm run notion:sync`を実行し、`content/images-todo.json`の件数と先頭10件をジョブのサマリーに出す。
 - `npm run build && npm run check`を実行する。失敗したらPRを作らずにジョブを失敗させる。
-- 差分があれば`chore/notion-sync`ブランチにコミットしてPRを自動で作る(`main`へ直接pushはしない)。コミット対象は`content/`と`web/public/notion-images/`だけ。
+- 差分があれば`chore/notion-sync`ブランチにコミットしてPRを自動で作る(`main`へ直接pushはしない)。コミット対象は`content/`、`web/public/notion-images/`、`web/public/notion-files/`だけ。
 
 ### 必要なSecrets
 
