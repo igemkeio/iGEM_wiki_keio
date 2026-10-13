@@ -2,7 +2,8 @@ import crypto from "node:crypto";
 
 import { escapeHtml } from "./figure.mjs";
 
-const MAX_NAME_LENGTH = 100;
+// ハッシュと区切りの17バイトを足しても、ファイル名の上限255バイトに収まる値。
+const MAX_NAME_BYTES = 200;
 const VIDEO_EXT = /\.(mp4|mov|webm|m4v|avi|mkv|wmv|flv|mpe?g|ogv|3gp)$/iu;
 
 // 署名付きURLのパスから、ダウンロード時の元のファイル名を取り出す。
@@ -15,17 +16,28 @@ export function fileNameFromUrl(url) {
   }
 }
 
-// パスとして使えない文字と空白を _ にし、長すぎる名前は拡張子を残して切る。
+// パスとして使えない文字と空白を _ にし、UTF-8で長すぎる名前は拡張子を残して文字の境目で切る。
 function sanitizeName(name) {
   const safe = name
     .replaceAll(/[\\/:*?"<>|\s\p{Cc}]+/gu, "_")
     .replace(/^\.+/u, "");
-  if (safe.length <= MAX_NAME_LENGTH) {
+  if (Buffer.byteLength(safe) <= MAX_NAME_BYTES) {
     return safe || "file";
   }
   const dot = safe.lastIndexOf(".");
-  const ext = dot > 0 && safe.length - dot <= 10 ? safe.slice(dot) : "";
-  return safe.slice(0, MAX_NAME_LENGTH - ext.length) + ext;
+  const ext =
+    dot > 0 && Buffer.byteLength(safe.slice(dot)) <= 10 ? safe.slice(dot) : "";
+  const stem = ext ? safe.slice(0, dot) : safe;
+  let out = "";
+  let bytes = Buffer.byteLength(ext);
+  for (const ch of stem) {
+    bytes += Buffer.byteLength(ch);
+    if (bytes > MAX_NAME_BYTES) {
+      break;
+    }
+    out += ch;
+  }
+  return out + ext;
 }
 
 // 保存名は内容のsha256先頭16桁と元のファイル名。同じ内容は同じ名前になり二重に保存されない。

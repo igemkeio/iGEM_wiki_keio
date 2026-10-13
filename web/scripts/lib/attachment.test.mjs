@@ -40,7 +40,7 @@ test("パスに使えない文字は置き換え、長い名前は拡張子を�
   );
   const long = attachmentFileName(Buffer.from("a"), `${"x".repeat(300)}.pdf`);
   assert.ok(long.endsWith(".pdf"));
-  assert.ok(long.length <= 16 + 1 + 100);
+  assert.ok(Buffer.byteLength(long) <= 255);
 });
 
 test("配信用パスはファイル名をエンコードする", () => {
@@ -177,4 +177,13 @@ test("キャプションのHTMLは解釈されずエスケープされる", asyn
   const html = renderMarkdown(md);
   assert.ok(!html.includes("<img"));
   assert.ok(html.includes("&lt;img src=x onerror=alert(1)&gt;"));
+});
+
+test("日本語の長い名前は多バイト文字の途中で切らず255バイトに収める", () => {
+  const name = `${"資料あ".repeat(100)}.pdf`;
+  const out = attachmentFileName(Buffer.from("a"), name);
+  assert.ok(Buffer.byteLength(out) <= 255);
+  assert.ok(out.endsWith(".pdf"));
+  assert.ok(!out.includes("\uFFFD"));
+  assert.equal(Buffer.from(out).toString("utf-8"), out);
 });
