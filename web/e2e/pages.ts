@@ -81,12 +81,16 @@ export function categoryLabelOf(slug: string): string | undefined {
   return found?.label;
 }
 
-// 分類の先頭のページ。対応表にあるページをorder順に並べ、そのあとに対応表にないページを足す。
+// 分類の先頭のページ。対応表の順で先頭にある公開ページで、無ければ対応表にないページ(pagesのorder順)の先頭。
 export function firstPageOf(pages: Entry[], label: string): Entry | undefined {
+  const category = navConfig.categories.find((c) => c.label === label);
   const mapped = new Set(navConfig.categories.flatMap((c) => c.slugs));
-  const inCategory = pages.filter((p) => categoryLabelOf(p.slug) === label);
-  return [
-    ...inCategory.filter((p) => mapped.has(p.slug)),
-    ...inCategory.filter((p) => !mapped.has(p.slug)),
-  ][0];
+  const inTable = (category?.slugs ?? []).flatMap((slug) =>
+    pages.filter((p) => p.slug === slug)
+  );
+  const unmapped =
+    category?.id === navConfig.fallback
+      ? pages.filter((p) => !mapped.has(p.slug))
+      : [];
+  return [...inTable, ...unmapped][0];
 }

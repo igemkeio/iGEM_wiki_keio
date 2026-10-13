@@ -11,7 +11,7 @@ export interface NavCategory {
 
 export interface NavGroup {
   category: NavCategory;
-  // order順。分類に載っていないページは、fallbackの分類の末尾に入る。
+  // 対応表のslug順。分類に載っていないページは、fallbackの分類の末尾にorder順で入る。
   routes: Route[];
 }
 
@@ -26,7 +26,7 @@ export const NAV_CONFIG: NavConfig = navCategories;
 const isNavPage = (r: Route, locale: Locale) =>
   r.page.locale === locale && r.page.slug !== "home";
 
-// localeのページを分類ごとにまとめる。routesはorder順に並んでいる前提で、その順を保つ。
+// localeのページを分類ごとにまとめる。分類内は対応表のslug順(その言語に無いslugは飛ばす)で、対応表にないページはroutesの順(order順)で続ける。
 export function groupRoutes(
   locale: Locale,
   routes: Route[],
@@ -37,7 +37,9 @@ export function groupRoutes(
   return config.categories.map((category) => ({
     category,
     routes: [
-      ...pages.filter((r) => category.slugs.includes(r.page.slug)),
+      ...category.slugs.flatMap((slug) =>
+        pages.filter((r) => r.page.slug === slug)
+      ),
       ...(category.id === config.fallback
         ? pages.filter((r) => !known.has(r.page.slug))
         : []),

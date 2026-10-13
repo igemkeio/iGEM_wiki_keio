@@ -27,6 +27,8 @@ const routes: Route[] = ["en", "ja"].flatMap((locale) =>
   })
 );
 
+const link = (name: string) => screen.getByRole("link", { name });
+
 afterEach(cleanup);
 
 describe(EcoliNav, () => {
@@ -49,6 +51,35 @@ describe(EcoliNav, () => {
       "/human-practices/",
       "/members/",
     ]);
+  });
+
+  it("リンク先は対応表の順で先頭の公開ページで、無いslugは飛ばす", () => {
+    // orderが逆でも、対応表のdescription、designの順に従う
+    const reversed = ["design", "description", "attributions", "members"].map(
+      (slug, i) => {
+        const page = readPage({
+          slug,
+          locale: "en",
+          title: slug,
+          html: "",
+          order: i,
+        });
+        return { page, path: pagePath(page) };
+      }
+    );
+    const { unmount } = render(
+      <EcoliNav page={pageOf("design")} routes={reversed} />
+    );
+    expect(link("Project").getAttribute("href")).toBe("/description/");
+    expect(link("Team").getAttribute("href")).toBe("/members/");
+    unmount();
+    render(
+      <EcoliNav
+        page={pageOf("design")}
+        routes={reversed.filter((r) => r.page.slug !== "description")}
+      />
+    );
+    expect(link("Project").getAttribute("href")).toBe("/design/");
   });
 
   it("いまのページの分類だけにaria-currentが付く", () => {

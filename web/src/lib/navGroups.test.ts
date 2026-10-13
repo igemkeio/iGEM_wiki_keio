@@ -13,13 +13,13 @@ const route = (slug: string, locale: "en" | "ja" = "en"): Route => {
 const slugs = (routes: Route[]) => routes.map((r) => r.page.slug);
 
 describe(groupRoutes, () => {
-  it("分類ごとにまとめ、routesの順を保つ", () => {
+  it("分類ごとにまとめ、分類内は対応表の順に並べる", () => {
     const groups = groupRoutes("en", [
       route("home"),
       route("model"),
-      route("description"),
-      route("members"),
       route("design"),
+      route("members"),
+      route("description"),
     ]);
     expect(groups.map((g) => g.category.id)).toStrictEqual([
       "project",
@@ -33,13 +33,20 @@ describe(groupRoutes, () => {
     expect(slugs(groups[4].routes)).toStrictEqual(["members"]);
   });
 
-  it("対応表にないページはProjectの末尾に入る", () => {
+  it("対応表にないページはProjectの末尾にroutesの順で入る", () => {
     const groups = groupRoutes("en", [
-      route("stray"),
+      route("stray-b"),
+      route("design"),
+      route("stray-a"),
       route("description"),
       route("members"),
     ]);
-    expect(slugs(groups[0].routes)).toStrictEqual(["description", "stray"]);
+    expect(slugs(groups[0].routes)).toStrictEqual([
+      "description",
+      "design",
+      "stray-b",
+      "stray-a",
+    ]);
     expect(slugs(groups[4].routes)).toStrictEqual(["members"]);
   });
 
