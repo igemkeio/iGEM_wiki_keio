@@ -95,7 +95,7 @@ Figmaのデザイン案(iGEM Keio 2026 Wiki Pages)を正とする。
 
 - レイアウトは左に固定のサイドバー(ロゴとナビ)、右に幅1200pxの本文。本文の上に、分類を選ぶ大腸菌のヘッダー(`EcoliNav`)を置く。
 - 375pxでは、上部に細いバー(ロゴと開くボタン)を置き、押すとナビが降りてくる。この形はこちらで決め、実装後にFigmaへ書き戻す。
-- ナビはNotionにある`published`なページから生成する。表示順はNotionの`order`プロパティで決める。ページの分類(Project、Wet Lab、Dry Lab、Human Practices、Team)だけは`src/data/nav-categories.json`のslugの対応表で決め、ヘッダーで分類を、サイドバーでその中のページを選ぶ。対応表にない公開ページはProjectの末尾に並べ、`npm run check`が警告する。ヘッダーとサイドバーはビルド時に決まる静的なマークアップで、JSは使わない。
+- ナビはNotionにある`published`なページから生成する。ページの分類(Project、Wet Lab、Dry Lab、Human Practices、Team)と、分類内の並び、ヘッダーのリンク先(分類の先頭のページ)は`src/data/nav-categories.json`のslugの対応表で決め、ヘッダーで分類を、サイドバーでその中のページを選ぶ。対応表にない公開ページはProjectの末尾にNotionの`order`順で並べ、`npm run check`が警告する。ヘッダーとサイドバーはビルド時に決まる静的なマークアップで、JSは使わない。
 - Homeは専用のテンプレート(ヒーロー、Contentsのカード)。カードはページ一覧から生成する。
 - 本文ページの型は、見出し、日本語の小見出し、リード、本文、Figureカード、Note。Membersもこの型を使う。
 - Figureカード(図と説明を点線で区切る2カラム)とNoteは、Notionのブロックから同期時に出す。対応はnotion-sync.mdに書く。
