@@ -1,0 +1,57 @@
+{
+  "fallback": "project",
+  "categories": [
+    {
+      "id": "project",
+      "label": "Project",
+      "slugs": [
+        "description",
+        "design",
+        "application",
+        "contribution",
+        "judging"
+      ]
+    },
+    {
+      "id": "wet-lab",
+      "label": "Wet Lab",
+      "slugs": [
+        "experiments",
+        "results",
+        "engineering",
+        "measurement",
+        "notebook",
+        "safety-and-security"
+      ]
+    },
+    {
+      "id": "dry-lab",
+      "label": "Dry Lab",
+      "slugs": [
+        "model",
+        "model-1",
+        "model-2",
+        "model-3",
+        "model-4",
+        "software",
+        "hardware"
+      ]
+    },
+    {
+      "id": "human-practices",
+      "label": "Human Practices",
+      "slugs": [
+        "human-practices",
+        "education",
+        "inclusivity",
+        "sustainability",
+        "entrepreneurship"
+      ]
+    },
+    {
+      "id": "team",
+      "label": "Team",
+      "slugs": ["members", "attributions"]
+    }
+  ]
+}
