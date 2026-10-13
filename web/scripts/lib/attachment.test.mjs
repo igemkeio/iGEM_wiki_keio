@@ -187,3 +187,16 @@ test("日本語の長い名前は多バイト文字の途中で切らず255バ�
   assert.ok(!out.includes("\uFFFD"));
   assert.equal(Buffer.from(out).toString("utf-8"), out);
 });
+
+test("空行を含むキャプションは1行にしてリンクの入れ子を保つ", async () => {
+  const md = await transformAttachment(
+    fileBlock("file", SIGNED, [{ plain_text: "段落1\n\n*段落2*" }]),
+    () => Promise.resolve("/notion-files/h-p.pdf"),
+    assert.fail
+  );
+  assert.ok(!md.includes("\n"));
+  const html = renderMarkdown(md);
+  assert.equal(html.match(/<a /gu)?.length, 1);
+  assert.equal(html.match(/<p>/gu)?.length, 1);
+  assert.ok(html.includes(">段落1 *段落2*</a>"));
+});

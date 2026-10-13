@@ -84,6 +84,6 @@ export async function transformAttachment(block, save, warn) {
     return `<!-- ファイルをスキップしました -->`;
   }
   const caption = (body.caption ?? []).map((t) => t.plain_text).join("");
-  const text = caption.trim() || name;
+  const text = (caption.trim() || name).replaceAll(/\s*\n\s*/gu, " ");
   return `<p><a href="${escapeHtml(href)}">${escapeHtml(text)}</a></p>`;
 }
