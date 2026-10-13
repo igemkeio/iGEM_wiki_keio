@@ -13,6 +13,7 @@ const SIGNED =
   "https://prod-files-secure.s3.us-west-2.amazonaws.com/aaa/bbb/Earth%20day%20poster.pdf?X-Amz-Credential=ASIAXXXX&X-Amz-Expires=3600";
 
 const fileBlock = (type, url = SIGNED, caption = []) => ({
+  id: "blk-1",
   type,
   [type]: { type: "file", file: { url }, caption },
 });
@@ -101,6 +102,7 @@ test("アップロードされた動画は警告して何も出力しない", as
   assert.equal(out, "");
   assert.equal(warns.length, 1);
   assert.ok(warns[0].includes("Earth day poster.mp4"));
+  assert.ok(warns[0].includes("blk-1"));
   assert.ok(!warns[0].includes("X-Amz"));
 });
 
@@ -129,4 +131,21 @@ test("ブロックの name があればURLのファイル名より優先する",
   );
   assert.deepEqual(saved, ["ポスター最終版.pdf"]);
   assert.ok(md.includes("ポスター最終版.pdf"));
+});
+
+test("file と pdf でも拡張子が動画なら警告して保存しない", async () => {
+  for (const ext of ["mp4", "MOV", "webm", "m4v", "avi", "mkv"]) {
+    for (const type of ["file", "pdf"]) {
+      const warns = [];
+      const out = await transformAttachment(
+        fileBlock(type, SIGNED.replace(".pdf", `.${ext}`)),
+        () => assert.fail("保存してはいけない"),
+        (m) => warns.push(m)
+      );
+      assert.equal(out, "");
+      assert.equal(warns.length, 1);
+      assert.ok(warns[0].includes("blk-1"));
+      assert.ok(!warns[0].includes("X-Amz"));
+    }
+  }
 });

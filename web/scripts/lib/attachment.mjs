@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 
 const MAX_NAME_LENGTH = 100;
+const VIDEO_EXT = /\.(mp4|mov|webm|m4v|avi|mkv|wmv|flv|mpe?g|ogv|3gp)$/iu;
 
 // 署名付きURLのパスから、ダウンロード時の元のファイル名を取り出す。
 export function fileNameFromUrl(url) {
@@ -58,19 +59,17 @@ function originalNameOf(body) {
 export async function transformAttachment(block, save, warn) {
   const { type } = block;
   const body = block[type];
-  if (type === "video") {
-    if (body.type === "external") {
-      return false;
-    }
-    warn(
-      `Notionにアップロードされた動画は出力しません。外部URLに差し替えてください: ${originalNameOf(body)}`
-    );
-    return "";
-  }
   if (body.type !== "file") {
     return false;
   }
   const name = originalNameOf(body);
+  // 動画はiGEMの規定でリポジトリに入れないため、videoブロックでなくても拡張子で除く。
+  if (type === "video" || VIDEO_EXT.test(name)) {
+    warn(
+      `Notionにアップロードされた動画は出力しません。外部URLに差し替えてください: ${name} (ブロック ${block.id})`
+    );
+    return "";
+  }
   const href = await save(body.file.url, name);
   if (!href) {
     return `<!-- ファイルをスキップしました -->`;
