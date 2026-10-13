@@ -125,4 +125,34 @@ for (const locale of locales) {
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL((url) => url.pathname === href);
   });
+
+  for (const width of [768, 900, 1000, 1100]) {
+    test(`[${locale}] ${width}px幅でも、ヘッダーの5匹がサイドバーに隠れず押せる`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto(start);
+      const links = header(page).getByRole("link");
+      await expect(links).toHaveCount(5);
+      for (const link of await links.all()) {
+        const box = await link.boundingBox();
+        expect(box?.x ?? -1).toBeGreaterThanOrEqual(0);
+        expect((box?.x ?? width) + (box?.width ?? width)).toBeLessThanOrEqual(
+          width
+        );
+        // 中央の点がリンク自身で、固定サイドバーなどに覆われていない
+        const covered = await link.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          const top = document.elementFromPoint(
+            r.x + r.width / 2,
+            r.y + r.height / 2
+          );
+          return !(top && el.contains(top));
+        });
+        expect(covered).toBe(false);
+      }
+      await links.last().click();
+      await expect(page).not.toHaveURL((url) => url.pathname === `/${start}`);
+    });
+  }
 }

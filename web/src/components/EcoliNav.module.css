@@ -8,8 +8,10 @@
 
   .chain {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: flex-end;
+    gap: 8px 0;
     margin: 0;
     padding: 8px 0;
     list-style: none;
@@ -129,7 +131,6 @@
     }
 
     .chain {
-      flex-wrap: wrap;
       justify-content: flex-start;
       gap: 8px 6px;
     }
