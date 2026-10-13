@@ -41,7 +41,11 @@ import {
   normalizeSlug,
   serializePage,
 } from "./lib/page.mjs";
-import { hasSignedUrl, signedUrlSummary } from "./lib/signed-url.mjs";
+import {
+  appendStepSummary,
+  hasSignedUrl,
+  signedUrlSummary,
+} from "./lib/signed-url.mjs";
 import { staleJsonFiles } from "./lib/stale.mjs";
 
 const __dirname = import.meta.dirname;
@@ -440,14 +444,6 @@ async function collectPages(rows) {
   return { pages, skipped };
 }
 
-// GitHub Actions の Step Summary に追記する。Actions の外（変数が無いとき）は何もしない。
-function appendStepSummary(markdown) {
-  const file = process.env.GITHUB_STEP_SUMMARY;
-  if (file && markdown) {
-    fs.appendFileSync(file, markdown, "utf-8");
-  }
-}
-
 function writeOutputs(pages) {
   const imagesTodo = [];
   const signedUrlPages = [];
@@ -471,7 +467,12 @@ function writeOutputs(pages) {
     }
   }
 
-  appendStepSummary(signedUrlSummary(signedUrlPages));
+  appendStepSummary(
+    process.env.GITHUB_STEP_SUMMARY,
+    signedUrlSummary(signedUrlPages),
+    (file, text) => fs.appendFileSync(file, text, "utf-8"),
+    (message) => console.warn(`[notion-sync] ${message}`)
+  );
   removeStaleJson(new Set(pages.keys()));
   fs.writeFileSync(
     path.join(CONTENT_DIR, "images-todo.json"),

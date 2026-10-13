@@ -87,7 +87,7 @@ npm run dev                        # 反映を確認
 `.github/workflows/notion-sync.yml`が次を行う。
 
 - 手動実行(Actionsタブのworkflowを実行)か、毎日0時(UTC。日本時間の9時)に起動する。
-- `npm ci`のあと`npm run notion:sync`を実行し、`content/images-todo.json`の件数と先頭10件をジョブのサマリーに出す。
+- `npm ci`のあと`npm run notion:sync`を実行し、`content/images-todo.json`の件数と先頭10件をジョブのサマリーに出す。署名付きURLが残ったページがあれば、その一覧も同期のステップからサマリーに出る。
 - `npm run build && npm run check`を実行する。失敗したらPRを作らずにジョブを失敗させる。
 - 差分があれば`chore/notion-sync`ブランチにコミットしてPRを自動で作る(`main`へ直接pushはしない)。コミット対象は`content/`、`web/public/notion-images/`、`web/public/notion-files/`だけ。
 

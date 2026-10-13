@@ -20,3 +20,16 @@ export function signedUrlSummary(names) {
     "",
   ].join("\n");
 }
+
+// Step Summary のファイルに追記する。パスが無い(Actions の外)か内容が空なら書かない。
+// 書き込みに失敗しても例外にせず、warn に渡して同期を続ける。
+export function appendStepSummary(file, markdown, append, warn) {
+  if (!(file && markdown)) {
+    return;
+  }
+  try {
+    append(file, markdown);
+  } catch (error) {
+    warn(`Step Summary に書き込めませんでした: ${error.message}`);
+  }
+}
