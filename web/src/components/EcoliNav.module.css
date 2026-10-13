@@ -122,7 +122,22 @@
     }
   }
 
-  /* 狭い幅では折り返して、5分類すべてを見せる */
+  /* 1段に収まらない幅では折り返すので、連結をやめて個体ごとに間を空ける */
+  @media (max-width: 1279px) {
+    .chain {
+      gap: 8px 6px;
+    }
+
+    .item + .item {
+      margin-left: 0;
+    }
+
+    .item + .item .cell::before {
+      display: none;
+    }
+  }
+
+  /* 狭い幅では尾と頭を外し、詰めて並べる */
   @media (max-width: 767px) {
     .root {
       --cell-height: 38px;
@@ -132,19 +147,10 @@
 
     .chain {
       justify-content: flex-start;
-      gap: 8px 6px;
     }
 
     .tail,
     .head {
-      display: none;
-    }
-
-    .item + .item {
-      margin-left: 0;
-    }
-
-    .item + .item .cell::before {
       display: none;
     }
 
