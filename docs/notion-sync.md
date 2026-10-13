@@ -57,7 +57,9 @@ HTMLの形は[`../content/README.md`](../content/README.md)のFigureカードと
 
 Notionにアップロードしたfile・pdfブロックは、同期時に`web/public/notion-files/<内容のsha256先頭16桁>-<元のファイル名>`に保存され、リンクは`/notion-files/...`になる。NotionのAPIが返す署名付きURLは1時間で切れるため、そのまま埋め込まない。ハッシュで同じファイルの二重保存を避け、元のファイル名はダウンロード時の名前を読めるように残す。
 
-videoブロックは、外部URLならそのまま通す。Notionにアップロードされた動画は同期のログに警告を出し、何も出力しない。外部の動画サービスにアップロードしてから、Notionの動画ブロックを外部URLに差し替える。
+videoブロックは、外部URLならそのまま通す。Notionにアップロードされた動画は同期のログに警告を出し、何も出力しない。iGEMの規定で動画はリポジトリに入れないため、iGEM Video Universe(video.igem.org)にアップロードしてから、Notionの動画ブロックを外部URLに差し替える。file・pdfブロックでも、ファイル名の拡張子が動画(mp4、mov、webmなど)なら同じ扱いで、ダウンロードせず警告を出す。
+
+添付ファイルの置き場所は画像と同じ暫定方式で、本番の提出前に`static.igem.wiki`へ移す([Issue #13](https://github.com/igemkeio/iGEM_wiki_keio/issues/13))。
 
 ### 画像の扱い(暫定)
 

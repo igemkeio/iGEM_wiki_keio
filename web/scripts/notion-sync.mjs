@@ -52,7 +52,8 @@ const LOCALES = ["en", "ja"];
 // ※ iGEM 本番では static.igem.wiki へ移す必要あり（Issue #13）。
 const IMAGES_DIR = path.join(WEB_DIR, "public", "notion-images");
 const IMAGES_URL_PREFIX = "/notion-images";
-// PDF などの添付ファイルを保存する場所。/notion-files/ で配信される。
+// PDF などの添付ファイルを保存する場所（暫定方式）。/notion-files/ で配信される。
+// ※ 画像と同じく、iGEM 本番では static.igem.wiki へ移す必要あり（Issue #13）。
 const FILES_DIR = path.join(WEB_DIR, "public", "notion-files");
 const FILES_URL_PREFIX = "/notion-files";
 
