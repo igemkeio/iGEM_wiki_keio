@@ -57,7 +57,7 @@ HTMLの形は[`../content/README.md`](../content/README.md)のFigureカードと
 
 Notionにアップロードしたfile・pdfブロックは、同期時に`web/public/notion-files/<内容のsha256先頭16桁>-<元のファイル名>`に保存され、リンクは`/notion-files/...`になる。NotionのAPIが返す署名付きURLは1時間で切れるため、そのまま埋め込まない。ハッシュで同じファイルの二重保存を避け、元のファイル名はダウンロード時の名前を読めるように残す。
 
-videoブロックは、外部URLならそのまま通す。Notionにアップロードされた動画は同期のログに警告を出し、何も出力しない。iGEMの規定で動画はリポジトリに入れないため、iGEM Video Universe(video.igem.org)にアップロードしてから、Notionの動画ブロックを外部URLに差し替える。file・pdfブロックでも、ファイル名の拡張子が動画(mp4、mov、webmなど)なら同じ扱いで、ダウンロードせず警告を出す。
+videoブロックの外部URLは、`video.igem.org`(Video Universe)のものだけiframeで埋め込み、それ以外はリンクのまま出す。`/w/<id>`と`/videos/watch/<id>`は`/videos/embed/<id>`に変換する(すでにembedならそのまま)。変換できない`video.igem.org`のURLは、警告を出してリンクにする。iframeは`class="video-embed"`、`loading="lazy"`、PeerTubeの推奨に沿った`sandbox`と`allow="fullscreen"`を持つ。キャプションがあれば画像と同じFigureカードで包み、titleにはキャプションのタグを除いた文字列を入れる(無ければ`Video`)。Notionにアップロードされた動画は同期のログに警告を出し、何も出力しない。iGEMの規定で動画はリポジトリに入れないため、iGEM Video Universe(video.igem.org)にアップロードしてから、Notionの動画ブロックを外部URLに差し替える。file・pdfブロックでも、ファイル名の拡張子が動画(mp4、mov、webmなど)なら同じ扱いで、ダウンロードせず警告を出す。
 
 書き出すcontentにNotionの署名付きURL(prod-files-secure)が残ったときは、ページ名を添えてログに警告する。環境変数`GITHUB_STEP_SUMMARY`があるとき(Actions上)は、そのファイルにも一覧を追記する。ジョブは失敗させない。
 
