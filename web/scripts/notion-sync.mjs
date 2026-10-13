@@ -21,6 +21,7 @@ import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 
 import { Client } from "@notionhq/client";
+import heicConvert from "heic-convert";
 import { NotionToMarkdown } from "notion-to-md";
 
 import { collectImageSrcs, isIgemStatic, renderImage } from "./lib/figure.mjs";
@@ -142,6 +143,8 @@ function guessExt(contentType, url) {
     "image/webp": "webp",
     "image/svg+xml": "svg",
     "image/avif": "avif",
+    "image/heic": "heic",
+    "image/heif": "heic",
   };
   const known = contentType && byType[contentType.split(";")[0].trim()];
   if (known) {
@@ -165,14 +168,23 @@ async function localizeImage(url) {
       .update(buf)
       .digest("hex")
       .slice(0, 16);
-    const ext = guessExt(res.headers.get("content-type"), url);
+    const srcExt = guessExt(res.headers.get("content-type"), url);
+    // HEIC は多くのブラウザで表示できないため JPEG に変換して保存する。
+    // 写真が大半で、PNG だと1枚10MB超になるため JPEG を選ぶ。
+    const isHeic = srcExt === "heic" || srcExt === "heif";
+    const ext = isHeic ? "jpg" : srcExt;
     const fileName = `${hash}.${ext}`;
     const outPath = path.join(IMAGES_DIR, fileName);
     if (!fs.existsSync(outPath)) {
       fs.mkdirSync(IMAGES_DIR, { recursive: true });
-      fs.writeFileSync(outPath, buf);
+      const out = isHeic
+        ? Buffer.from(
+            await heicConvert({ buffer: buf, format: "JPEG", quality: 0.9 })
+          )
+        : buf;
+      fs.writeFileSync(outPath, out);
       console.log(
-        `[notion-sync] image saved ${fileName} (${buf.length} bytes)`
+        `[notion-sync] image saved ${fileName} (${out.length} bytes)`
       );
     }
     return `${IMAGES_URL_PREFIX}/${fileName}`;
