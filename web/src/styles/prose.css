@@ -111,6 +111,10 @@
     border-radius: 8px;
   }
 
+  & > .video-embed {
+    margin-top: var(--space-paragraph);
+  }
+
   hr {
     height: 1px;
     margin: 32px 0;
