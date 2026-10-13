@@ -81,8 +81,8 @@ export function categoryLabelOf(slug: string): string | undefined {
   return found?.label;
 }
 
-// 分類の先頭のページ。対応表の順で先頭にある公開ページで、無ければ対応表にないページ(pagesのorder順)の先頭。
-export function firstPageOf(pages: Entry[], label: string): Entry | undefined {
+// 分類のページを並べた順。対応表の順に公開ページを並べ、fallbackの分類にはそのあと、対応表にないページをpagesの順(order順)で足す。
+export function pagesOfCategory(pages: Entry[], label: string): Entry[] {
   const category = navConfig.categories.find((c) => c.label === label);
   const mapped = new Set(navConfig.categories.flatMap((c) => c.slugs));
   const inTable = (category?.slugs ?? []).flatMap((slug) =>
@@ -92,5 +92,10 @@ export function firstPageOf(pages: Entry[], label: string): Entry | undefined {
     category?.id === navConfig.fallback
       ? pages.filter((p) => !mapped.has(p.slug))
       : [];
-  return [...inTable, ...unmapped][0];
+  return [...inTable, ...unmapped];
+}
+
+// 分類の先頭のページ。
+export function firstPageOf(pages: Entry[], label: string): Entry | undefined {
+  return pagesOfCategory(pages, label)[0];
 }

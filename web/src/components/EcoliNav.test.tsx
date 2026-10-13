@@ -123,6 +123,27 @@ describe(EcoliNav, () => {
 const mainNav = () => screen.getByRole("navigation", { name: "Main" });
 
 describe(Sidebar, () => {
+  it("orderを逆にしても、対応表の順に並ぶ", () => {
+    const reversed = ["design", "description", "judging", "application"].map(
+      (slug, i) => {
+        const page = readPage({
+          slug,
+          locale: "en",
+          title: slug,
+          html: "",
+          order: i,
+        });
+        return { page, path: pagePath(page) };
+      }
+    );
+    render(<Sidebar page={pageOf("design")} routes={reversed} />);
+    expect(
+      within(mainNav())
+        .getAllByRole("link")
+        .map((a) => a.textContent)
+    ).toStrictEqual(["description", "design", "application", "judging"]);
+  });
+
   it("同じ分類のページだけを並べ、いまのページにaria-current=pageが付く", () => {
     render(<Sidebar page={pageOf("results")} routes={routes} />);
     const links = within(mainNav()).getAllByRole("link");

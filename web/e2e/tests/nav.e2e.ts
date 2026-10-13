@@ -7,6 +7,7 @@ import {
   labels,
   locales,
   navConfig,
+  pagesOfCategory,
   publishedPages,
 } from "../pages";
 
@@ -88,6 +89,24 @@ for (const locale of locales) {
           sidebar(page).locator(`a[href="${hrefOf(p.path, baseURL)}"]`)
         ).toHaveCount(categoryLabelOf(p.slug) === label ? 1 : 0);
       }
+    }
+  });
+
+  test(`[${locale}] Sidebarの並びは対応表の順になる`, async ({
+    page,
+    baseURL,
+  }) => {
+    const published = new Set(articles.map((p) => hrefOf(p.path, baseURL)));
+    for (const label of categoryLabels) {
+      const expected = pagesOfCategory(articles, label).map((p) =>
+        hrefOf(p.path, baseURL)
+      );
+      await page.goto(expected[0].slice(hrefOf("/", baseURL).length));
+      // 確認用ページ(PRERENDER_ALLで出る)はProjectの末尾に混ざるので、公開ページだけを比べる
+      const hrefs = await sidebar(page)
+        .getByRole("link")
+        .evaluateAll((els) => els.map((el) => el.getAttribute("href") ?? ""));
+      expect(hrefs.filter((h) => published.has(h))).toStrictEqual(expected);
     }
   });
 
