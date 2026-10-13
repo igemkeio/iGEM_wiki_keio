@@ -59,6 +59,20 @@ describe(EcoliNav, () => {
     expect(current.map((a) => a.textContent)).toStrictEqual(["Dry Lab"]);
   });
 
+  it("リンク先がいまのページなら page、同じ分類の別ページなら true になる", () => {
+    const { unmount } = render(
+      <EcoliNav page={pageOf("description")} routes={routes} />
+    );
+    expect(
+      screen.getByRole("link", { name: "Project" }).getAttribute("aria-current")
+    ).toBe("page");
+    unmount();
+    render(<EcoliNav page={pageOf("design")} routes={routes} />);
+    expect(
+      screen.getByRole("link", { name: "Project" }).getAttribute("aria-current")
+    ).toBe("true");
+  });
+
   it("homeではどの分類にもaria-currentが付かない", () => {
     render(<EcoliNav page={pageOf("home")} routes={routes} />);
     expect(
