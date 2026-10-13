@@ -1,5 +1,7 @@
 import crypto from "node:crypto";
 
+import { escapeHtml } from "./figure.mjs";
+
 const MAX_NAME_LENGTH = 100;
 const VIDEO_EXT = /\.(mp4|mov|webm|m4v|avi|mkv|wmv|flv|mpe?g|ogv|3gp)$/iu;
 
@@ -41,11 +43,6 @@ export function attachmentHref(prefix, fileName) {
   return `${prefix}/${encodeURIComponent(fileName)}`;
 }
 
-// Markdown のリンクテキストに使えない文字を逃がす。
-function escapeLinkText(text) {
-  return text.replaceAll(/[[\]\\]/gu, (c) => `\\${c}`);
-}
-
 // ブロックに name があればそれを、無ければURLのパスから元のファイル名を得る。
 function originalNameOf(body) {
   return typeof body.name === "string" && body.name.trim()
@@ -75,5 +72,6 @@ export async function transformAttachment(block, save, warn) {
     return `<!-- ファイルをスキップしました -->`;
   }
   const caption = (body.caption ?? []).map((t) => t.plain_text).join("");
-  return `[${escapeLinkText(caption.trim() || name)}](${href})`;
+  const text = caption.trim() || name;
+  return `<p><a href="${escapeHtml(href)}">${escapeHtml(text)}</a></p>`;
 }

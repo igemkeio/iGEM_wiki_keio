@@ -57,7 +57,10 @@ test("file と pdf は保存して配信用パスのリンクにする", async (
       () => Promise.resolve("/notion-files/h-poster.pdf"),
       assert.fail
     );
-    assert.equal(md, "[Earth day poster.pdf](/notion-files/h-poster.pdf)");
+    assert.equal(
+      md,
+      '<p><a href="/notion-files/h-poster.pdf">Earth day poster.pdf</a></p>'
+    );
     assert.ok(!renderMarkdown(md).includes("prod-files-secure"));
   }
 });
@@ -68,7 +71,7 @@ test("キャプションがあればリンクテキストにする", async () =>
     () => Promise.resolve("/notion-files/h-p.pdf"),
     assert.fail
   );
-  assert.equal(md, "[ポスター \\[A3\\]](/notion-files/h-p.pdf)");
+  assert.equal(md, '<p><a href="/notion-files/h-p.pdf">ポスター [A3]</a></p>');
 });
 
 test("保存に失敗したら署名付きURLを残さずスキップする", async () => {
@@ -148,4 +151,30 @@ test("file と pdf でも拡張子が動画なら警告して保存しない", a
       assert.ok(!warns[0].includes("X-Amz"));
     }
   }
+});
+
+test("括弧やバッククォートを含む名前はリンクのまま壊れない", async () => {
+  const name = "a (1) `b`.pdf";
+  const href = attachmentHref("/notion-files", `h-${name}`);
+  const md = await transformAttachment(
+    fileBlock("file", SIGNED, [{ plain_text: name }]),
+    () => Promise.resolve(href),
+    assert.fail
+  );
+  const html = renderMarkdown(md);
+  assert.equal(html.match(/<a /gu)?.length, 1);
+  assert.ok(html.includes(`>${name}</a>`));
+  assert.ok(!html.includes("<code>"));
+  assert.ok(html.includes(`href="${href}"`));
+});
+
+test("キャプションのHTMLは解釈されずエスケープされる", async () => {
+  const md = await transformAttachment(
+    fileBlock("file", SIGNED, [{ plain_text: "<img src=x onerror=alert(1)>" }]),
+    () => Promise.resolve("/notion-files/h-p.pdf"),
+    assert.fail
+  );
+  const html = renderMarkdown(md);
+  assert.ok(!html.includes("<img"));
+  assert.ok(html.includes("&lt;img src=x onerror=alert(1)&gt;"));
 });
