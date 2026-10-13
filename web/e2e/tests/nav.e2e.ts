@@ -3,6 +3,7 @@ import type { Page } from "@playwright/test";
 import { expect, hrefOf, pathOf, test } from "../fixtures";
 import {
   categoryLabelOf,
+  firstPageOf,
   labels,
   locales,
   navConfig,
@@ -113,9 +114,7 @@ for (const locale of locales) {
     const links = header(page).getByRole("link");
     const first = links.first();
     const href = await first.getAttribute("href");
-    const target = articles.find(
-      (p) => categoryLabelOf(p.slug) === categoryLabels[0]
-    );
+    const target = firstPageOf(articles, categoryLabels[0]);
     expect(href).toBe(hrefOf(target?.path ?? "", baseURL));
     await first.focus();
     await expect(first).toBeFocused();

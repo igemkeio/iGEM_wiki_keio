@@ -1,7 +1,14 @@
 import type { Page } from "@playwright/test";
 
 import { expect, hrefOf, test } from "../../fixtures";
-import { labels, locales, publishedPages } from "../../pages";
+import {
+  categoryLabelOf,
+  firstPageOf,
+  labels,
+  locales,
+  navConfig,
+  publishedPages,
+} from "../../pages";
 
 for (const locale of locales) {
   const start = locale === "en" ? "" : "ja/";
@@ -53,6 +60,13 @@ for (const locale of locales) {
       );
     }
     await links.last().click();
-    await expect(page).toHaveURL(/attributions\/$/u);
+    const lastLabel = navConfig.categories.at(-1)?.label ?? "";
+    const target = firstPageOf(
+      publishedPages(locale).filter((p) => categoryLabelOf(p.slug)),
+      lastLabel
+    );
+    await expect(page).toHaveURL((url) =>
+      url.pathname.endsWith(target?.path ?? "")
+    );
   });
 }

@@ -73,3 +73,13 @@ export function categoryLabelOf(slug: string): string | undefined {
     navConfig.categories.find((c) => c.id === navConfig.fallback);
   return found?.label;
 }
+
+// 分類の先頭のページ。対応表にあるページをorder順に並べ、そのあとに対応表にないページを足す。
+export function firstPageOf(pages: Entry[], label: string): Entry | undefined {
+  const mapped = new Set(navConfig.categories.flatMap((c) => c.slugs));
+  const inCategory = pages.filter((p) => categoryLabelOf(p.slug) === label);
+  return [
+    ...inCategory.filter((p) => mapped.has(p.slug)),
+    ...inCategory.filter((p) => !mapped.has(p.slug)),
+  ][0];
+}
