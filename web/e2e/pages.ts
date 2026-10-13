@@ -10,6 +10,13 @@ export interface Entry {
   path: string;
 }
 
+function compareSlug(a: string, b: string): number {
+  if (a < b) {
+    return -1;
+  }
+  return a > b ? 1 : 0;
+}
+
 const contentDir = join(import.meta.dirname, "../../content");
 
 // content/のpublishedなページ。E2E用の未公開ページはPRERENDER_ALLで出るが、ここでは数えない。
@@ -30,7 +37,7 @@ export function publishedPages(locale: Locale): Entry[] {
     .toSorted(
       (a, b) =>
         (a.order ?? Number.MAX_SAFE_INTEGER) -
-        (b.order ?? Number.MAX_SAFE_INTEGER)
+          (b.order ?? Number.MAX_SAFE_INTEGER) || compareSlug(a.slug, b.slug)
     )
     .map(({ slug, title, order }) => {
       const prefix = locale === "en" ? "/" : "/ja/";
