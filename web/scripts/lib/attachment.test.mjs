@@ -213,9 +213,21 @@ test("視聴URLの2形式を埋め込みURLにし、embed はそのまま返す"
   assert.equal(videoEmbedUrl("https://video.igem.org/w/abc-123"), EMBED);
   assert.equal(
     videoEmbedUrl("https://video.igem.org/videos/watch/abc-123?start=1"),
-    EMBED
+    `${EMBED}?start=1`
   );
   assert.equal(videoEmbedUrl(EMBED), EMBED);
+  assert.equal(
+    videoEmbedUrl("https://video.igem.org/w/abc-123?start=1m"),
+    `${EMBED}?start=1m`
+  );
+  assert.equal(
+    videoEmbedUrl("https://video.igem.org/videos/embed/abc-123?start=1m"),
+    `${EMBED}?start=1m`
+  );
+  assert.equal(
+    videoEmbedUrl("https://u:p@video.igem.org/w/abc-123#frag"),
+    EMBED
+  );
   assert.equal(videoEmbedUrl("https://video.igem.org/a/abc"), null);
   assert.equal(videoEmbedUrl("https://example.com/w/abc"), null);
   assert.equal(videoEmbedUrl("https://video.igem.org.evil.com/w/abc"), null);

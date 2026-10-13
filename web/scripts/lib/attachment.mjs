@@ -64,7 +64,8 @@ function originalNameOf(body) {
 }
 
 // video.igem.org(PeerTube)の視聴URLを埋め込みURLにする。
-// /w/<id> と /videos/watch/<id> を変換し、/videos/embed/<id> はそのまま返す。当たらなければ null。
+// /w/<id>、/videos/watch/<id>、/videos/embed/<id> を /videos/embed/<id> に組み立て直す。
+// クエリ(?start= など)は残し、ユーザー情報とハッシュは落とす。当たらなければ null。
 export function videoEmbedUrl(value) {
   let url;
   try {
@@ -81,9 +82,7 @@ export function videoEmbedUrl(value) {
   if (!m) {
     return null;
   }
-  return url.pathname.startsWith("/videos/embed/")
-    ? value
-    : `https://${VIDEO_HOST}/videos/embed/${m[1]}`;
+  return `https://${VIDEO_HOST}/videos/embed/${m[1]}${url.search}`;
 }
 
 // 外部URLの動画。video.igem.org だけ iframe にし、他は既定の変換(リンク)に任せる。
