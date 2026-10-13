@@ -41,6 +41,7 @@ import {
   normalizeSlug,
   serializePage,
 } from "./lib/page.mjs";
+import { hasSignedUrl } from "./lib/signed-url.mjs";
 import { staleJsonFiles } from "./lib/stale.mjs";
 
 const __dirname = import.meta.dirname;
@@ -443,11 +444,13 @@ function writeOutputs(pages) {
 
   for (const [name, page] of pages) {
     fs.mkdirSync(path.join(CONTENT_DIR, page.locale), { recursive: true });
-    fs.writeFileSync(
-      path.join(CONTENT_DIR, name),
-      serializePage(page),
-      "utf-8"
-    );
+    const serialized = serializePage(page);
+    if (hasSignedUrl(serialized)) {
+      console.warn(
+        `[notion-sync] ${name} にNotionの署名付きURL(prod-files-secure)が残っています。1時間で切れるうえ、gitleaksに止められます。`
+      );
+    }
+    fs.writeFileSync(path.join(CONTENT_DIR, name), serialized, "utf-8");
     console.log(`[notion-sync] wrote content/${name}`);
 
     for (const src of collectImageSrcs(page.html)) {
