@@ -6,6 +6,7 @@ import {
   attachmentHref,
   fileNameFromUrl,
   transformAttachment,
+  videoEmbedUrl,
 } from "./attachment.mjs";
 import { renderMarkdown } from "./markdown.mjs";
 
@@ -199,4 +200,79 @@ test("空行を含むキャプションは1行にしてリンクの入れ子を�
   assert.equal(html.match(/<a /gu)?.length, 1);
   assert.equal(html.match(/<p>/gu)?.length, 1);
   assert.ok(html.includes(">段落1 *段落2*</a>"));
+});
+
+const extVideo = (url, caption = []) => ({
+  id: "blk-2",
+  type: "video",
+  video: { type: "external", external: { url }, caption },
+});
+const EMBED = "https://video.igem.org/videos/embed/abc-123";
+
+test("視聴URLの2形式を埋め込みURLにし、embed はそのまま返す", () => {
+  assert.equal(videoEmbedUrl("https://video.igem.org/w/abc-123"), EMBED);
+  assert.equal(
+    videoEmbedUrl("https://video.igem.org/videos/watch/abc-123?start=1"),
+    EMBED
+  );
+  assert.equal(videoEmbedUrl(EMBED), EMBED);
+  assert.equal(videoEmbedUrl("https://video.igem.org/a/abc"), null);
+  assert.equal(videoEmbedUrl("https://example.com/w/abc"), null);
+  assert.equal(videoEmbedUrl("https://video.igem.org.evil.com/w/abc"), null);
+});
+
+test("video.igem.org の動画はキャプションなしなら iframe だけを出す", () => {
+  const out = transformAttachment(
+    extVideo("https://video.igem.org/w/abc-123"),
+    assert.fail,
+    assert.fail
+  );
+  return out.then((html) => {
+    assert.ok(html.startsWith(`<iframe class="video-embed" src="${EMBED}"`));
+    assert.ok(html.includes('title="Video"'));
+    assert.ok(
+      html.includes(
+        'sandbox="allow-same-origin allow-scripts allow-popups allow-forms" allow="fullscreen" loading="lazy"'
+      )
+    );
+    assert.ok(!html.includes("<figure"));
+    assert.ok(renderMarkdown(html).includes(html));
+  });
+});
+
+test("キャプションがあれば Figure カードで包み、titleはタグを除いてエスケープする", async () => {
+  const html = await transformAttachment(
+    extVideo(EMBED, [{ plain_text: 'Fig. 1 <b>"MD"</b> & 動画\n\n説明' }]),
+    assert.fail,
+    assert.fail
+  );
+  assert.ok(html.startsWith('<figure class="figure-card">'));
+  assert.ok(html.includes('title="Fig. 1 &quot;MD&quot; &amp; 動画 説明"'));
+  assert.ok(html.includes('<p class="figure-card__label">Fig. 1</p>'));
+  assert.ok(!html.includes("<b>"));
+  assert.ok(!html.includes("\n\n"));
+  const rendered = renderMarkdown(html);
+  assert.equal(rendered.match(/<iframe /gu)?.length, 1);
+  assert.equal(rendered.match(/<figure /gu)?.length, 1);
+});
+
+test("video.igem.org 以外の外部動画はリンクのまま(既定の変換)", async () => {
+  const out = await transformAttachment(
+    extVideo("https://www.youtube.com/watch?v=x"),
+    assert.fail,
+    assert.fail
+  );
+  assert.equal(out, false);
+});
+
+test("変換できない video.igem.org のURLは警告してリンクのまま", async () => {
+  const warns = [];
+  const out = await transformAttachment(
+    extVideo("https://video.igem.org/c/channel"),
+    assert.fail,
+    (m) => warns.push(m)
+  );
+  assert.equal(out, false);
+  assert.equal(warns.length, 1);
+  assert.ok(warns[0].includes("blk-2"));
 });

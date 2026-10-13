@@ -1,9 +1,10 @@
 import crypto from "node:crypto";
 
-import { escapeHtml } from "./figure.mjs";
+import { escapeHtml, renderVideoEmbed } from "./figure.mjs";
 
 // ハッシュと区切りの17バイトを足しても、ファイル名の上限255バイトに収まる値。
 const MAX_NAME_BYTES = 200;
+const VIDEO_HOST = "video.igem.org";
 const VIDEO_EXT = /\.(mp4|mov|webm|m4v|avi|mkv|wmv|flv|mpe?g|ogv|3gp)$/iu;
 
 // 署名付きURLのパスから、ダウンロード時の元のファイル名を取り出す。
@@ -62,12 +63,61 @@ function originalNameOf(body) {
     : fileNameFromUrl(body.file.url);
 }
 
+// video.igem.org(PeerTube)の視聴URLを埋め込みURLにする。
+// /w/<id> と /videos/watch/<id> を変換し、/videos/embed/<id> はそのまま返す。当たらなければ null。
+export function videoEmbedUrl(value) {
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== "https:" || url.hostname !== VIDEO_HOST) {
+    return null;
+  }
+  const m = /^\/(?:w|videos\/watch|videos\/embed)\/([\w-]+)\/?$/u.exec(
+    url.pathname
+  );
+  if (!m) {
+    return null;
+  }
+  return url.pathname.startsWith("/videos/embed/")
+    ? value
+    : `https://${VIDEO_HOST}/videos/embed/${m[1]}`;
+}
+
+// 外部URLの動画。video.igem.org だけ iframe にし、他は既定の変換(リンク)に任せる。
+function transformExternalVideo(block, warn) {
+  const { url } = block.video.external;
+  let host = "";
+  try {
+    host = new URL(url).hostname;
+  } catch {
+    return false;
+  }
+  if (host !== VIDEO_HOST) {
+    return false;
+  }
+  const embed = videoEmbedUrl(url);
+  if (!embed) {
+    warn(
+      `${VIDEO_HOST} のURLを埋め込みに変換できないためリンクのまま出力します: ${url} (ブロック ${block.id})`
+    );
+    return false;
+  }
+  const caption = (block.video.caption ?? []).map((t) => t.plain_text).join("");
+  return renderVideoEmbed({ src: embed, caption });
+}
+
 // file / pdf / video ブロックのカスタム変換。
 // save(url) はダウンロードして保存し、配信用パスを返す(失敗時は null)。
 // 戻り値が文字列ならその内容に置き換え、false なら notion-to-md の既定変換に任せる。
 export async function transformAttachment(block, save, warn) {
   const { type } = block;
   const body = block[type];
+  if (type === "video" && body.type === "external") {
+    return transformExternalVideo(block, warn);
+  }
   if (body.type !== "file") {
     return false;
   }
