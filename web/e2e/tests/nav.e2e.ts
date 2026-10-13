@@ -128,6 +128,7 @@ for (const locale of locales) {
   for (const width of [768, 900, 1000, 1100]) {
     test(`[${locale}] ${width}px幅でも、ヘッダーの5匹がサイドバーに隠れず押せる`, async ({
       page,
+      baseURL,
     }) => {
       await page.setViewportSize({ width, height: 800 });
       await page.goto(start);
@@ -151,7 +152,11 @@ for (const locale of locales) {
         expect(covered).toBe(false);
       }
       await links.last().click();
-      await expect(page).not.toHaveURL((url) => url.pathname === `/${start}`);
+      const target = firstPageOf(articles, categoryLabels.at(-1) ?? "");
+      expect(target).toBeDefined();
+      await expect(page).toHaveURL(
+        (url) => pathOf(url.href, baseURL) === target?.path
+      );
     });
   }
 }

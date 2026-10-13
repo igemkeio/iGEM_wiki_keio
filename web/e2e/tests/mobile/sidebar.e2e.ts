@@ -65,6 +65,7 @@ for (const locale of locales) {
       publishedPages(locale).filter((p) => categoryLabelOf(p.slug)),
       lastLabel
     );
+    expect(target).toBeDefined();
     await expect(page).toHaveURL((url) =>
       url.pathname.endsWith(target?.path ?? "")
     );
