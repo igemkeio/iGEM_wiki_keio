@@ -38,7 +38,7 @@ export function EcoliNav({
   return (
     <nav className={styles.root} aria-label={labels[locale]}>
       <ol className={styles.chain}>
-        <li className={styles.tail}>
+        <li className={styles.tail} aria-hidden="true">
           <Flagella />
         </li>
         {groupRoutes(locale, routes)
