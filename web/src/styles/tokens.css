@@ -48,36 +48,14 @@
 
   --space-frame-x: 56px;
 
-  /* 固定ヘッダーの高さ。大腸菌の行が折り返す幅ごとの実測値(切り上げ)で、2段目の分は hover: none のときだけ足す。目次の位置と html の scroll-padding-top が使う。高さが下がる側の切り替え幅は、スクロールバーで折り返しが遅れる分を見て、実測の幅より20px上に置く */
-  --size-header-bar: 231px;
+  /* 固定ヘッダーの高さ(幅768px以上の分だけ)。大腸菌の行が折り返す幅ごとの実測値(切り上げ)で、2段目の分は hover: none のときだけ足す。高さが下がる側の切り替え幅は、スクロールバーで折り返しが遅れる分を見て、実測の幅より20px上に置く */
+  --size-header-bar: 159px;
   --size-header-sub: 0px;
   --size-header: calc(var(--size-header-bar) + var(--size-header-sub));
-  --size-header-fixed: var(--size-header);
+
+  /* ヘッダーを固定するときだけ、固定分の高さ。目次の位置と html の scroll-padding-top が使う */
+  --size-header-fixed: 0px;
   --space-toc-top: 24px;
-}
-
-@media (min-width: 361px) {
-  :root {
-    --size-header-bar: 185px;
-  }
-}
-
-@media (min-width: 436px) {
-  :root {
-    --size-header-bar: 139px;
-  }
-}
-
-@media (min-width: 735px) {
-  :root {
-    --size-header-bar: 93px;
-  }
-}
-
-@media (min-width: 768px) {
-  :root {
-    --size-header-bar: 159px;
-  }
 }
 
 @media (min-width: 950px) {
@@ -104,10 +82,10 @@
   }
 }
 
-/* ヘッダーを固定しない幅と高さでは、固定分の高さを目次の位置とscroll-padding-topに足さない */
-@media (max-width: 767px), (max-height: 500px) {
+/* ヘッダーを固定する条件は EcoliNav.module.css と同じ文字列にする */
+@media (min-width: 768px) and (min-height: 501px) {
   :root {
-    --size-header-fixed: 0px;
+    --size-header-fixed: var(--size-header);
   }
 }
 
