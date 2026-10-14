@@ -1,6 +1,7 @@
 @layer components {
   .root {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 32px;
     padding: 16px var(--space-frame-x) 40px;
     color: var(--color-muted);
