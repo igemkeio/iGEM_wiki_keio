@@ -12,7 +12,7 @@ Notion(原稿) ─sync─> content/<locale>/<slug>.json ─prerender─> dist/**
 
 - 原稿の正はNotionにある。同期スクリプトが1ページ1つのJSONに書き出す。
 - ビルド時にReactでHTMLを生成する。ページの数だけHTMLファイルができる、いわゆるMPAで、SPAではない。
-- ブラウザでReactが動くのは、対話が必要な部品(島)の中だけ。島のないページにはReactのJSが含まれない。
+- ブラウザでReactが動くのは、対話が必要な部品(島)の中だけ。島のないページにはReactのJSが含まれない。全ページが読むJSは、`public/`に置いたフッターの帯用の素のJS1ファイル(`footer-sponsors.js`)だけ。
 - 配信先はiGEMのGitLab Pagesで、PRごとのプレビューはVercelが担う。どちらも静的ファイルを置くだけで、サーバー側の処理はない。
 
 ## 選定の理由
