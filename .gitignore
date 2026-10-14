@@ -3,3 +3,7 @@ public
 !web/public
 !web/public/**
 content/images-todo.json
+
+# Blenderの出力
+3d/out/
+__pycache__/

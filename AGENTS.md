@@ -14,6 +14,7 @@ iGEM Keioチームのwiki。`content/`の原稿JSONから、ViteとReactで静�
 │   ├── e2e/            PlaywrightのE2Eとビジュアル回帰
 │   └── public/         そのまま配信するファイル(フォント、画像、3Dモデル、notion-images、notion-files)
 ├── content/            原稿JSON(content/<locale>/<slug>.json)。Notion同期が書く
+├── 3d/                 Blenderのシーン生成スクリプト。glbとhero動画の元
 ├── docs/               設計メモ(architecture.md)、Notion連携(notion-sync.md)、tasks/
 ├── notion-trigger/     Notionのボタンから同期を起動するVercel関数。独立したプロジェクト
 ├── .github/            CI、Notion同期のワークフロー、Issueのテンプレート、PRのテンプレート
