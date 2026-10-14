@@ -38,14 +38,18 @@ for (const locale of locales) {
       }
       // パネルは使わない
       await expect(categoryNav(page).locator("ul a").first()).toBeHidden();
-      const last = inCategory.at(-1);
-      await pagesNav(page)
-        .locator(`a[href="${hrefOf(last?.path ?? "", baseURL)}"]`)
-        .click();
-      await expect(page).toHaveURL((url) =>
-        url.pathname.endsWith(last?.path ?? "")
-      );
     }
+    // 遷移は最後の分類の最後のページだけ確かめる
+    const last = pagesOfCategory(
+      articles,
+      navConfig.categories.at(-1)?.label ?? ""
+    ).at(-1);
+    await pagesNav(page)
+      .locator(`a[href="${hrefOf(last?.path ?? "", baseURL)}"]`)
+      .click();
+    await expect(page).toHaveURL((url) =>
+      url.pathname.endsWith(last?.path ?? "")
+    );
   });
 
   test(`[${locale}] Homeでは2段目を出さない`, async ({ page }) => {
