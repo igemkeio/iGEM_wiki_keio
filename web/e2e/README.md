@@ -95,15 +95,15 @@ npx playwright show-report e2e/playwright-report
 
 | 変えたもの | 流すテスト |
 | --- | --- |
-| `Sidebar`、`PageShell`、ナビ | `nav`、`mobile/sidebar`、`locale` |
+| `EcoliNav`、`PageShell`、ナビ | `nav`、`mobile/nav`、`locale` |
 | `src/client/`(島の起動、保存、言語) | `islands`、`locale` |
 | `Island`、`islands.ts`、`Page.tsx`の`<script>`の出し分け | `islands`、`model-viewer` |
 | `MemberList` | `islands` |
 | `ModelViewer` | `model-viewer` |
-| `prose.css`、`ArticlePage`、`tokens.css`、`global.css`、`Sidebar`、`Footer` | `prose`、`visual` |
+| `prose.css`、`ArticlePage`、`tokens.css`、`global.css`、`EcoliNav`、`Footer` | `prose`、`visual` |
 | `HomePage` | `nav`(Homeのカード) |
 | `vite.config.ts`、`base.ts`、`prerender.mjs` | 全件(特に`chromium-base`) |
-| `content/`のページの増減 | `nav`、`mobile/sidebar` |
+| `content/`のページの増減 | `nav`、`mobile/nav` |
 
 ## ビジュアル回帰
 

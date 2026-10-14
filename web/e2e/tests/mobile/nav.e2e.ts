@@ -1,46 +1,79 @@
 import type { Page } from "@playwright/test";
 
-import { expect, hrefOf, test } from "../../fixtures";
+import { expect, hrefOf, pathOf, test } from "../../fixtures";
 import {
   categoryLabelOf,
   firstPageOf,
   labels,
   locales,
   navConfig,
+  pagesOfCategory,
   publishedPages,
 } from "../../pages";
 
 for (const locale of locales) {
   const start = locale === "en" ? "" : "ja/";
-  const nav = (page: Page) =>
-    page.getByRole("navigation", { name: labels[locale].nav });
+  const pagesNav = (page: Page) =>
+    page.getByRole("navigation", { name: labels[locale].pages });
+  const categoryNav = (page: Page) =>
+    page.getByRole("navigation", { name: labels[locale].category });
 
-  test(`[${locale}] 375pxでは上部バーのトグルでナビが開閉する`, async ({
+  test(`[${locale}] hover: noneでは、分類のページの2段目からすべてのページへ行ける`, async ({
     page,
+    baseURL,
   }) => {
-    await page.goto(start);
-    const toggle = page.getByLabel(labels[locale].menu, { exact: true });
-    await expect(toggle).toBeVisible();
-    await expect(nav(page)).toBeHidden();
-    await toggle.click();
-    await expect(nav(page)).toBeVisible();
-    await toggle.click();
-    await expect(nav(page)).toBeHidden();
+    expect(await page.evaluate(() => matchMedia("(hover: none)").matches)).toBe(
+      true
+    );
+    const articles = publishedPages(locale).filter((p) => p.slug !== "home");
+    for (const label of navConfig.categories.map((c) => c.label)) {
+      const inCategory = pagesOfCategory(articles, label);
+      const [first] = inCategory;
+      await page.goto(first.path.slice(1));
+      await expect(pagesNav(page)).toBeVisible();
+      for (const entry of inCategory) {
+        await expect(
+          pagesNav(page).locator(`a[href="${hrefOf(entry.path, baseURL)}"]`)
+        ).toBeVisible();
+      }
+      // パネルは使わない
+      await expect(categoryNav(page).locator("ul a").first()).toBeHidden();
+      const last = inCategory.at(-1);
+      await pagesNav(page)
+        .locator(`a[href="${hrefOf(last?.path ?? "", baseURL)}"]`)
+        .click();
+      await expect(page).toHaveURL((url) =>
+        url.pathname.endsWith(last?.path ?? "")
+      );
+    }
   });
 
-  test(`[${locale}] 開いたHomeのナビに、home以外のpublishedな全ページへのリンクがある`, async ({
+  test(`[${locale}] Homeでは2段目を出さない`, async ({ page }) => {
+    await page.goto(start);
+    await expect(pagesNav(page)).toHaveCount(0);
+  });
+
+  test(`[${locale}] 2段目は狭い幅で横スクロールになる`, async ({ page }) => {
+    const entry = publishedPages(locale).find((p) => p.slug !== "home");
+    await page.goto((entry?.path ?? "/").slice(1));
+    await expect(pagesNav(page).locator("ul")).toHaveCSS("overflow-x", "auto");
+  });
+
+  test(`[${locale}] ロゴと言語の切り替えが375pxでも押せる`, async ({
     page,
     baseURL,
   }) => {
     await page.goto(start);
-    await page.getByLabel(labels[locale].menu, { exact: true }).click();
-    for (const entry of publishedPages(locale).filter(
-      (p) => p.slug !== "home"
-    )) {
-      await expect(
-        nav(page).locator(`a[href="${hrefOf(entry.path, baseURL)}"]`)
-      ).toBeVisible();
-    }
+    const other = locale === "en" ? "ja" : "en";
+    await expect(page.locator(`header a[hreflang=${other}]`)).toBeVisible();
+    await page.locator(`header a[hreflang=${other}]`).click();
+    await expect(page).toHaveURL(
+      (url) => pathOf(url.href, baseURL) === (other === "en" ? "/" : "/ja/")
+    );
+    await page.locator("header a", { hasText: "iGEM" }).click();
+    await expect(page).toHaveURL(
+      (url) => pathOf(url.href, baseURL) === (other === "en" ? "/" : "/ja/")
+    );
   });
 
   test(`[${locale}] ヘッダーの5分類すべてが375pxの幅に収まり、末尾にも届く`, async ({

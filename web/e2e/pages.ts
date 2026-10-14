@@ -54,8 +54,8 @@ export function publishedPages(locale: Locale): Entry[] {
 export const locales: Locale[] = ["en", "ja"];
 
 export const labels = {
-  en: { nav: "Main", menu: "Menu", category: "Category" },
-  ja: { nav: "メインメニュー", menu: "メニュー", category: "カテゴリ" },
+  en: { category: "Category", pages: "Pages" },
+  ja: { category: "カテゴリ", pages: "ページ" },
 } as const;
 
 interface NavConfig {
