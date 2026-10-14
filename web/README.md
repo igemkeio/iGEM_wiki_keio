@@ -165,7 +165,7 @@ GIT_CONFIG_GLOBAL=/dev/null npx lefthook install
 
 `src/components/Footer.tsx`が3段のフッターを描く。1段目は左にロゴと連絡先のメール、右にSNS、2段目はスポンサーのロゴの帯、3段目はCC BY 4.0の表記とwikiのリポジトリへのリンク。連絡先、SNS、リポジトリのURLは`src/data/footer.json`、スポンサーは`src/data/sponsors.json`(名前、リンク先、`logo`、`alt`)にあり、差し替えるのはこのJSONとロゴの画像だけ。`logo`は画像の配信元(`WIKI_IMAGE_BASE`)からの相対パスで、仮のロゴは`public/images/sponsors/`にある。
 
-帯は素のJS(`public/footer-sponsors.js`、Reactなし)が全ページで3秒ごとに1枚ずつ左へ送り、最後から先頭へ戻る。ホバー中、帯の中にフォーカスがある間、`prefers-reduced-motion: reduce`のときは自動で送らない。前後のボタンは1枚ずつ送り、`hidden`で出力してJSが外す。次へは最後から先頭へ戻り、前へは先頭で止まる。JSが無いときは、帯が`scroll-snap`の横スクロールのままでボタンは出ない。
+帯は素のJS(`public/footer-sponsors.js`、Reactなし)が全ページで3秒ごとに1枚ずつ左へ送り、最後から先頭へ戻る。ホバー中、帯の中にフォーカスがある間、`prefers-reduced-motion: reduce`のときは自動で送らない。前後のボタンは1枚ずつ送り、`hidden`で出力して、帯がはみ出すときだけJSが`hidden`を外す(幅が変わるたびに付け直す)。次へは最後から先頭へ戻り、前へは先頭で止まる。JSが無いときは、帯が`scroll-snap`の横スクロールのままでボタンは出ない。
 
 ### 永続化と共有ストア
 
