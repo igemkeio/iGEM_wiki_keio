@@ -15,6 +15,8 @@ const labels = {
     sponsors: "Sponsors",
     prev: "Previous",
     next: "Next",
+    pause: "Pause",
+    play: "Play",
     license: "Licensed under CC BY 4.0",
     repository: "Wiki repository",
   },
@@ -24,6 +26,8 @@ const labels = {
     sponsors: "スポンサー",
     prev: "前へ",
     next: "次へ",
+    pause: "一時停止",
+    play: "再生",
     license: "Licensed under CC BY 4.0",
     repository: "wikiのリポジトリ",
   },
@@ -124,6 +128,36 @@ export function Footer({ locale }: { locale: Locale }) {
           hidden
         >
           <span aria-hidden="true">›</span>
+        </button>
+        <button
+          type="button"
+          className={styles.arrow}
+          aria-label={label.pause}
+          data-sponsors-toggle=""
+          data-label-pause={label.pause}
+          data-label-play={label.play}
+          hidden
+        >
+          <svg
+            className={styles.iconPause}
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="M6 4h4v16H6zM14 4h4v16h-4z" fill="currentColor" />
+          </svg>
+          <svg
+            className={styles.iconPlay}
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="M7 4l13 8-13 8z" fill="currentColor" />
+          </svg>
         </button>
       </section>
       <p className={styles.bottom}>

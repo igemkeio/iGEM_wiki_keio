@@ -100,6 +100,15 @@
     display: none;
   }
 
+  .iconPlay,
+  .arrow[data-paused] .iconPause {
+    display: none;
+  }
+
+  .arrow[data-paused] .iconPlay {
+    display: block;
+  }
+
   .track {
     position: relative;
     display: flex;
