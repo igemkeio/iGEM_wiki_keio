@@ -62,15 +62,14 @@ const scrollTo = async (page: Page, y: number) => {
   await page.evaluate((top) => window.scrollTo(0, top), y);
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(y);
 };
-// 要素の中心が最前面の要素自身(またはその中身)か
+// 左端の内側と中心の2点が、最前面の要素自身(またはその中身)か。左端は左の目次と重なる位置を見る
 const isOnTop = (link: Locator) =>
   link.evaluate((el) => {
     const r = el.getBoundingClientRect();
-    const top = document.elementFromPoint(
-      r.x + r.width / 2,
-      r.y + r.height / 2
-    );
-    return !!top && el.contains(top);
+    return [r.x + 8, r.x + r.width / 2].every((x) => {
+      const top = document.elementFromPoint(x, r.y + r.height / 2);
+      return !!top && el.contains(top);
+    });
   });
 
 for (const locale of locales) {
@@ -181,6 +180,8 @@ for (const locale of locales) {
   test(`[${locale}] 左のSidebarが出ず、本文が左の列に押されない`, async ({
     page,
   }) => {
+    // 目次が出ない幅で見る。目次が出る幅では本文が目次の分だけ右にずれる
+    await page.setViewportSize({ width: 1099, height: 800 });
     for (const entry of [pages[0], ...representatives.slice(0, 1)]) {
       await page.goto(entry.path.slice(1));
       await expect(
@@ -189,7 +190,7 @@ for (const locale of locales) {
         })
       ).toHaveCount(0);
       const box = await page.locator("main").boundingBox();
-      expect(box?.x ?? 1000).toBeLessThan(400);
+      expect(box?.x ?? 1000).toBeLessThan(300);
     }
   });
 
@@ -290,6 +291,33 @@ for (const locale of locales) {
     await cell(page, label).hover();
     await expect(panel).toBeVisible();
     await expect(panel).toHaveCSS("animation-name", "none");
+  });
+
+  test(`[${locale}] 幅を動かしても、--size-headerが固定ヘッダーの実際の高さ以上になる`, async ({
+    page,
+  }, testInfo) => {
+    skipInBase(testInfo);
+    await page.goto(`${start}description/`);
+    const short: { width: number; header: number; token: number }[] = [];
+    for (let width = 300; width <= 1500; width += 10) {
+      await page.setViewportSize({ width, height: 800 });
+      const sizes = await page.evaluate(() => ({
+        header:
+          document.querySelector("header")?.getBoundingClientRect().height ?? 0,
+        // scroll-padding-topは--size-headerに16pxを足した値
+        token:
+          Number(
+            getComputedStyle(document.documentElement).scrollPaddingTop.replace(
+              "px",
+              ""
+            )
+          ) - 16,
+      }));
+      if (sizes.token < sizes.header) {
+        short.push({ width, ...sizes });
+      }
+    }
+    expect(short).toStrictEqual([]);
   });
 
   test(`[${locale}] ナビのためのJSがページに入らない`, async ({ page }) => {
@@ -494,6 +522,37 @@ for (const locale of locales) {
       }
     });
   }
+
+  test(`[${locale}] 全ページの目次のリンク先が、リンクで移るとヘッダーの下に出る`, async ({
+    page,
+  }, testInfo) => {
+    skipInBase(testInfo);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    let checked = 0;
+    for (const entry of articles) {
+      await page.goto(entry.path.slice(1));
+      // 同じページ内でハッシュだけを変え、見出しごとの上端とヘッダーの下端を比べる
+      const tops = await page.evaluate(() => {
+        const bottom = document
+          .querySelector("header")
+          ?.getBoundingClientRect().bottom;
+        return [
+          ...document.querySelectorAll<HTMLAnchorElement>("aside nav a"),
+        ].map((a) => {
+          const id = decodeURIComponent(a.hash.slice(1));
+          window.location.hash = a.hash;
+          const top = document
+            .querySelector(`[id="${id}"]`)
+            ?.getBoundingClientRect().top;
+          return { id, top: top ?? Number.NaN, bottom: bottom ?? 0 };
+        });
+      });
+      const hidden = tops.filter((t) => !(t.top >= t.bottom - 0.5));
+      expect(hidden, entry.path).toStrictEqual([]);
+      checked += tops.length;
+    }
+    expect(checked).toBeGreaterThan(articles.length);
+  });
 
   for (const width of [1000, 768]) {
     test(`[${locale}] ${width}px幅で、見出しへのリンクで移ってもヘッダーに隠れない`, async ({

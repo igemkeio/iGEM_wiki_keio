@@ -97,6 +97,31 @@ for (const locale of locales) {
     expect(box?.y ?? 0).toBeGreaterThanOrEqual(bar.bottom);
   });
 
+  test(`[${locale}] hover: noneで幅を動かしても、--size-headerが2段目を含むヘッダーの高さ以上になる`, async ({
+    page,
+  }) => {
+    await page.goto(`${start}description/`);
+    const short: { width: number; header: number; token: number }[] = [];
+    for (let width = 300; width <= 1500; width += 10) {
+      await page.setViewportSize({ width, height: 812 });
+      const sizes = await page.evaluate(() => ({
+        header:
+          document.querySelector("header")?.getBoundingClientRect().height ?? 0,
+        token:
+          Number(
+            getComputedStyle(document.documentElement).scrollPaddingTop.replace(
+              "px",
+              ""
+            )
+          ) - 16,
+      }));
+      if (sizes.token < sizes.header) {
+        short.push({ width, ...sizes });
+      }
+    }
+    expect(short).toStrictEqual([]);
+  });
+
   test(`[${locale}] ロゴと言語の切り替えが375pxでも押せる`, async ({
     page,
     baseURL,
