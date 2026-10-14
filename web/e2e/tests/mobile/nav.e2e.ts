@@ -97,26 +97,37 @@ for (const locale of locales) {
     expect(box?.y ?? 0).toBeGreaterThanOrEqual(bar.bottom);
   });
 
-  test(`[${locale}] hover: noneで幅を動かしても、--size-headerが2段目を含むヘッダーの高さ以上になる`, async ({
+  test(`[${locale}] hover: noneで幅を動かしても、scroll-padding-topが2段目を含むヘッダーの高さ以上(スクロールバー分の遅れも見込む)になる`, async ({
     page,
   }) => {
     await page.goto(`${start}description/`);
-    const short: { width: number; header: number; token: number }[] = [];
+    // 幅wのscroll-padding-topが、幅wと幅w-20(スクロールバーで折り返しが遅れる分)のヘッダーの高さ以上か
+    const sizes = new Map<number, { padding: number; header: number }>();
     for (let width = 300; width <= 1500; width += 10) {
       await page.setViewportSize({ width, height: 812 });
-      const sizes = await page.evaluate(() => ({
-        header:
-          document.querySelector("header")?.getBoundingClientRect().height ?? 0,
-        token:
-          Number(
+      sizes.set(
+        width,
+        await page.evaluate(() => ({
+          padding: Number(
             getComputedStyle(document.documentElement).scrollPaddingTop.replace(
               "px",
               ""
             )
-          ) - 16,
-      }));
-      if (sizes.token < sizes.header) {
-        short.push({ width, ...sizes });
+          ),
+          header:
+            document.querySelector("header")?.getBoundingClientRect().height ??
+            0,
+        }))
+      );
+    }
+    const short: { width: number; padding: number; header: number }[] = [];
+    for (const [width, size] of sizes) {
+      // 1280pxで1段になる切り替えはmedia queryで決まり、スクロールバーで遅れない
+      const lagged =
+        width >= 1280 && width < 1300 ? undefined : sizes.get(width - 20);
+      const tallest = Math.max(size.header, lagged?.header ?? 0);
+      if (width >= 320 && size.padding < tallest) {
+        short.push({ width, padding: size.padding, header: tallest });
       }
     }
     expect(short).toStrictEqual([]);
