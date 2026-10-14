@@ -137,7 +137,7 @@ GitLab Pagesは`https://2026.igem.wiki/keio/`のようにサブパスで配信�
 | 型 | `tsc --noEmit` | Node側とブラウザ側の境界 |
 | ユニット | Vitest | `toc.ts`、`routes.ts`、`usePersistedState`、`applyBase` |
 | スクリプト | `node:test` | Notion同期の変換、`check`の検査関数 |
-| コンポーネント | Vitest、Testing Library、happy-dom | `Sidebar`、`Toc`、各島 |
+| コンポーネント | Vitest、Testing Library、happy-dom | `EcoliNav`、`Toc`、各島 |
 | プリレンダー | Vitest | サンプルJSONからのHTML生成をスナップショットで固定 |
 | 出力の検査 | `npm run check` | ページ数の一致、外部URL、リンク切れ、`alt`の欠落 |
 | E2E | Playwright(chromium、mobile-chromium 375px、`/keio/`配信のchromium-base) | ページをまたぐ状態の保持、島の動作、島のないページでReactが読まれないこと、3Dの遅延読み込み |
