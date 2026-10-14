@@ -27,8 +27,6 @@
   --size-prose: 672px;
   --size-lead-max: 576px;
   --size-frame: 1200px;
-  --size-sidebar: 300px;
-  --size-topbar: 56px;
   --size-toc: 200px;
   --size-card-height: 178px;
   --space-card: 48px;
@@ -50,8 +48,6 @@
   --radius-media: 14.4px;
 
   --space-frame-x: 56px;
-  --space-sidebar-x: 56px;
-  --space-nav-gap: 2px;
 }
 
 :root[data-palette="a"] {

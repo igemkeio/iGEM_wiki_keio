@@ -5,7 +5,27 @@ import type { Route } from "../routes";
 
 import styles from "./EcoliNav.module.css";
 
-const labels = { en: "Category", ja: "カテゴリ" } as const;
+const otherLocale = (locale: Locale): Locale => (locale === "en" ? "ja" : "en");
+
+const homePath = (locale: Locale, routes: Route[]): string | undefined =>
+  routes.find((r) => r.page.locale === locale && r.page.slug === "home")?.path;
+
+// 相手の言語に同じslugがあればそのページ、なければ相手の言語のhomeのURLパスを返す。homeも無ければundefined。
+export function alternatePath(
+  page: Pick<WikiPage, "locale" | "slug">,
+  routes: Route[]
+): string | undefined {
+  const locale = otherLocale(page.locale);
+  const same = routes.find(
+    (r) => r.page.locale === locale && r.page.slug === page.slug
+  );
+  return same ? same.path : homePath(locale, routes);
+}
+
+const labels = {
+  en: { category: "Category", pages: "Pages", lang: "Language" },
+  ja: { category: "カテゴリ", pages: "ページ", lang: "言語" },
+} as const;
 
 // 進行方向を示す矢印。ecoli-line.svgのpathと同じ形。
 function Arrow() {
@@ -33,7 +53,8 @@ function currentValue(inCategory: boolean, isPage: boolean) {
   return isPage ? "page" : "true";
 }
 
-// 大腸菌の連なり。1匹が1分類で、いまのページの分類の1匹を強調する。JSは使わない。
+// 1段目にロゴ、大腸菌の連なり、言語の切り替えを並べるヘッダー。1匹が1分類で、いまのページの分類の1匹を強調する。
+// 大腸菌にホバーかフォーカスが入るとその分類のページ一覧が下に開き、ホバーできない端末では一覧を2段目に出す。JSは使わない。
 export function EcoliNav({
   page,
   routes,
@@ -42,32 +63,99 @@ export function EcoliNav({
   routes: Route[];
 }) {
   const locale: Locale = page.locale;
+  const label = labels[locale];
   const current = categoryIdOf(page.slug);
+  const alternate = otherLocale(locale);
+  const alternateHref = alternatePath(page, routes);
+  const groups = groupRoutes(locale, routes).filter(
+    (g) => g.routes.length > 0
+  );
+  const currentGroup = groups.find((g) => g.category.id === current);
   return (
-    <nav className={styles.root} aria-label={labels[locale]}>
-      <ol className={styles.chain}>
-        <li className={styles.tail} aria-hidden="true">
-          <Flagella />
-        </li>
-        {groupRoutes(locale, routes)
-          .filter((g) => g.routes.length > 0)
-          .map(({ category, routes: items }) => (
-            <li key={category.id} className={styles.item}>
-              <a
-                className={styles.cell}
-                href={withBase(items[0].path)}
-                aria-current={currentValue(
-                  category.id === current,
-                  items[0].page.slug === page.slug
-                )}
-              >
-                <Arrow />
-                <span className={styles.label}>{category.label}</span>
-              </a>
+    <header className={styles.root}>
+      <div className={styles.bar}>
+        <a
+          className={styles.logo}
+          href={withBase(homePath(locale, routes) ?? "/")}
+          aria-current={page.slug === "home" ? "page" : undefined}
+        >
+          <span>iGEM</span>
+          <span className={styles.logoSub}>Keio 2026</span>
+        </a>
+        <nav className={styles.category} aria-label={label.category}>
+          <ol className={styles.chain}>
+            <li className={styles.tail} aria-hidden="true">
+              <Flagella />
             </li>
-          ))}
-        <li className={styles.head} aria-hidden="true" />
-      </ol>
-    </nav>
+            {groups.map(({ category, routes: items }) => (
+              <li key={category.id} className={styles.item}>
+                <a
+                  className={styles.cell}
+                  href={withBase(items[0].path)}
+                  aria-current={currentValue(
+                    category.id === current,
+                    items[0].page.slug === page.slug
+                  )}
+                >
+                  <Arrow />
+                  <span className={styles.label}>{category.label}</span>
+                </a>
+                <div className={styles.panel}>
+                  <ul className={styles.panelList}>
+                    {items.map(({ page: p, path }) => (
+                      <li key={path}>
+                        <a
+                          className={styles.link}
+                          href={withBase(path)}
+                          aria-current={
+                            p.slug === page.slug ? "page" : undefined
+                          }
+                        >
+                          {p.title}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </li>
+            ))}
+            <li className={styles.head} aria-hidden="true" />
+          </ol>
+        </nav>
+        {alternateHref && (
+          // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- fieldsetにすると既定の枠線とレイアウトが付く
+          <div className={styles.lang} role="group" aria-label={label.lang}>
+            <span className={styles.langCurrent} lang={locale}>
+              {locale.toUpperCase()}
+            </span>
+            <a
+              className={styles.langLink}
+              href={withBase(alternateHref)}
+              hrefLang={alternate}
+              lang={alternate}
+            >
+              {alternate.toUpperCase()}
+            </a>
+          </div>
+        )}
+      </div>
+      {currentGroup && (
+        <nav className={styles.sub} aria-label={label.pages}>
+          <ul className={styles.subList}>
+            {currentGroup.routes.map(({ page: p, path }) => (
+              <li key={path}>
+                <a
+                  className={styles.link}
+                  href={withBase(path)}
+                  aria-current={p.slug === page.slug ? "page" : undefined}
+                >
+                  {p.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+    </header>
   );
 }

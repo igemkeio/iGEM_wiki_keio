@@ -2,15 +2,75 @@
   .root {
     --cell-height: 44px;
 
+    position: relative;
+    z-index: 10;
     padding: 24px var(--space-frame-x) 0;
     font-family: var(--font-heading);
+  }
+
+  .bar {
+    display: grid;
+    grid-template-areas: "logo lang" "category category";
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 8px 24px;
+  }
+
+  .logo,
+  .lang {
+    font-size: var(--size-nav);
+    line-height: var(--size-nav-leading);
+    letter-spacing: var(--size-nav-tracking);
+    text-transform: uppercase;
+  }
+
+  .logo {
+    grid-area: logo;
+    display: flex;
+    gap: 14px;
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+
+  .logoSub {
+    color: var(--color-muted);
+  }
+
+  .lang {
+    grid-area: lang;
+    display: flex;
+    gap: 12px;
+  }
+
+  .langCurrent {
+    color: var(--color-ink);
+  }
+
+  .langLink {
+    color: var(--color-nav);
+    text-decoration: none;
+  }
+
+  .langLink:hover {
+    color: var(--color-ink);
+  }
+
+  .logo:focus-visible,
+  .langLink:focus-visible,
+  .link:focus-visible {
+    outline: 3px solid var(--color-accent-orange);
+    outline-offset: 3px;
+  }
+
+  .category {
+    grid-area: category;
   }
 
   .chain {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
     gap: 8px 0;
     margin: 0;
     padding: 8px 0;
@@ -61,6 +121,10 @@
   }
 
   /* 隣の個体と重ねて連結して見せ、つなぎ目に青いくびれを置く */
+  .item {
+    position: relative;
+  }
+
   .item + .item {
     margin-left: -3px;
   }
@@ -101,6 +165,102 @@
     fill: var(--color-accent-blue);
   }
 
+  /* パネルは大腸菌の真下に隙間なく付けるので、マウスが移っても閉じない */
+  .panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1;
+    display: none;
+    padding-top: 8px;
+  }
+
+  .item:nth-last-child(-n + 3) .panel {
+    right: 0;
+    left: auto;
+  }
+
+  .item:hover .panel,
+  .item:focus-within .panel {
+    display: block;
+  }
+
+  .panelList {
+    min-width: 180px;
+    max-width: 280px;
+    margin: 0;
+    padding: 8px 0;
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(13, 15, 18, 0.12);
+    list-style: none;
+  }
+
+  .panelList .link {
+    display: block;
+    padding: 8px 18px;
+  }
+
+  .link {
+    color: var(--color-nav);
+    font-size: 14px;
+    line-height: 1.4;
+    text-decoration: none;
+  }
+
+  .link:hover,
+  .link[aria-current="page"] {
+    color: var(--color-ink);
+  }
+
+  .link[aria-current="page"] {
+    font-weight: 700;
+  }
+
+  .panelList .link[aria-current="page"] {
+    box-shadow: inset 4px 0 0 var(--color-accent-orange);
+  }
+
+  .sub {
+    display: none;
+  }
+
+  .subList {
+    display: flex;
+    gap: 4px 20px;
+    margin: 12px 0 0;
+    padding: 12px 0;
+    overflow-x: auto;
+    border-top: 1px solid var(--color-line);
+    list-style: none;
+  }
+
+  .subList .link {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .subList .link[aria-current="page"] {
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-orange);
+    text-decoration-thickness: 3px;
+    text-underline-offset: 6px;
+  }
+
+  /* ホバーできない端末ではパネルを使わず、いまの分類のページ一覧を2段目に出す */
+  @media (hover: none) {
+    .item .panel,
+    .item:hover .panel,
+    .item:focus-within .panel {
+      display: none;
+    }
+
+    .sub {
+      display: block;
+    }
+  }
+
   .head {
     width: 12px;
     height: 12px;
@@ -115,10 +275,39 @@
     }
   }
 
+  @media (prefers-reduced-motion: no-preference) {
+    .item:hover .panel,
+    .item:focus-within .panel {
+      animation: unfold 0.2s ease-out;
+    }
+  }
+
+  @keyframes unfold {
+    from {
+      clip-path: inset(0 -24px 100% -24px);
+    }
+
+    to {
+      clip-path: inset(0 -24px -32px -24px);
+    }
+  }
+
   @keyframes pulse {
     50% {
       opacity: 0.8;
       transform: scale(1.35);
+    }
+  }
+
+  /* 広い幅ではロゴ、大腸菌、言語の切り替えを1段に並べる */
+  @media (min-width: 1280px) {
+    .bar {
+      grid-template-areas: "logo category lang";
+      grid-template-columns: 1fr auto 1fr;
+    }
+
+    .lang {
+      justify-self: end;
     }
   }
 
@@ -147,6 +336,10 @@
 
     .chain {
       justify-content: flex-start;
+    }
+
+    .panelList {
+      min-width: 160px;
     }
 
     .tail,

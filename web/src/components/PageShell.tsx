@@ -4,7 +4,6 @@ import type { WikiPage } from "../content";
 import type { Route } from "../routes";
 import { EcoliNav } from "./EcoliNav";
 import { Footer } from "./Footer";
-import { Sidebar } from "./Sidebar";
 
 import styles from "./PageShell.module.css";
 
@@ -19,13 +18,10 @@ export function PageShell({
   children?: ReactNode;
 }) {
   return (
-    <>
-      <Sidebar page={page} routes={routes} />
-      <div className={styles.frame}>
-        <EcoliNav page={page} routes={routes} />
-        <div className={styles.inner}>{children}</div>
-        <Footer />
-      </div>
-    </>
+    <div className={styles.frame}>
+      <EcoliNav page={page} routes={routes} />
+      <div className={styles.inner}>{children}</div>
+      <Footer />
+    </div>
   );
 }

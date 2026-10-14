@@ -60,11 +60,4 @@
   a {
     color: inherit;
   }
-
-  @media (max-width: 767px) {
-    h2,
-    h3 {
-      scroll-margin-top: var(--size-topbar);
-    }
-  }
 }
