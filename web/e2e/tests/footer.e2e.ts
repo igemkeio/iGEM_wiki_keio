@@ -153,10 +153,14 @@ test.describe("スポンサーの帯", () => {
     const t = track(page);
     const [, second] = await offsets(t);
     await page.getByRole("button", { name: "Pause" }).click();
+    // 読み込み時の周期の途中まで進めてから再生し、再生の3秒後に送られることを確かめる。
+    await page.clock.runFor(1500);
     await page.getByRole("button", { name: "Play" }).click();
     await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
     await expect(page.locator("[data-sponsors-toggle]")).toBeFocused();
-    await page.clock.runFor(3000);
+    await page.clock.runFor(2900);
+    expect(await scrollLeft(t)).toBe(0);
+    await page.clock.runFor(100);
     await settledAt(t, second);
   });
 
@@ -169,11 +173,14 @@ test.describe("スポンサーの帯", () => {
     await toggle.focus();
     await page.keyboard.press("Enter");
     await expect(toggle).toHaveAttribute("aria-label", "Play");
+    await page.clock.runFor(1500);
     await page.keyboard.press("Enter");
     await expect(toggle).toHaveAttribute("aria-label", "Pause");
     await expect(toggle).toBeFocused();
     await page.mouse.move(2, 2);
-    await page.clock.runFor(3000);
+    await page.clock.runFor(2900);
+    expect(await scrollLeft(t)).toBe(0);
+    await page.clock.runFor(100);
     await settledAt(t, second);
   });
 
@@ -196,6 +203,15 @@ test.describe("スポンサーの帯", () => {
       expect(await scrollLeft(track(page))).toBe(0);
     });
   }
+
+  test("トグルにホバーしていても、ロゴにフォーカスがあれば送られない", async ({
+    page,
+  }) => {
+    await page.locator("[data-sponsors-toggle]").hover();
+    await parts.ロゴ(page).focus();
+    await page.clock.runFor(9000);
+    expect(await scrollLeft(track(page))).toBe(0);
+  });
 
   test("先頭で前へを押すと末尾へ回る", async ({ page }) => {
     const t = track(page);
