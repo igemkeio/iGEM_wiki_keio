@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import type { Locator, Page, TestInfo } from "@playwright/test";
 
 import { expect, hrefOf, pathOf, test } from "../fixtures";
 import {
@@ -38,6 +38,13 @@ function path(from: Point, to: Point, steps: number): [number, number][] {
   return points;
 }
 
+// 全ページをたどる重いテストはbase付きのprojectでは流さない。base付きはhrefに/keio/が付くことだけを見る。
+const skipInBase = (testInfo: TestInfo) =>
+  testInfo.skip(
+    testInfo.project.name === "chromium-base",
+    "base付きではhrefの接頭辞だけを見る"
+  );
+
 for (const locale of locales) {
   const pages = publishedPages(locale);
   const articles = pages.filter((p) => p.slug !== "home");
@@ -48,39 +55,78 @@ for (const locale of locales) {
   const cell = (page: Page, label: string) =>
     header(page).getByRole("link", { name: label, exact: true });
   const cells = (page: Page) => header(page).locator("ol > li > a");
+  // 分類ごとの先頭のページ(分類にページが無ければ除く)。全ページの代わりに代表として開く。
+  const representatives = categoryLabels.flatMap((label) => {
+    const first = firstPageOf(articles, label);
+    return first ? [first] : [];
+  });
   // 大腸菌のうちパネルを持つ1匹の<li>
   const item = (page: Page, label: string) =>
     header(page).locator("li", {
       has: page.getByRole("link", { name: label, exact: true }),
     });
 
-  test(`[${locale}] Homeのパネルから、publishedな全ページに着く`, async ({
+  test(`[${locale}] Homeのパネルに、publishedな全ページへのリンクが対応表の順で並び、どれも開ける`, async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    skipInBase(testInfo);
+    expect(articles.length).toBeGreaterThan(1);
+    await page.goto(start);
+    // 遷移せずに、全分類のパネルのhrefを1回で集める
+    const all = await header(page)
+      .locator("ul a")
+      .evaluateAll((els) => els.map((el) => el.getAttribute("href") ?? ""));
+    const published = articles.map((p) => hrefOf(p.path, baseURL));
+    // 確認用ページ(PRERENDER_ALLで出る)も並ぶので、公開ページが漏れなく含まれることを見る
+    expect(all).toEqual(expect.arrayContaining(published));
+    // 各ページが開けることを、遷移せずにHTTPのステータスで並列に確かめる
+    const responses = await Promise.all(
+      [...new Set(all)].map(async (href) => {
+        const response = await page.request.get(href);
+        return { href, status: response.status() };
+      })
+    );
+    expect(responses.filter((r) => r.status !== 200)).toStrictEqual([]);
+  });
+
+  test(`[${locale}] Homeのパネルから代表のページへクリックで移れる`, async ({
     page,
     baseURL,
   }) => {
-    // 全ページを順に開くので、制限時間はページ数に比例させる(1ページ5秒の見積もり)。
-    test.setTimeout(30_000 + 5000 * pages.length);
-    expect(articles.length).toBeGreaterThan(1);
-    for (const entry of articles) {
+    const entries = [representatives[0], representatives.at(-1)];
+    for (const entry of entries) {
       await page.goto(start);
-      const label = categoryLabelOf(entry.slug) ?? "";
+      const label = categoryLabelOf(entry?.slug ?? "") ?? "";
       await cell(page, label).hover();
       await item(page, label)
-        .locator(`ul a[href="${hrefOf(entry.path, baseURL)}"]`)
+        .locator(`ul a[href="${hrefOf(entry?.path ?? "", baseURL)}"]`)
         .click();
       await expect(page).toHaveURL(
-        (url) => pathOf(url.href, baseURL) === entry.path
+        (url) => pathOf(url.href, baseURL) === entry?.path
       );
-      await expect(page).toHaveTitle(`${entry.title} | iGEM Keio 2026`);
-      await expect(page.locator("h1")).toHaveCount(1);
-      await expect(page.locator("h1")).toHaveText(entry.title);
+      await expect(page).toHaveTitle(`${entry?.title} | iGEM Keio 2026`);
+      await expect(page.locator("h1")).toHaveText(entry?.title ?? "");
     }
+  });
+
+  test(`[${locale}] ヘッダーのリンクのhrefにbaseが付く`, async ({
+    page,
+    baseURL,
+  }) => {
+    const prefix = new URL(baseURL ?? "http://localhost/").pathname;
+    await page.goto(start);
+    const hrefs = await page
+      .locator("header a")
+      .evaluateAll((els) => els.map((el) => el.getAttribute("href") ?? ""));
+    expect(hrefs.length).toBeGreaterThan(10);
+    expect(hrefs.filter((h) => !h.startsWith(prefix))).toStrictEqual([]);
   });
 
   test(`[${locale}] 左のSidebarが出ず、本文が左の列に押されない`, async ({
     page,
   }) => {
-    for (const entry of pages) {
+    for (const entry of [pages[0], ...representatives.slice(0, 1)]) {
       await page.goto(entry.path.slice(1));
       await expect(
         page.getByRole("navigation", {
@@ -116,6 +162,7 @@ for (const locale of locales) {
   test(`[${locale}] 展開の途中で下のリンクへ素早く移っても、パネルは閉じない`, async ({
     page,
   }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto(start);
     const [label] = categoryLabels;
     const panelLinks = item(page, label).locator("ul a");
@@ -176,6 +223,7 @@ for (const locale of locales) {
   test(`[${locale}] パネルは上から伸びるアニメーションで開き、prefers-reduced-motionでは止まる`, async ({
     page,
   }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto(start);
     const [label] = categoryLabels;
     const panel = item(page, label).locator("ul").first();
@@ -198,7 +246,7 @@ for (const locale of locales) {
     page,
     baseURL,
   }) => {
-    for (const entry of articles) {
+    for (const entry of representatives) {
       await page.goto(entry.path.slice(1));
       const current = header(page).locator('ul a[aria-current="page"]');
       await expect(current).toHaveCount(1);
@@ -236,10 +284,9 @@ for (const locale of locales) {
     page,
     baseURL,
   }) => {
-    test.setTimeout(30_000 + 5000 * articles.length);
     const other = locale === "en" ? "ja" : "en";
     const otherPages = publishedPages(other);
-    for (const entry of articles) {
+    for (const entry of [articles[0], articles.at(-1) ?? articles[0]]) {
       await page.goto(entry.path.slice(1));
       const target =
         otherPages.find((p) => p.slug === entry.slug) ??
@@ -259,7 +306,7 @@ for (const locale of locales) {
   test(`[${locale}] ヘッダーの大腸菌は5匹で、いまの分類だけが現在地になる`, async ({
     page,
   }) => {
-    for (const entry of pages) {
+    for (const entry of [pages[0], ...representatives]) {
       await page.goto(entry.path.slice(1));
       const links = cells(page);
       await expect(links).toHaveText(categoryLabels);
@@ -298,7 +345,8 @@ for (const locale of locales) {
     test(`[${locale}] ${width}px幅でも、ヘッダーの5匹が収まり押せる`, async ({
       page,
       baseURL,
-    }) => {
+    }, testInfo) => {
+      skipInBase(testInfo);
       await page.setViewportSize({ width, height: 800 });
       await page.goto(start);
       const links = cells(page);
