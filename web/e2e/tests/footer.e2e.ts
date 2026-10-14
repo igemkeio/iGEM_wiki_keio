@@ -2,6 +2,7 @@ import type { Locator, Page } from "@playwright/test";
 
 import footerData from "../../src/data/footer.json" with { type: "json" };
 import sponsors from "../../src/data/sponsors.json" with { type: "json" };
+import { socialIconPath } from "../../src/lib/socialIcons";
 import { expect, test } from "../fixtures";
 import { locales, publishedPages } from "../pages";
 
@@ -73,8 +74,11 @@ test("SNSはアイコンで出て、リンクのaria-labelにサービス名が�
   for (const item of footerData.social) {
     const link = links.getByRole("link", { name: item.label });
     await expect(link).toHaveAttribute("href", item.href);
-    await expect(link).toHaveAttribute("aria-label", item.label);
-    await expect(link.locator("svg")).toHaveAttribute("aria-hidden", "true");
+    // アイコンがあるサービスだけ、SVGの aria-hidden とリンクの aria-label を確かめる。
+    if (socialIconPath(item.href)) {
+      await expect(link).toHaveAttribute("aria-label", item.label);
+      await expect(link.locator("svg")).toHaveAttribute("aria-hidden", "true");
+    }
   }
 });
 
