@@ -221,26 +221,29 @@ test("checkNoScriptはdata-palette-switcherのインラインscriptだけを許�
   );
 });
 
-test("checkNoScriptはフッター用のfooter-sponsors.jsを読むscriptだけを許す", () => {
-  for (const src of ["/footer-sponsors.js", "/keio/footer-sponsors.js"]) {
-    assert.deepEqual(
-      checkNoScript(`<body><script src="${src}" defer></script></body>`),
-      []
-    );
-  }
-  for (const src of ["/other.js", "/footer-sponsors.js.map", "/assets/a.js"]) {
-    assert.deepEqual(
-      checkNoScript(`<body><script src="${src}" defer></script></body>`),
-      ["islandsが空のページに<script>があります"]
-    );
+const tag = (src) => `<body><script src="${src}" defer></script></body>`;
+
+test("checkNoScriptはbase付きのfooter-sponsors.jsを読むscriptだけを許す", () => {
+  const bad = ["islandsが空のページに<script>があります"];
+  assert.deepEqual(checkNoScript(tag("/footer-sponsors.js")), []);
+  assert.deepEqual(
+    checkNoScript(tag("/keio/footer-sponsors.js"), "/keio/"),
+    []
+  );
+  assert.deepEqual(checkNoScript(tag("/footer-sponsors.js"), "/keio/"), bad);
+  for (const src of [
+    "https://example.com/footer-sponsors.js",
+    "/assets/footer-sponsors.js",
+    "/footer-sponsors.js.map",
+    "/other.js",
+  ]) {
+    assert.deepEqual(checkNoScript(tag(src)), bad);
   }
   assert.deepEqual(
     checkNoScript(
       `<body><script src="/footer-sponsors.js"></script><script src="/a.js"></script></body>`
     ),
-    ["islandsが空のページに<script>があります"]
+    bad
   );
-  assert.deepEqual(checkNoScript(`<body><script>var a;</script></body>`), [
-    "islandsが空のページに<script>があります",
-  ]);
+  assert.deepEqual(checkNoScript(`<body><script>var a;</script></body>`), bad);
 });
