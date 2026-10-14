@@ -1,5 +1,5 @@
 // フッターのスポンサーの帯を1枚ずつ送る。全ページが読む素のJSで、Reactもライブラリも使わない。
-// JSが無いときは、帯が横スクロールのまま残り、送りのボタンは hidden のまま出ない。
+// JSが無いときは、帯が横スクロールのまま残り、送りのボタンは hidden のまま出ない。帯がはみ出さないときもボタンは出ない。
 (() => {
   const INTERVAL = 3000;
   const root = document.querySelector("[data-sponsors]");
@@ -27,9 +27,16 @@
     goTo(target ? target.offsetLeft : 0);
   };
 
+  // 帯がはみ出すときだけボタンを出す。幅が変わるたびに付け直す。
+  const sync = () => {
+    const overflows = track.scrollWidth > track.clientWidth + 1;
+    prev.hidden = !overflows;
+    next.hidden = !overflows;
+  };
+
   root.dataset.sponsorsJs = "";
-  prev.hidden = false;
-  next.hidden = false;
+  sync();
+  new ResizeObserver(sync).observe(track);
   prev.addEventListener("click", backward);
   next.addEventListener("click", forward);
 

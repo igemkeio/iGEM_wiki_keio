@@ -64,10 +64,9 @@
     list-style: none;
   }
 
-  /* ボタンはJSが hidden を外したときだけ出る。JSが無いときは横スクロールで見る */
+  /* ボタンはJSが、帯がはみ出すときだけ hidden を外す。JSが無いときは横スクロールで見る */
   .sponsors[data-sponsors-js] {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    display: flex;
     align-items: center;
     gap: 8px;
   }
@@ -103,6 +102,8 @@
   }
 
   .sponsors[data-sponsors-js] .track {
+    flex: 1;
+    min-width: 0;
     scrollbar-width: none;
   }
 
