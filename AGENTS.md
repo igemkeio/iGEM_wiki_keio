@@ -55,7 +55,7 @@ iGEM Keioチームのwiki。`content/`の原稿JSONから、ViteとReactで静�
 
 - タイトルはコミットと同じ形式。本文はPRテンプレートを埋める。対応するIssueは`Closes #N`で紐付ける。
 - 小さく保ち、作業中はDraftにする。マージはマージコミット(Create a merge commit)で、履歴を残す。
-- `ci-passed`が`main`の必須チェック。CIは`.github/workflows/ci.yml`で、型、lint、Vitest、スクリプトのテスト、build-check、E2Eを流し、`ci-passed`が結果を集約する。
+- `ci-passed`が`main`の必須チェック。CIは`.github/workflows/ci.yml`で、型、lint、Vitest、スクリプトのテスト、build-check、E2E、gitleaks(秘密情報と署名付きURLの混入の検査)を流し、`ci-passed`が結果を集約する。
 
 ### lefthook
 
