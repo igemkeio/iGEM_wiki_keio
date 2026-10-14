@@ -78,7 +78,7 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 - `islands`が空のページに`<script>`がない。ただし`data-palette-switcher`属性を持ち、`src`を持たないインラインのscriptは許す。
 - 警告(違反に数えず、終了コードも変えない): `src/data/nav-categories.json`の分類に載っていない公開ページを`警告: <ファイル>: ...`の形で出す。
 
-検査するのは`dist/`のHTMLと、`dist/assets/`配下のCSSだけ。`web/public/`由来のファイル(`fonts/`、`images/`、`models/`、`notion-images/`)は読まない。HTMLの解析は正規表現で行い、依存は増やさない。検査の関数は`scripts/lib/check/`にあり、`npm run test:check`でテストする。
+検査するのは`dist/`のHTMLと、`dist/assets/`配下のCSSだけ。`web/public/`由来のファイル(`fonts/`、`images/`、`models/`、`notion-images/`、`notion-files/`)は読まない。`notion-images/`と`notion-files/`は暫定の置き場で、本番では[Issue #13](https://github.com/igemkeio/iGEM_wiki_keio/issues/13)で`static.igem.wiki`へ移す。HTMLの解析は正規表現で行い、依存は増やさない。検査の関数は`scripts/lib/check/`にあり、`npm run test:check`でテストする。
 
 ## テスト
 
