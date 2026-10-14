@@ -587,6 +587,45 @@ for (const locale of locales) {
     });
   }
 
+  for (const [width, height] of [
+    [1280, 800],
+    [1600, 900],
+    [375, 812],
+  ] as const) {
+    test(`[${locale}] ${width}px幅で、ヘッダーのロゴと言語の切り替えが本文のフレームの左右に揃う`, async ({
+      page,
+    }, testInfo) => {
+      skipInBase(testInfo);
+      await page.setViewportSize({ width, height });
+      await page.goto(longPath);
+      const edges = await page.evaluate(() => {
+        const inner = document.querySelector("main")?.parentElement;
+        const style = inner ? getComputedStyle(inner) : undefined;
+        const box = inner?.getBoundingClientRect();
+        const logo = document
+          .querySelector("header a")
+          ?.getBoundingClientRect();
+        const lang = document
+          .querySelector('header [role="group"]')
+          ?.getBoundingClientRect();
+        return {
+          innerLeft:
+            (box?.left ?? 0) +
+            Number((style?.paddingLeft ?? "0").replace("px", "")),
+          innerRight:
+            (box?.right ?? 0) -
+            Number((style?.paddingRight ?? "0").replace("px", "")),
+          logoLeft: logo?.left ?? -1,
+          langRight: lang?.right ?? -1,
+        };
+      });
+      expect(Math.abs(edges.logoLeft - edges.innerLeft)).toBeLessThanOrEqual(1);
+      expect(Math.abs(edges.langRight - edges.innerRight)).toBeLessThanOrEqual(
+        1
+      );
+    });
+  }
+
   test(`[${locale}] 高さ500px以下でも幅1100px以上なら目次は出て、ヘッダーの高さを足さずに上へ付く`, async ({
     page,
   }, testInfo) => {
