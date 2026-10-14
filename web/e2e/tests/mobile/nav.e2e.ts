@@ -39,11 +39,12 @@ for (const locale of locales) {
       // パネルは使わない
       await expect(categoryNav(page).locator("ul a").first()).toBeHidden();
     }
-    // 遷移は最後の分類の最後のページだけ確かめる
-    const last = pagesOfCategory(
-      articles,
-      navConfig.categories.at(-1)?.label ?? ""
-    ).at(-1);
+    // 遷移は、ページ数が最多の分類(2段目が横にあふれる)の最後のページだけ確かめる
+    const [largest] = navConfig.categories
+      .map((c) => pagesOfCategory(articles, c.label))
+      .toSorted((a, b) => b.length - a.length);
+    const last = largest.at(-1);
+    await page.goto((largest[0]?.path ?? "/").slice(1));
     await pagesNav(page)
       .locator(`a[href="${hrefOf(last?.path ?? "", baseURL)}"]`)
       .click();
