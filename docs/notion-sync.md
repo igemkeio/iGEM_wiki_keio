@@ -53,6 +53,18 @@ Database IDはDBのURLに含まれる32文字の英数字。
 
 HTMLの形は[`../content/README.md`](../content/README.md)のFigureカードとNoteのHTMLの形の節にある。
 
+### 添付ファイルの扱い
+
+Notionにアップロードしたfile・pdfブロックは、同期時に`web/public/notion-files/<内容のsha256先頭16桁>-<元のファイル名>`に保存され、リンクは`/notion-files/...`になる。NotionのAPIが返す署名付きURLは1時間で切れるため、そのまま埋め込まない。ハッシュで同じファイルの二重保存を避け、元のファイル名はダウンロード時の名前を読めるように残す。
+
+videoブロックの外部URLは、`video.igem.org`(Video Universe)のものだけiframeで埋め込み、それ以外はリンクのまま出す。`/w/<id>`と`/videos/watch/<id>`は`/videos/embed/<id>`に変換する(すでにembedならそのまま)。変換できない`video.igem.org`のURLは、警告を出してリンクにする。iframeは`class="video-embed"`、`loading="lazy"`、PeerTubeの推奨に沿った`sandbox`と`allow="fullscreen"`を持つ。キャプションがあれば画像と同じFigureカードで包み、titleにはキャプションのタグを除いた文字列を入れる(無ければ`Video`)。クエリ(`?start=`など)は残す。
+
+Notionにアップロードされた動画は同期のログに警告を出し、何も出力しない。iGEMの規定で動画はリポジトリに入れないため、iGEM Video Universe(video.igem.org)にアップロードしてから、Notionの動画ブロックを外部URLに差し替える。file・pdfブロックでも、ファイル名の拡張子が動画(mp4、mov、webmなど)なら同じ扱いで、ダウンロードせず警告を出す。
+
+書き出すcontentにNotionの署名付きURL(prod-files-secure)が残ったときは、ページ名を添えてログに警告する。環境変数`GITHUB_STEP_SUMMARY`があるとき(Actions上)は、そのファイルにも一覧を追記する。ジョブは失敗させない。
+
+添付ファイルの置き場所は画像と同じ暫定方式で、本番の提出前に`static.igem.wiki`へ移す([Issue #13](https://github.com/igemkeio/iGEM_wiki_keio/issues/13))。
+
 ### 画像の扱い(暫定)
 
 Notionの本文に貼った画像は、同期時に`web/public/notion-images/<ハッシュ>.<拡張子>`に取り込まれ(内容ハッシュで重複を排除する)、`/notion-images/...`として配信される。外部URL(例: `static.igem.wiki`の画像を埋め込みで貼った場合)はそのまま通す。
@@ -77,9 +89,9 @@ npm run dev                        # 反映を確認
 `.github/workflows/notion-sync.yml`が次を行う。
 
 - 手動実行(Actionsタブのworkflowを実行)か、毎日0時(UTC。日本時間の9時)に起動する。
-- `npm ci`のあと`npm run notion:sync`を実行し、`content/images-todo.json`の件数と先頭10件をジョブのサマリーに出す。
+- `npm ci`のあと`npm run notion:sync`を実行し、`content/images-todo.json`の件数と先頭10件をジョブのサマリーに出す。署名付きURLが残ったページがあれば、その一覧も同期のステップからサマリーに出る。
 - `npm run build && npm run check`を実行する。失敗したらPRを作らずにジョブを失敗させる。
-- 差分があれば`chore/notion-sync`ブランチにコミットしてPRを自動で作る(`main`へ直接pushはしない)。コミット対象は`content/`と`web/public/notion-images/`だけ。
+- 差分があれば`chore/notion-sync`ブランチにコミットしてPRを自動で作る(`main`へ直接pushはしない)。コミット対象は`content/`、`web/public/notion-images/`、`web/public/notion-files/`だけ。
 
 ### 必要なSecrets
 

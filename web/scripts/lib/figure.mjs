@@ -21,15 +21,9 @@ export function parseCaption(caption) {
   return { label, title: lines[0] ?? "", description: lines.slice(1) };
 }
 
-// 画像とキャプションを Figure カードの HTML にする。キャプションが無ければ素の img にする。
+// メディアのHTMLをキャプション付きの Figure カードで包む。
 // 空行を含めないのは、外側のmarkedにHTMLブロックとして素通しさせるため。
-export function renderImage({ src, caption }) {
-  const text = caption.trim();
-  const alt = escapeHtml(text.replaceAll(/\s*\n\s*/gu, " "));
-  const img = `<img src="${escapeHtml(src)}" alt="${alt}" />`;
-  if (!text) {
-    return img;
-  }
+function renderFigureCard(media, text) {
   const { label, title, description } = parseCaption(text);
   const body = [
     label && `<p class="figure-card__label">${escapeHtml(label)}</p>`,
@@ -38,12 +32,33 @@ export function renderImage({ src, caption }) {
   ].filter(Boolean);
   return [
     '<figure class="figure-card">',
-    `<div class="figure-card__media">${img}</div>`,
+    `<div class="figure-card__media">${media}</div>`,
     '<figcaption class="figure-card__body">',
     ...body,
     "</figcaption>",
     "</figure>",
   ].join("\n");
+}
+
+// 画像とキャプションを Figure カードの HTML にする。キャプションが無ければ素の img にする。
+export function renderImage({ src, caption }) {
+  const text = caption.trim();
+  const alt = escapeHtml(text.replaceAll(/\s*\n\s*/gu, " "));
+  const img = `<img src="${escapeHtml(src)}" alt="${alt}" />`;
+  return text ? renderFigureCard(img, text) : img;
+}
+
+// 動画の埋め込み iframe。キャプションがあれば Figure カードで包む。
+// title はキャプションからタグを除いた1行、無ければ Video。
+export function renderVideoEmbed({ src, caption }) {
+  const text = caption.trim();
+  const title =
+    text
+      .replaceAll(/<[^>]*>/gu, "")
+      .replaceAll(/\s+/gu, " ")
+      .trim() || "Video";
+  const iframe = `<iframe class="video-embed" src="${escapeHtml(src)}" title="${escapeHtml(title)}" sandbox="allow-same-origin allow-scripts allow-popups allow-forms" allow="fullscreen" loading="lazy"></iframe>`;
+  return text ? renderFigureCard(iframe, text) : iframe;
 }
 
 // HTML 中の img の src を出現順に返す。

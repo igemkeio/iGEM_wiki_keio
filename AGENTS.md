@@ -12,7 +12,7 @@ iGEM Keioチームのwiki。`content/`の原稿JSONから、ViteとReactで静�
 │   ├── src/            ページ、部品、島、ビルド時と実行時のコード
 │   ├── scripts/        prerender、check、Notion同期、フォントのサブセット化
 │   ├── e2e/            PlaywrightのE2Eとビジュアル回帰
-│   └── public/         そのまま配信するファイル(フォント、画像、3Dモデル、notion-images)
+│   └── public/         そのまま配信するファイル(フォント、画像、3Dモデル、notion-images、notion-files)
 ├── content/            原稿JSON(content/<locale>/<slug>.json)。Notion同期が書く
 ├── docs/               設計メモ(architecture.md)、Notion連携(notion-sync.md)、tasks/
 ├── notion-trigger/     Notionのボタンから同期を起動するVercel関数。独立したプロジェクト

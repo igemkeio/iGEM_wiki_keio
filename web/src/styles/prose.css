@@ -111,6 +111,10 @@
     border-radius: 8px;
   }
 
+  & > .video-embed {
+    margin-top: var(--space-paragraph);
+  }
+
   hr {
     height: 1px;
     margin: 32px 0;
@@ -162,6 +166,17 @@
     overflow: hidden;
     border-radius: var(--radius-media);
     background: var(--color-page);
+  }
+
+  .figure-card__media:has(.video-embed) {
+    aspect-ratio: auto;
+  }
+
+  .video-embed {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 0;
   }
 
   .figure-card__media img {

@@ -24,6 +24,11 @@ import { Client } from "@notionhq/client";
 import heicConvert from "heic-convert";
 import { NotionToMarkdown } from "notion-to-md";
 
+import {
+  attachmentFileName,
+  attachmentHref,
+  transformAttachment,
+} from "./lib/attachment.mjs";
 import { collectImageSrcs, isIgemStatic, renderImage } from "./lib/figure.mjs";
 import {
   renderMarkdown,
@@ -36,6 +41,11 @@ import {
   normalizeSlug,
   serializePage,
 } from "./lib/page.mjs";
+import {
+  appendStepSummary,
+  hasSignedUrl,
+  signedUrlSummary,
+} from "./lib/signed-url.mjs";
 import { staleJsonFiles } from "./lib/stale.mjs";
 
 const __dirname = import.meta.dirname;
@@ -46,6 +56,10 @@ const LOCALES = ["en", "ja"];
 // ※ iGEM 本番では static.igem.wiki へ移す必要あり（Issue #13）。
 const IMAGES_DIR = path.join(WEB_DIR, "public", "notion-images");
 const IMAGES_URL_PREFIX = "/notion-images";
+// PDF などの添付ファイルを保存する場所（暫定方式）。/notion-files/ で配信される。
+// ※ 画像と同じく、iGEM 本番では static.igem.wiki へ移す必要あり（Issue #13）。
+const FILES_DIR = path.join(WEB_DIR, "public", "notion-files");
+const FILES_URL_PREFIX = "/notion-files";
 
 // web/.env.local があれば最小パースで読み込む（dotenv 非依存）。
 function loadEnvLocal() {
@@ -192,6 +206,39 @@ async function localizeImage(url) {
     console.warn(`[notion-sync] 画像取得失敗のためスキップ: ${error.message}`);
     return null;
   }
+}
+
+// 添付ファイルをダウンロードして web/public/notion-files に保存し、配信用パスを返す。
+// Notion の署名付きURLは1時間で切れるため、リンクは保存したファイルに向ける。失敗時は null。
+async function localizeFile(url, originalName) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+    const buf = Buffer.from(await res.arrayBuffer());
+    const fileName = attachmentFileName(buf, originalName);
+    const outPath = path.join(FILES_DIR, fileName);
+    if (!fs.existsSync(outPath)) {
+      fs.mkdirSync(FILES_DIR, { recursive: true });
+      fs.writeFileSync(outPath, buf);
+      console.log(`[notion-sync] file saved ${fileName} (${buf.length} bytes)`);
+    }
+    return attachmentHref(FILES_URL_PREFIX, fileName);
+  } catch (error) {
+    console.warn(
+      `[notion-sync] ファイル取得失敗のためスキップ: ${error.message}`
+    );
+    return null;
+  }
+}
+
+for (const type of ["file", "pdf", "video"]) {
+  n2m.setCustomTransformer(type, (block) =>
+    transformAttachment(block, localizeFile, (message) =>
+      console.warn(`[notion-sync] ${message}`)
+    )
+  );
 }
 
 // image ブロックのカスタム変換。Notion アップロード画像（一時URL）は
@@ -399,14 +446,18 @@ async function collectPages(rows) {
 
 function writeOutputs(pages) {
   const imagesTodo = [];
+  const signedUrlPages = [];
 
   for (const [name, page] of pages) {
     fs.mkdirSync(path.join(CONTENT_DIR, page.locale), { recursive: true });
-    fs.writeFileSync(
-      path.join(CONTENT_DIR, name),
-      serializePage(page),
-      "utf-8"
-    );
+    const serialized = serializePage(page);
+    if (hasSignedUrl(serialized)) {
+      signedUrlPages.push(name);
+      console.warn(
+        `[notion-sync] ${name} にNotionの署名付きURL(prod-files-secure)が残っています。1時間で切れるうえ、gitleaksに止められます。`
+      );
+    }
+    fs.writeFileSync(path.join(CONTENT_DIR, name), serialized, "utf-8");
     console.log(`[notion-sync] wrote content/${name}`);
 
     for (const src of collectImageSrcs(page.html)) {
@@ -416,6 +467,12 @@ function writeOutputs(pages) {
     }
   }
 
+  appendStepSummary(
+    process.env.GITHUB_STEP_SUMMARY,
+    signedUrlSummary(signedUrlPages),
+    (file, text) => fs.appendFileSync(file, text, "utf-8"),
+    (message) => console.warn(`[notion-sync] ${message}`)
+  );
   removeStaleJson(new Set(pages.keys()));
   fs.writeFileSync(
     path.join(CONTENT_DIR, "images-todo.json"),
