@@ -163,12 +163,17 @@ export function checkLang(html) {
   ];
 }
 
-// 島のないページにscriptがあれば違反。許すのは、srcを持たず data-palette-switcher を持つインラインscriptだけ。
+// フッターの帯用に全ページが読む、public/の素のJS。
+const footerScript = /\/footer-sponsors\.js$/u;
+
+// 島のないページにscriptがあれば違反。許すのは、srcを持たず data-palette-switcher を持つインラインscriptと、
+// フッター用の footer-sponsors.js を読むscriptだけ。
 export function checkNoScript(html) {
   return parseTags(html).some(
     (t) =>
       t.name === "script" &&
-      !(t.attrs.has("data-palette-switcher") && !t.attrs.has("src"))
+      !(t.attrs.has("data-palette-switcher") && !t.attrs.has("src")) &&
+      !footerScript.test(t.attrs.get("src") ?? "")
   )
     ? ["islandsが空のページに<script>があります"]
     : [];
