@@ -41,7 +41,7 @@ export function Footer({ locale }: { locale: Locale }) {
             <span className={styles.logoSub}>Keio 2026</span>
           </p>
           <p className={styles.contact}>
-            <span className={styles.contactLabel}>{label.contact}</span>
+            <span>{label.contact}</span>
             <a href={`mailto:${footer.email}`}>{footer.email}</a>
           </p>
         </div>
