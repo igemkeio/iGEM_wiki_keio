@@ -54,6 +54,14 @@ for (const locale of locales) {
       has: page.getByRole("link", { name: label, exact: true }),
     });
 
+  // 大腸菌にホバーしてパネルが開き切るまで待つ。展開中は下の部分がまだ当たり判定に入らない。
+  const openPanel = async (page: Page, label: string) => {
+    await cell(page, label).hover();
+    await item(page, label)
+      .locator("div")
+      .first()
+      .evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+  };
   test(`[${locale}] Homeのパネルから、publishedな全ページに着く`, async ({
     page,
     baseURL,
@@ -64,7 +72,7 @@ for (const locale of locales) {
     for (const entry of articles) {
       await page.goto(start);
       const label = categoryLabelOf(entry.slug) ?? "";
-      await cell(page, label).hover();
+      await openPanel(page, label);
       await item(page, label)
         .locator(`ul a[href="${hrefOf(entry.path, baseURL)}"]`)
         .click();
@@ -99,7 +107,7 @@ for (const locale of locales) {
     const [label] = categoryLabels;
     const panelLinks = item(page, label).locator("ul a");
     await expect(panelLinks.first()).toBeHidden();
-    await cell(page, label).hover();
+    await openPanel(page, label);
     await expect(panelLinks.first()).toBeVisible();
     // 大腸菌の中心から真下へ、続けて横へパネルの最後のリンクの中心まで連続して動かし、途中で閉じないことを見る
     const origin = await centerOf(cell(page, label));
