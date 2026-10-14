@@ -96,6 +96,20 @@ for (const locale of locales) {
     });
   }
 
+  test(`[${locale}] 768x1024(hover: none)では、ヘッダーが固定され、スクロール後も2段目が画面内に残る`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await page.goto(`${start}description/`);
+    expect(await page.evaluate(() => matchMedia("(hover: none)").matches)).toBe(
+      true
+    );
+    await expect(page.locator("header")).toHaveCSS("position", "sticky");
+    await page.evaluate(() => window.scrollTo(0, 900));
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(900);
+    await expect(pagesNav(page)).toBeInViewport({ ratio: 1 });
+  });
+
   test(`[${locale}] hover: noneで幅を動かしても、scroll-padding-topが2段目を含むヘッダーの高さ以上(スクロールバー分の遅れも見込む)になる`, async ({
     page,
   }) => {

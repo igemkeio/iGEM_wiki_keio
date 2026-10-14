@@ -552,17 +552,25 @@ for (const locale of locales) {
       );
       await scrollTo(page, 900);
       const bar = await headerBox(page);
+      // 本文が透けないよう、ページと同じ背景を画面の幅いっぱいに敷き、下端に影を付ける(固定の有無によらない)
+      const bodyBackground = await page.evaluate(
+        () => getComputedStyle(document.body).backgroundColor
+      );
+      await expect(page.locator("header")).toHaveCSS(
+        "background-color",
+        bodyBackground
+      );
+      await expect(page.locator("header")).not.toHaveCSS("box-shadow", "none");
+      const widths = await page.evaluate(() => ({
+        header:
+          document.querySelector("header")?.getBoundingClientRect().width ?? 0,
+        client: document.documentElement.clientWidth,
+        scroll: document.documentElement.scrollWidth,
+      }));
+      expect(widths.header).toBe(widths.client);
+      expect(widths.scroll).toBeLessThanOrEqual(widths.client);
       if (stuck) {
         expect(bar.top).toBe(0);
-        // 本文が透けないよう、ページと同じ背景を敷き、下端に影を付ける
-        await expect(page.locator("header")).toHaveCSS(
-          "background-color",
-          "rgb(223, 228, 234)"
-        );
-        await expect(page.locator("header")).not.toHaveCSS(
-          "box-shadow",
-          "none"
-        );
       } else {
         expect(bar.bottom).toBeLessThanOrEqual(0);
       }
