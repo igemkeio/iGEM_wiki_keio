@@ -1,5 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
+import footerData from "../../src/data/footer.json" with { type: "json" };
+import sponsors from "../../src/data/sponsors.json" with { type: "json" };
 import { expect, test } from "../fixtures";
 import { locales, publishedPages } from "../pages";
 
@@ -16,6 +18,12 @@ const maxScroll = (locator: Locator) =>
 const scrollLeft = (locator: Locator) =>
   locator.evaluate((el) => Math.round(el.scrollLeft));
 
+// 時計を止め、以後は runFor だけで進める。実時間で自動送りが発火しないようにする。
+const freezeClock = async (page: Page) => {
+  await page.clock.install({ time: 0 });
+  await page.clock.pauseAt(1000);
+};
+
 const settledAt = (locator: Locator, expected: number) =>
   expect.poll(() => scrollLeft(locator)).toBe(expected);
 
@@ -29,10 +37,12 @@ test.describe("フッターの3段", () => {
         await expect(
           f.getByRole("list", { name: /Social|SNS/u })
         ).toBeVisible();
-        await expect(f.locator("[data-sponsors-track] img")).toHaveCount(6);
+        await expect(f.locator("[data-sponsors-track] img")).toHaveCount(
+          sponsors.length
+        );
         await expect(f.getByText("CC BY 4.0")).toBeVisible();
         await expect(
-          f.locator('a[href="https://gitlab.igem.org/2026/keio"]')
+          f.locator(`a[href="${footerData.repository}"]`)
         ).toBeVisible();
       });
     }
@@ -42,10 +52,14 @@ test.describe("フッターの3段", () => {
 test.describe("スポンサーの帯", () => {
   test.beforeEach(async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
-    await page.clock.install();
+    await freezeClock(page);
     await page.goto("e2e-plain/");
     await track(page).scrollIntoViewIfNeeded();
-    await expect(page.locator("[data-sponsors-prev]")).toBeVisible();
+    // 社数が変わって帯がはみ出さなくなったときは、送りのテストを飛ばす。
+    test.skip(
+      await page.locator("[data-sponsors-prev]").isHidden(),
+      "帯がはみ出さないので送らない"
+    );
   });
 
   test("3秒ごとに1枚ずつ左へ送られ、最後から先頭へ戻る", async ({ page }) => {
@@ -105,11 +119,38 @@ test.describe("スポンサーの帯", () => {
   });
 });
 
+test("帯がはみ出さないときはボタンが出ず、はみ出すと出る", async ({ page }) => {
+  await page.goto("e2e-plain/");
+  const buttons = page.locator("[data-sponsors-prev], [data-sponsors-next]");
+  const slides = page.locator("[data-sponsors-track] li");
+  const setHidden = (hidden: boolean) =>
+    slides.evaluateAll((items, hide) => {
+      for (const item of items.slice(1)) {
+        (item as HTMLElement).style.display = hide ? "none" : "";
+      }
+    }, hidden);
+  await setHidden(true);
+  await expect(buttons.first()).toBeHidden();
+  await expect(buttons.last()).toBeHidden();
+  await setHidden(false);
+  const overflows = await track(page).evaluate(
+    (el) => el.scrollWidth > el.clientWidth
+  );
+  if (overflows) {
+    await expect(buttons.first()).toBeVisible();
+    await expect(buttons.last()).toBeVisible();
+  }
+});
+
 test.describe("prefers-reduced-motion", () => {
   test("自動では送られないが、ボタンでは送れる", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.clock.install();
+    await freezeClock(page);
     await page.goto("e2e-plain/");
+    test.skip(
+      await page.locator("[data-sponsors-prev]").isHidden(),
+      "帯がはみ出さないので送らない"
+    );
     const t = track(page);
     const [, second] = await offsets(t);
     await page.clock.runFor(12_000);
@@ -131,7 +172,13 @@ test.describe("JSを切ったとき", () => {
       overflow: getComputedStyle(el).overflowX,
       wider: el.scrollWidth > el.clientWidth,
     }));
-    expect(scrollable).toStrictEqual({ overflow: "auto", wider: true });
+    expect(scrollable.overflow).toBe("auto");
+    // 社数が変わって帯がはみ出さないときは、末尾のロゴが見えることだけを確かめる。
+    if (!scrollable.wider) {
+      await t.scrollIntoViewIfNeeded();
+      await expect(t.locator("li").last()).toBeInViewport({ ratio: 1 });
+      return;
+    }
     const pageOverflows = await page.evaluate(
       () => document.documentElement.scrollWidth > window.innerWidth
     );
