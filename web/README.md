@@ -165,7 +165,9 @@ GIT_CONFIG_GLOBAL=/dev/null npx lefthook install
 
 `src/components/Footer.tsx`が3段のフッターを描く。1段目は左にロゴと連絡先のメール、右にSNS、2段目はスポンサーのロゴの帯、3段目はCC BY 4.0の表記とwikiのリポジトリへのリンク。連絡先、SNS、リポジトリのURLは`src/data/footer.json`、スポンサーは`src/data/sponsors.json`(名前、リンク先、`logo`、`alt`)にあり、差し替えるのはこのJSONとロゴの画像だけ。`logo`は画像の配信元(`WIKI_IMAGE_BASE`)からの相対パスで、仮のロゴは`public/images/sponsors/`にある。
 
-帯は素のJS(`public/footer-sponsors.js`、Reactなし)が全ページで3秒ごとに1枚ずつ左へ送り、最後から先頭へ戻る。ホバー中、帯の中にフォーカスがある間、`prefers-reduced-motion: reduce`のときは自動で送らない。前後のボタンは1枚ずつ送り、`hidden`で出力して、帯がはみ出すときだけJSが`hidden`を外す(幅が変わるたびに付け直す)。次へは最後から先頭へ戻り、前へは先頭で止まる。JSが無いときは、帯が`scroll-snap`の横スクロールのままでボタンは出ない。
+SNSのリンクは、`href`のホスト名からアイコンを決める。Instagram、X(twitter.comを含む)、YouTubeに対応し、SVGのパスはSimple Icons(CC0)から写して`src/lib/socialIcons.ts`に持つ。アイコンのSVGは`aria-hidden`で、リンクの`aria-label`に`label`(サービス名)が入る。対応するホストが無いときは`label`を文字で出す。
+
+帯は素のJS(`public/footer-sponsors.js`、Reactなし)が全ページで3秒ごとに1枚ずつ左へ送り、最後から先頭へ戻る。ホバー中、帯の中にフォーカスがある間、一時停止の間は自動で送らない。`prefers-reduced-motion: reduce`のときは初めから一時停止で、再生を押すと送り始める。前後のボタンは1枚ずつ送り、次へは最後から先頭へ、前へは先頭から末尾へ回る。一時停止と再生は1つのボタンで切り替え、`aria-label`が状態に合わせて変わる(en: Pause/Play、ja: 一時停止/再生)。3つのボタンは`hidden`で出力して、帯がはみ出すときだけJSが`hidden`を外す(幅が変わるたびに付け直す)。JSが無いときは、帯が`scroll-snap`の横スクロールのままでボタンは出ない。
 
 ### 永続化と共有ストア
 
