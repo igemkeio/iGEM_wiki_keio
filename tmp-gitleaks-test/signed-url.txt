@@ -1,0 +1,1 @@
+https://example-bucket.s3.us-west-2.amazonaws.com/dummy.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAT6BQKWLT3FWKMCPX%2F20261014%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20261014T000000Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=35ba5ed4e4e9f07f279b6a473dfc96e2d8c08d42bf936e460868bdbbe1c91ea5
