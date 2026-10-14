@@ -20,7 +20,7 @@
 | --- | --- | --- | --- |
 | `chromium` | 1280x800 | `tests/`(`mobile/`を除く) | `http://localhost:4173/` |
 | `mobile-chromium` | 375x812(Pixel 5相当) | `tests/mobile/` | `http://localhost:4173/` |
-| `chromium-base` | 1280x800 | `nav`、`locale`、`islands`、`model-viewer` | `http://localhost:4174/keio/` |
+| `chromium-base` | 1280x800 | `nav`、`locale`、`islands`、`model-viewer`、`footer` | `http://localhost:4174/keio/` |
 
 テストはパスを先頭に`/`を付けない相対(`page.goto("members/")`)で書く。baseURLの末尾が`/`なので、`/`でも`/keio/`でも同じテストが動く。
 
@@ -99,6 +99,7 @@ npx playwright show-report e2e/playwright-report
 | `src/client/`(島の起動、保存、言語) | `islands`、`locale` |
 | `Island`、`islands.ts`、`Page.tsx`の`<script>`の出し分け | `islands`、`model-viewer` |
 | `MemberList` | `islands` |
+| `Footer`、`public/footer-sponsors.js` | `footer`、`islands` |
 | `ModelViewer` | `model-viewer` |
 | `prose.css`、`ArticlePage`、`tokens.css`、`global.css`、`EcoliNav`、`Footer` | `prose`、`visual` |
 | `HomePage` | `visual` |

@@ -10,7 +10,7 @@ const launchOptions = {
 };
 
 // base付き(/keio/)のprojectでも流す、配信パスに依存するテスト。
-const baseSensitive = /(nav|locale|islands|model-viewer)\.e2e\.ts$/u;
+const baseSensitive = /(nav|locale|islands|model-viewer|footer)\.e2e\.ts$/u;
 
 export default defineConfig({
   testDir: "./tests",
