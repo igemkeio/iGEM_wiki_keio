@@ -1,5 +1,0 @@
-[extend]
-useDefault = true
-
-[[allowlists]]
-paths = ['''^tmp-gitleaks-test/signed-url\.txt$''']
