@@ -147,6 +147,56 @@ test.describe("スポンサーの帯", () => {
     await expect.poll(() => scrollLeft(t)).toBeGreaterThan(0);
   });
 
+  test("マウスで再生を押し、ポインタがボタンに乗ったままでも送られる", async ({
+    page,
+  }) => {
+    const t = track(page);
+    const [, second] = await offsets(t);
+    await page.getByRole("button", { name: "Pause" }).click();
+    await page.getByRole("button", { name: "Play" }).click();
+    await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
+    await expect(page.locator("[data-sponsors-toggle]")).toBeFocused();
+    await page.clock.runFor(3000);
+    await settledAt(t, second);
+  });
+
+  test("キーボードで再生を押し、フォーカスがボタンに残ったままでも送られる", async ({
+    page,
+  }) => {
+    const t = track(page);
+    const [, second] = await offsets(t);
+    const toggle = page.locator("[data-sponsors-toggle]");
+    await toggle.focus();
+    await page.keyboard.press("Enter");
+    await expect(toggle).toHaveAttribute("aria-label", "Play");
+    await page.keyboard.press("Enter");
+    await expect(toggle).toHaveAttribute("aria-label", "Pause");
+    await expect(toggle).toBeFocused();
+    await page.mouse.move(2, 2);
+    await page.clock.runFor(3000);
+    await settledAt(t, second);
+  });
+
+  const parts = {
+    ロゴ: (page: Page) => page.locator("[data-sponsors-track] li a").first(),
+    前へ: (page: Page) => page.getByRole("button", { name: "Previous" }),
+    次へ: (page: Page) => page.getByRole("button", { name: "Next" }),
+  };
+  for (const [name, locate] of Object.entries(parts)) {
+    test(`${name}にホバーがある間は送られない`, async ({ page }) => {
+      await locate(page).hover();
+      await page.clock.runFor(9000);
+      expect(await scrollLeft(track(page))).toBe(0);
+    });
+
+    test(`${name}にフォーカスがある間は送られない`, async ({ page }) => {
+      await page.mouse.move(2, 2);
+      await locate(page).focus();
+      await page.clock.runFor(9000);
+      expect(await scrollLeft(track(page))).toBe(0);
+    });
+  }
+
   test("先頭で前へを押すと末尾へ回る", async ({ page }) => {
     const t = track(page);
     await page.getByRole("button", { name: "Previous" }).click();
