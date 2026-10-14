@@ -24,6 +24,16 @@ const freezeClock = async (page: Page) => {
   await page.clock.pauseAt(1000);
 };
 
+// 帯がはみ出さないときは送りのテストを飛ばす。はみ出すのにボタンが出ないとき(JSが読まれていない)は失敗させる。
+const skipUnlessOverflow = async (page: Page) => {
+  const overflows = await track(page).evaluate(
+    (el) => el.scrollWidth > el.clientWidth
+  );
+  test.skip(!overflows, "帯がはみ出さないので送らない");
+  await expect(page.locator("[data-sponsors-prev]")).toBeVisible();
+  await expect(page.locator("[data-sponsors-next]")).toBeVisible();
+};
+
 const settledAt = (locator: Locator, expected: number) =>
   expect.poll(() => scrollLeft(locator)).toBe(expected);
 
@@ -55,11 +65,7 @@ test.describe("スポンサーの帯", () => {
     await freezeClock(page);
     await page.goto("e2e-plain/");
     await track(page).scrollIntoViewIfNeeded();
-    // 社数が変わって帯がはみ出さなくなったときは、送りのテストを飛ばす。
-    test.skip(
-      await page.locator("[data-sponsors-prev]").isHidden(),
-      "帯がはみ出さないので送らない"
-    );
+    await skipUnlessOverflow(page);
   });
 
   test("3秒ごとに1枚ずつ左へ送られ、最後から先頭へ戻る", async ({ page }) => {
@@ -147,10 +153,7 @@ test.describe("prefers-reduced-motion", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await freezeClock(page);
     await page.goto("e2e-plain/");
-    test.skip(
-      await page.locator("[data-sponsors-prev]").isHidden(),
-      "帯がはみ出さないので送らない"
-    );
+    await skipUnlessOverflow(page);
     const t = track(page);
     const [, second] = await offsets(t);
     await page.clock.runFor(12_000);
