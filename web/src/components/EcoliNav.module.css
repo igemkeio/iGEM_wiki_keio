@@ -2,10 +2,17 @@
   .root {
     --cell-height: 44px;
 
+    /* 背景と影は画面の幅いっぱいに敷き、中身は幅1200pxのフレームに揃える */
+    --frame-pad: max(
+      var(--space-frame-x),
+      calc((100% - var(--size-frame)) / 2 + var(--space-frame-x))
+    );
+
     position: relative;
     z-index: 10;
-    padding: 24px var(--space-frame-x) 0;
+    padding: 24px var(--frame-pad) 0;
     background: var(--color-page);
+    box-shadow: 0 6px 8px -6px rgba(13, 15, 18, 0.16);
     font-family: var(--font-heading);
   }
 
@@ -14,7 +21,6 @@
     .root {
       position: sticky;
       top: 0;
-      box-shadow: 0 6px 8px -6px rgba(13, 15, 18, 0.16);
     }
   }
 
@@ -347,7 +353,9 @@
     .root {
       --cell-height: 38px;
 
-      padding: 16px 24px 0;
+      --frame-pad: 24px;
+
+      padding: 16px var(--frame-pad) 0;
     }
 
     .chain {

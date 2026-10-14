@@ -18,10 +18,12 @@ export function PageShell({
   children?: ReactNode;
 }) {
   return (
-    <div className={styles.frame}>
+    <>
       <EcoliNav page={page} routes={routes} />
-      <div className={styles.inner}>{children}</div>
-      <Footer />
-    </div>
+      <div className={styles.frame}>
+        <div className={styles.inner}>{children}</div>
+        <Footer />
+      </div>
+    </>
   );
 }
