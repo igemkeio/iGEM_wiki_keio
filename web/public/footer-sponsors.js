@@ -47,6 +47,24 @@
     toggle.hidden = !overflows;
   };
 
+  // 一時停止の間、ホバー中、帯の中にフォーカスがある間は自動で送らない。
+  // 一時停止と再生のボタンへのホバーとフォーカスは数えない。
+  const tick = () => {
+    const hovering = root.matches(":hover") && !toggle.matches(":hover");
+    const focusing = root.matches(":focus-within") && !toggle.matches(":focus");
+    if (paused || hovering || focusing) {
+      return;
+    }
+    forward();
+  };
+
+  // 再生にしたときは周期を張り直し、最初の送りを再生の3秒後にする。
+  let timer = setInterval(tick, INTERVAL);
+  const restart = () => {
+    clearInterval(timer);
+    timer = setInterval(tick, INTERVAL);
+  };
+
   root.dataset.sponsorsJs = "";
   sync();
   syncToggle();
@@ -60,6 +78,9 @@
   toggle.addEventListener("click", () => {
     paused = !paused;
     syncToggle();
+    if (!paused) {
+      restart();
+    }
   });
   // 設定がreduceに変わったときは止める。戻ったときは利用者の選択のままにする。
   reduced.addEventListener("change", () => {
@@ -68,15 +89,4 @@
       syncToggle();
     }
   });
-
-  // 一時停止の間、ホバー中、帯の中にフォーカスがある間は自動で送らない。
-  // 一時停止と再生のボタンへのホバーとフォーカスは数えない。
-  setInterval(() => {
-    const hovering = root.matches(":hover") && !toggle.matches(":hover");
-    const focusing = root.matches(":focus-within") && !toggle.matches(":focus");
-    if (paused || hovering || focusing) {
-      return;
-    }
-    forward();
-  }, INTERVAL);
 })();
