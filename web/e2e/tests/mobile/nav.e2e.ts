@@ -64,6 +64,38 @@ for (const locale of locales) {
     await expect(pagesNav(page).locator("ul")).toHaveCSS("overflow-x", "auto");
   });
 
+  test(`[${locale}] スクロールしても、2段目を含むヘッダーが上に残り、移った見出しが隠れない`, async ({
+    page,
+  }) => {
+    await page.goto(`${start}description/`);
+    const header = () =>
+      page.locator("header").evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return { top: r.top, bottom: r.bottom };
+      });
+    const before = await header();
+    await page.evaluate(() => window.scrollTo(0, 900));
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(900);
+    const after = await header();
+    expect(after.top).toBe(0);
+    expect(after.bottom).toBeCloseTo(before.bottom, 0);
+    // 2段目がヘッダーの中で画面内にある
+    const sub = await pagesNav(page).boundingBox();
+    expect(sub?.y ?? -1).toBeGreaterThanOrEqual(0);
+    expect((sub?.y ?? 0) + (sub?.height ?? 0)).toBeLessThanOrEqual(
+      after.bottom + 0.5
+    );
+    await expect(pagesNav(page)).toBeInViewport({ ratio: 1 });
+    // 見出しへのリンクで移っても、ヘッダーの下に出る
+    const id = await page
+      .locator("main h2[id]")
+      .nth(2)
+      .evaluate((el) => el.id);
+    await page.goto(`${start}description/#${id}`);
+    const box = await page.locator(`[id="${id}"]`).boundingBox();
+    expect(box?.y ?? 0).toBeGreaterThanOrEqual((await header()).bottom);
+  });
+
   test(`[${locale}] ロゴと言語の切り替えが375pxでも押せる`, async ({
     page,
     baseURL,

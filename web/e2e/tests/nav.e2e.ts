@@ -405,6 +405,131 @@ for (const locale of locales) {
     });
   }
 
+  // 目次のある長い記事
+  const longPath = `${start}description/`;
+  const toc = (page: Page) =>
+    page.getByRole("navigation", {
+      name: locale === "en" ? "On this page" : "目次",
+    });
+  const headerBox = (page: Page) =>
+    page.locator("header").evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { top: r.top, bottom: r.bottom };
+    });
+  const scrollTo = async (page: Page, y: number) => {
+    await page.evaluate((top) => window.scrollTo(0, top), y);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(y);
+  };
+  // 要素の中心が最前面の要素自身(またはその中身)か
+  const isOnTop = (link: Locator) =>
+    link.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      const top = document.elementFromPoint(
+        r.x + r.width / 2,
+        r.y + r.height / 2
+      );
+      return !!top && el.contains(top);
+    });
+
+  for (const width of [1280, 1100]) {
+    test(`[${locale}] ${width}px幅で、スクロールしてもヘッダーが上に残り、目次は本文の左でヘッダーの下に付いてくる`, async ({
+      page,
+    }, testInfo) => {
+      skipInBase(testInfo);
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto(longPath);
+      const tocBox = () => toc(page).locator("xpath=..").boundingBox();
+      const main = await page.locator("main").boundingBox();
+      const first = await tocBox();
+      expect(first).not.toBeNull();
+      // 目次は本文の左にあり、重ならない
+      expect((first?.x ?? 0) + (first?.width ?? 0)).toBeLessThanOrEqual(
+        main?.x ?? 0
+      );
+      const tops: number[] = [];
+      for (const y of [600, 1500]) {
+        await scrollTo(page, y);
+        const header = await headerBox(page);
+        expect(header.top).toBe(0);
+        const box = await tocBox();
+        // ヘッダーに重ならず、ヘッダーの下に近い位置に付いている
+        expect(box?.y ?? 0).toBeGreaterThanOrEqual(header.bottom);
+        expect(box?.y ?? 999).toBeLessThanOrEqual(header.bottom + 40);
+        tops.push(box?.y ?? 0);
+      }
+      expect(tops[0]).toBeCloseTo(tops[1], 0);
+    });
+  }
+
+  test(`[${locale}] 1099px幅では目次を出さない`, async ({ page }, testInfo) => {
+    skipInBase(testInfo);
+    await page.setViewportSize({ width: 1099, height: 800 });
+    await page.goto(longPath);
+    await expect(toc(page)).toBeHidden();
+  });
+
+  for (const width of [1280, 1100]) {
+    test(`[${locale}] ${width}px幅で、目次のリンクで移った見出しがヘッダーに隠れない`, async ({
+      page,
+    }, testInfo) => {
+      skipInBase(testInfo);
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto(longPath);
+      const links = toc(page).getByRole("link");
+      const count = await links.count();
+      expect(count).toBeGreaterThan(2);
+      // 先頭、中ほど、末尾の見出しを見る。末尾は本文の終わりに近く、スクロールが足りない場合もある。
+      for (const i of [1, Math.floor(count / 2), count - 1]) {
+        const id = (await links.nth(i).getAttribute("href"))?.slice(1) ?? "";
+        await links.nth(i).click();
+        await expect(page).toHaveURL(
+          (url) => decodeURIComponent(url.hash) === `#${id}`
+        );
+        const heading = page.locator(`[id="${id}"]`);
+        const header = await headerBox(page);
+        const box = await heading.boundingBox();
+        expect(box?.y ?? 0).toBeGreaterThanOrEqual(header.bottom);
+        await expect(heading).toBeInViewport();
+      }
+    });
+  }
+
+  for (const width of [1000, 768]) {
+    test(`[${locale}] ${width}px幅で、見出しへのリンクで移ってもヘッダーに隠れない`, async ({
+      page,
+    }, testInfo) => {
+      skipInBase(testInfo);
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto(longPath);
+      const ids = await page
+        .locator("main h2[id]")
+        .evaluateAll((els) => els.map((el) => el.id));
+      await page.goto(`${longPath}#${ids[2]}`);
+      const header = await headerBox(page);
+      const box = await page.locator(`[id="${ids[2]}"]`).boundingBox();
+      expect(box?.y ?? 0).toBeGreaterThanOrEqual(header.bottom);
+    });
+  }
+
+  for (const width of [1280, 1100]) {
+    test(`[${locale}] ${width}px幅で、スクロール後もパネルが本文と目次より手前に出る`, async ({
+      page,
+    }, testInfo) => {
+      skipInBase(testInfo);
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto(longPath);
+      await scrollTo(page, 600);
+      for (const label of categoryLabels) {
+        await cell(page, label).hover();
+        const links = item(page, label).locator("ul a");
+        const count = await links.count();
+        for (let i = 0; i < count; i += 1) {
+          expect(await isOnTop(links.nth(i)), `${label} ${i}`).toBe(true);
+        }
+      }
+    });
+  }
+
   for (const width of [768, 900, 1000, 1100]) {
     test(`[${locale}] ${width}px幅でも、ヘッダーの5匹が収まり押せる`, async ({
       page,
