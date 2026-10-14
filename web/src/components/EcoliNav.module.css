@@ -176,9 +176,12 @@
     padding-top: 8px;
   }
 
-  .item:nth-last-child(-n + 3) .panel {
-    right: 0;
-    left: auto;
+  /* 右端に寄る大腸菌のパネルは、右端を揃えて画面の外へはみ出さないようにする。詰めて並べる狭い幅では左揃えのまま */
+  @media (min-width: 768px) {
+    .item:nth-last-child(-n + 3) .panel {
+      right: 0;
+      left: auto;
+    }
   }
 
   .item:hover .panel,
