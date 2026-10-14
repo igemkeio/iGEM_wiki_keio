@@ -36,7 +36,11 @@
 
   root.dataset.sponsorsJs = "";
   sync();
-  new ResizeObserver(sync).observe(track);
+  const observer = new ResizeObserver(sync);
+  observer.observe(track);
+  for (const slide of slides) {
+    observer.observe(slide);
+  }
   prev.addEventListener("click", backward);
   next.addEventListener("click", forward);
 
