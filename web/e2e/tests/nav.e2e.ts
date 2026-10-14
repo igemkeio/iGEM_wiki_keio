@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 import { expect, hrefOf, pathOf, test } from "../fixtures";
 import {
@@ -12,6 +12,31 @@ import {
 } from "../pages";
 
 const categoryLabels = navConfig.categories.map((c) => c.label);
+
+interface Point {
+  x: number;
+  y: number;
+}
+
+async function centerOf(locator: Locator): Promise<Point> {
+  const box = await locator.boundingBox();
+  if (!box) {
+    throw new Error("boundingBoxを取れない");
+  }
+  return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+}
+
+// fromからtoまで、まず縦、次に横へ、steps刻みで進む点列。
+function path(from: Point, to: Point, steps: number): [number, number][] {
+  const points: [number, number][] = [];
+  for (let i = 0; i <= steps; i += 1) {
+    points.push([from.x, from.y + ((to.y - from.y) * i) / steps]);
+  }
+  for (let i = 1; i <= steps; i += 1) {
+    points.push([from.x + ((to.x - from.x) * i) / steps, to.y]);
+  }
+  return points;
+}
 
 for (const locale of locales) {
   const pages = publishedPages(locale);
@@ -76,10 +101,14 @@ for (const locale of locales) {
     await expect(panelLinks.first()).toBeHidden();
     await cell(page, label).hover();
     await expect(panelLinks.first()).toBeVisible();
-    // 大腸菌から離さずにパネルの最後のリンクへ移る
-    await panelLinks.last().hover();
+    // 大腸菌の中心から真下へ、続けて横へパネルの最後のリンクの中心まで連続して動かし、途中で閉じないことを見る
+    const origin = await centerOf(cell(page, label));
+    const end = await centerOf(panelLinks.last());
+    for (const [x, y] of path(origin, end, 20)) {
+      await page.mouse.move(x, y);
+      await expect(panelLinks.first()).toBeVisible();
+    }
     await expect(panelLinks.last()).toBeVisible();
-    await expect(panelLinks.first()).toBeVisible();
     await page.mouse.move(5, 700);
     await expect(panelLinks.first()).toBeHidden();
   });
@@ -90,15 +119,23 @@ for (const locale of locales) {
     await page.goto(start);
     const [label] = categoryLabels;
     const panelLinks = item(page, label).locator("ul a");
-    await cell(page, label).focus();
+    // ロゴの次が先頭の大腸菌
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await expect(cell(page, label)).toBeFocused();
     await expect(panelLinks.first()).toBeVisible();
     await page.keyboard.press("Tab");
     await expect(panelLinks.first()).toBeFocused();
+    expect(await panelLinks.count()).toBeGreaterThan(1);
     await page.keyboard.press("Tab");
-    await expect(
-      panelLinks.nth(Math.min(1, (await panelLinks.count()) - 1))
-    ).toBeVisible();
-    await cell(page, categoryLabels[1]).focus();
+    await expect(panelLinks.nth(1)).toBeFocused();
+    await expect(panelLinks.nth(1)).toBeVisible();
+    // 最後のリンクを越えると次の大腸菌に移り、前のパネルは閉じる
+    for (let i = 2; i < (await panelLinks.count()); i += 1) {
+      await page.keyboard.press("Tab");
+    }
+    await page.keyboard.press("Tab");
+    await expect(cell(page, categoryLabels[1])).toBeFocused();
     await expect(panelLinks.first()).toBeHidden();
   });
 
@@ -218,6 +255,7 @@ for (const locale of locales) {
       item(page, categoryLabels[0]).locator("ul a").first()
     ).toBeFocused();
     await first.focus();
+    await expect(first).toBeFocused();
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL((url) => url.pathname === href);
   });
