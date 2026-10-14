@@ -8,7 +8,9 @@
       display: block;
       position: sticky;
       top: calc(var(--size-header) + var(--space-toc-top));
-      max-height: calc(100vh - var(--size-header) - var(--space-toc-top) - 24px);
+      max-height: calc(
+        100vh - var(--size-header) - var(--space-toc-top) - 24px
+      );
       overflow-y: auto;
       align-self: flex-start;
       flex: none;

@@ -93,7 +93,8 @@ for (const locale of locales) {
       .evaluate((el) => el.id);
     await page.goto(`${start}description/#${id}`);
     const box = await page.locator(`[id="${id}"]`).boundingBox();
-    expect(box?.y ?? 0).toBeGreaterThanOrEqual((await header()).bottom);
+    const bar = await header();
+    expect(box?.y ?? 0).toBeGreaterThanOrEqual(bar.bottom);
   });
 
   test(`[${locale}] ロゴと言語の切り替えが375pxでも押せる`, async ({

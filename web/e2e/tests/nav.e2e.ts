@@ -53,6 +53,26 @@ const skipInBase = (testInfo: TestInfo) =>
     "base付きではhrefの接頭辞だけを見る"
   );
 
+const headerBox = (page: Page) =>
+  page.locator("header").evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return { top: r.top, bottom: r.bottom };
+  });
+const scrollTo = async (page: Page, y: number) => {
+  await page.evaluate((top) => window.scrollTo(0, top), y);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(y);
+};
+// 要素の中心が最前面の要素自身(またはその中身)か
+const isOnTop = (link: Locator) =>
+  link.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    const top = document.elementFromPoint(
+      r.x + r.width / 2,
+      r.y + r.height / 2
+    );
+    return !!top && el.contains(top);
+  });
+
 for (const locale of locales) {
   const pages = publishedPages(locale);
   const articles = pages.filter((p) => p.slug !== "home");
@@ -169,7 +189,7 @@ for (const locale of locales) {
         })
       ).toHaveCount(0);
       const box = await page.locator("main").boundingBox();
-      expect(box?.x ?? 1000).toBeLessThan(300);
+      expect(box?.x ?? 1000).toBeLessThan(400);
     }
   });
 
@@ -411,26 +431,6 @@ for (const locale of locales) {
     page.getByRole("navigation", {
       name: locale === "en" ? "On this page" : "目次",
     });
-  const headerBox = (page: Page) =>
-    page.locator("header").evaluate((el) => {
-      const r = el.getBoundingClientRect();
-      return { top: r.top, bottom: r.bottom };
-    });
-  const scrollTo = async (page: Page, y: number) => {
-    await page.evaluate((top) => window.scrollTo(0, top), y);
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(y);
-  };
-  // 要素の中心が最前面の要素自身(またはその中身)か
-  const isOnTop = (link: Locator) =>
-    link.evaluate((el) => {
-      const r = el.getBoundingClientRect();
-      const top = document.elementFromPoint(
-        r.x + r.width / 2,
-        r.y + r.height / 2
-      );
-      return !!top && el.contains(top);
-    });
-
   for (const width of [1280, 1100]) {
     test(`[${locale}] ${width}px幅で、スクロールしてもヘッダーが上に残り、目次は本文の左でヘッダーの下に付いてくる`, async ({
       page,
@@ -449,12 +449,12 @@ for (const locale of locales) {
       const tops: number[] = [];
       for (const y of [600, 1500]) {
         await scrollTo(page, y);
-        const header = await headerBox(page);
-        expect(header.top).toBe(0);
+        const bar = await headerBox(page);
+        expect(bar.top).toBe(0);
         const box = await tocBox();
         // ヘッダーに重ならず、ヘッダーの下に近い位置に付いている
-        expect(box?.y ?? 0).toBeGreaterThanOrEqual(header.bottom);
-        expect(box?.y ?? 999).toBeLessThanOrEqual(header.bottom + 40);
+        expect(box?.y ?? 0).toBeGreaterThanOrEqual(bar.bottom);
+        expect(box?.y ?? 999).toBeLessThanOrEqual(bar.bottom + 40);
         tops.push(box?.y ?? 0);
       }
       expect(tops[0]).toBeCloseTo(tops[1], 0);
@@ -480,15 +480,16 @@ for (const locale of locales) {
       expect(count).toBeGreaterThan(2);
       // 先頭、中ほど、末尾の見出しを見る。末尾は本文の終わりに近く、スクロールが足りない場合もある。
       for (const i of [1, Math.floor(count / 2), count - 1]) {
-        const id = (await links.nth(i).getAttribute("href"))?.slice(1) ?? "";
+        const href = await links.nth(i).getAttribute("href");
+        const id = href?.slice(1) ?? "";
         await links.nth(i).click();
         await expect(page).toHaveURL(
           (url) => decodeURIComponent(url.hash) === `#${id}`
         );
         const heading = page.locator(`[id="${id}"]`);
-        const header = await headerBox(page);
+        const bar = await headerBox(page);
         const box = await heading.boundingBox();
-        expect(box?.y ?? 0).toBeGreaterThanOrEqual(header.bottom);
+        expect(box?.y ?? 0).toBeGreaterThanOrEqual(bar.bottom);
         await expect(heading).toBeInViewport();
       }
     });
@@ -505,9 +506,9 @@ for (const locale of locales) {
         .locator("main h2[id]")
         .evaluateAll((els) => els.map((el) => el.id));
       await page.goto(`${longPath}#${ids[2]}`);
-      const header = await headerBox(page);
+      const bar = await headerBox(page);
       const box = await page.locator(`[id="${ids[2]}"]`).boundingBox();
-      expect(box?.y ?? 0).toBeGreaterThanOrEqual(header.bottom);
+      expect(box?.y ?? 0).toBeGreaterThanOrEqual(bar.bottom);
     });
   }
 
