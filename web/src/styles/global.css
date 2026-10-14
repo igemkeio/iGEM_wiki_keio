@@ -37,7 +37,7 @@
 @layer reset {
   /* 固定ヘッダーの下に、リンクで移った先が隠れないようにする */
   html {
-    scroll-padding-top: calc(var(--size-header) + 16px);
+    scroll-padding-top: calc(var(--size-header-fixed) + 16px);
   }
 
   *,

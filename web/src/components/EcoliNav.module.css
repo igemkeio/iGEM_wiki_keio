@@ -2,12 +2,20 @@
   .root {
     --cell-height: 44px;
 
-    position: sticky;
-    top: 0;
+    position: relative;
     z-index: 10;
     padding: 24px var(--space-frame-x) 0;
     background: var(--color-page);
     font-family: var(--font-heading);
+  }
+
+  /* 幅768px以上かつ高さ501px以上でだけ上に固定する。狭い画面や横向きでは画面を占めるので、ページと一緒に流す */
+  @media (min-width: 768px) and (min-height: 501px) {
+    .root {
+      position: sticky;
+      top: 0;
+      box-shadow: 0 6px 8px -6px rgba(13, 15, 18, 0.16);
+    }
   }
 
   .bar {

@@ -52,6 +52,7 @@
   --size-header-bar: 231px;
   --size-header-sub: 0px;
   --size-header: calc(var(--size-header-bar) + var(--size-header-sub));
+  --size-header-fixed: var(--size-header);
   --space-toc-top: 24px;
 }
 
@@ -100,6 +101,13 @@
 @media (hover: none) {
   :root {
     --size-header-sub: 57px;
+  }
+}
+
+/* ヘッダーを固定しない幅と高さでは、固定分の高さを目次の位置とscroll-padding-topに足さない */
+@media (max-width: 767px), (max-height: 500px) {
+  :root {
+    --size-header-fixed: 0px;
   }
 }
 
