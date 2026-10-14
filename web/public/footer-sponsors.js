@@ -23,9 +23,10 @@
     goTo(atEnd || !target ? 0 : target.offsetLeft);
   };
 
+  // 左端より左にある最後の1枚へ戻す。先頭にいれば末尾へ回る。
   const backward = () => {
     const target = slides.findLast((s) => s.offsetLeft < track.scrollLeft - 1);
-    goTo(target ? target.offsetLeft : 0);
+    goTo(target ? target.offsetLeft : track.scrollWidth - track.clientWidth);
   };
 
   // 一時停止の間は、ホバーやフォーカスが外れても自動で送らない。reduced-motionのときは初めから一時停止にする。
