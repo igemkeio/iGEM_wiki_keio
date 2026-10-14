@@ -185,13 +185,13 @@ describe("ロゴと言語の切り替え", () => {
     const { unmount } = render(
       <EcoliNav page={pageOf("design", "ja")} routes={routes} />
     );
-    const logo = screen.getByRole("link", { name: /iGEM/ });
+    const logo = screen.getByRole("link", { name: /iGEM/u });
     expect(logo.getAttribute("href")).toBe("/ja/");
     expect(logo.hasAttribute("aria-current")).toBe(false);
     unmount();
     render(<EcoliNav page={pageOf("home")} routes={routes} />);
     expect(
-      screen.getByRole("link", { name: /iGEM/ }).getAttribute("aria-current")
+      screen.getByRole("link", { name: /iGEM/u }).getAttribute("aria-current")
     ).toBe("page");
   });
 

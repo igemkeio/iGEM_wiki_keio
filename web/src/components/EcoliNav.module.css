@@ -30,6 +30,7 @@
     gap: 14px;
     color: var(--color-ink);
     text-decoration: none;
+    white-space: nowrap;
   }
 
   .logoSub {

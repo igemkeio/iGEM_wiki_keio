@@ -67,9 +67,7 @@ export function EcoliNav({
   const current = categoryIdOf(page.slug);
   const alternate = otherLocale(locale);
   const alternateHref = alternatePath(page, routes);
-  const groups = groupRoutes(locale, routes).filter(
-    (g) => g.routes.length > 0
-  );
+  const groups = groupRoutes(locale, routes).filter((g) => g.routes.length > 0);
   const currentGroup = groups.find((g) => g.category.id === current);
   return (
     <header className={styles.root}>
