@@ -34,6 +34,12 @@ const skipUnlessOverflow = async (page: Page) => {
   await expect(page.locator("[data-sponsors-next]")).toBeVisible();
 };
 
+// ホバーとフォーカスを帯の外へ出す。
+const leaveBand = async (page: Page) => {
+  await page.mouse.move(2, 2);
+  await page.evaluate(() => (document.activeElement as HTMLElement)?.blur());
+};
+
 const settledAt = (locator: Locator, expected: number) =>
   expect.poll(() => scrollLeft(locator)).toBe(expected);
 
@@ -56,6 +62,19 @@ test.describe("フッターの3段", () => {
         ).toBeVisible();
       });
     }
+  }
+});
+
+test("SNSはアイコンで出て、リンクのaria-labelにサービス名が入る", async ({
+  page,
+}) => {
+  await page.goto("e2e-plain/");
+  const links = footer(page).getByRole("list", { name: /Social|SNS/u });
+  for (const item of footerData.social) {
+    const link = links.getByRole("link", { name: item.label });
+    await expect(link).toHaveAttribute("href", item.href);
+    await expect(link).toHaveAttribute("aria-label", item.label);
+    await expect(link.locator("svg")).toHaveAttribute("aria-hidden", "true");
   }
 });
 
@@ -123,11 +142,53 @@ test.describe("スポンサーの帯", () => {
     await page.clock.runFor(3000);
     await expect.poll(() => scrollLeft(t)).toBeGreaterThan(0);
   });
+
+  test("先頭で前へを押すと末尾へ回る", async ({ page }) => {
+    const t = track(page);
+    await page.getByRole("button", { name: "Previous" }).click();
+    await settledAt(t, await maxScroll(t));
+  });
+
+  test("一時停止で自動の送りが止まり、再生で再開する(クリック)", async ({
+    page,
+  }) => {
+    const t = track(page);
+    const [, second] = await offsets(t);
+    await page.getByRole("button", { name: "Pause" }).click();
+    await expect(page.getByRole("button", { name: "Play" })).toBeVisible();
+    await leaveBand(page);
+    await page.clock.runFor(9000);
+    expect(await scrollLeft(t)).toBe(0);
+    await page.getByRole("button", { name: "Play" }).click();
+    await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
+    await leaveBand(page);
+    await page.clock.runFor(3000);
+    await settledAt(t, second);
+  });
+
+  test("一時停止と再生はキーボードでも切り替えられる", async ({ page }) => {
+    const t = track(page);
+    const toggle = page.locator("[data-sponsors-toggle]");
+    await toggle.focus();
+    await page.keyboard.press("Enter");
+    await expect(toggle).toHaveAttribute("aria-label", "Play");
+    await leaveBand(page);
+    await page.clock.runFor(9000);
+    expect(await scrollLeft(t)).toBe(0);
+    await toggle.focus();
+    await page.keyboard.press("Space");
+    await expect(toggle).toHaveAttribute("aria-label", "Pause");
+    await leaveBand(page);
+    await page.clock.runFor(3000);
+    await expect.poll(() => scrollLeft(t)).toBeGreaterThan(0);
+  });
 });
 
 test("帯がはみ出さないときはボタンが出ず、はみ出すと出る", async ({ page }) => {
   await page.goto("e2e-plain/");
-  const buttons = page.locator("[data-sponsors-prev], [data-sponsors-next]");
+  const buttons = page.locator(
+    "[data-sponsors-prev], [data-sponsors-next], [data-sponsors-toggle]"
+  );
   const slides = page.locator("[data-sponsors-track] li");
   const setHidden = (hidden: boolean) =>
     slides.evaluateAll((items, hide) => {
@@ -136,15 +197,17 @@ test("帯がはみ出さないときはボタンが出ず、はみ出すと出�
       }
     }, hidden);
   await setHidden(true);
-  await expect(buttons.first()).toBeHidden();
-  await expect(buttons.last()).toBeHidden();
+  for (const button of await buttons.all()) {
+    await expect(button).toBeHidden();
+  }
   await setHidden(false);
   const overflows = await track(page).evaluate(
     (el) => el.scrollWidth > el.clientWidth
   );
   if (overflows) {
-    await expect(buttons.first()).toBeVisible();
-    await expect(buttons.last()).toBeVisible();
+    for (const button of await buttons.all()) {
+      await expect(button).toBeVisible();
+    }
   }
 });
 
@@ -156,9 +219,23 @@ test.describe("prefers-reduced-motion", () => {
     await skipUnlessOverflow(page);
     const t = track(page);
     const [, second] = await offsets(t);
+    await expect(page.getByRole("button", { name: "Play" })).toBeVisible();
     await page.clock.runFor(12_000);
     expect(await scrollLeft(t)).toBe(0);
     await page.getByRole("button", { name: "Next" }).click();
+    await settledAt(t, second);
+  });
+
+  test("初めは一時停止で、再生を押すと自動で送られる", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await freezeClock(page);
+    await page.goto("e2e-plain/");
+    await skipUnlessOverflow(page);
+    const t = track(page);
+    const [, second] = await offsets(t);
+    await page.getByRole("button", { name: "Play" }).click();
+    await leaveBand(page);
+    await page.clock.runFor(3000);
     await settledAt(t, second);
   });
 });
@@ -170,6 +247,7 @@ test.describe("JSを切ったとき", () => {
     await page.goto("e2e-plain/");
     await expect(page.locator("[data-sponsors-prev]")).toBeHidden();
     await expect(page.locator("[data-sponsors-next]")).toBeHidden();
+    await expect(page.locator("[data-sponsors-toggle]")).toBeHidden();
     const t = track(page);
     const scrollable = await t.evaluate((el) => ({
       overflow: getComputedStyle(el).overflowX,
