@@ -1,51 +1,13 @@
-import { withBase } from "../base";
-import type { Locale, WikiPage } from "../content";
+import type { WikiPage } from "../content";
 import { applyBase } from "../lib/applyBase";
-import type { Route } from "../routes";
 
 import styles from "./HomePage.module.css";
 
 // ビルド時にvite.config.tsのプラグインが画像の配信元に置き換える。
 const imageBase = "__WIKI_IMAGE_BASE__";
 
-const contentsSubtitle: Record<Locale, string> = {
-  en: "コンテンツ",
-  ja: "Contents",
-};
-
-// カード全体がリンクなので、leadのaは外す。入れ子のaはHTMLとして不正になる。
-const stripLinks = (html: string) => html.replaceAll(/<\/?a(\s[^>]*)?>/giu, "");
-
-function compareSlug(a: string, b: string): number {
-  if (a < b) {
-    return -1;
-  }
-  return a > b ? 1 : 0;
-}
-
-// 現在のlocaleのhome以外のページをorder順(同値はslug順)に並べる。
-function contentsRoutes(page: WikiPage, routes: Route[]): Route[] {
-  return routes
-    .filter(
-      (r) =>
-        r.page.locale === page.locale &&
-        r.page.slug !== "home" &&
-        r.page.published
-    )
-    .toSorted(
-      (a, b) =>
-        a.page.order - b.page.order || compareSlug(a.page.slug, b.page.slug)
-    );
-}
-
-// ヒーローとContentsのカードを持つHome専用の本文。
-export function HomePage({
-  page,
-  routes,
-}: {
-  page: WikiPage;
-  routes: Route[];
-}) {
+// ヒーローを持つHome専用の本文。
+export function HomePage({ page }: { page: WikiPage }) {
   return (
     <main className={styles.main}>
       <h1 className={styles.visuallyHidden}>{page.title}</h1>
@@ -92,33 +54,6 @@ export function HomePage({
             />
           )}
         </div>
-      </section>
-      <section className={styles.contents}>
-        <h2 className={styles.contentsTitle}>Contents</h2>
-        <p className={styles.contentsSubtitle}>
-          {contentsSubtitle[page.locale]}
-        </p>
-        <ul className={styles.cards}>
-          {contentsRoutes(page, routes).map(({ page: item, path }) => (
-            <li key={path}>
-              <a className={styles.card} href={withBase(path)}>
-                <span className={styles.cardTitle}>{item.title}</span>
-                {item.subtitle && (
-                  <span className={styles.cardSubtitle}>{item.subtitle}</span>
-                )}
-                <span
-                  className={styles.cardLead}
-                  dangerouslySetInnerHTML={{
-                    __html: applyBase(
-                      stripLinks(item.lead),
-                      import.meta.env.BASE_URL
-                    ),
-                  }}
-                />
-              </a>
-            </li>
-          ))}
-        </ul>
       </section>
     </main>
   );

@@ -28,7 +28,7 @@
 
 `content/en/e2e-model.json`(3Dのページ。enだけにあり、言語切り替えがhomeに向く場合の確認にも使う)と`content/{en,ja}/e2e-plain.json`(島のないページ。両言語にあり、切り替えが同じslugに向く場合の確認に使う)。3つとも`published: false`。
 
-ビルドを`PRERENDER_ALL=1`で走らせると、`scripts/prerender.mjs`が`published: false`のページも書き出す。このとき書き出し数の突き合わせは、`content/`の全ページ数と行う。ナビとHomeのContentsカードにもE2E用のページが並ぶ。通常のビルドでは何も変わらない。
+ビルドを`PRERENDER_ALL=1`で走らせると、`scripts/prerender.mjs`が`published: false`のページも書き出す。このとき書き出し数の突き合わせは、`content/`の全ページ数と行う。ナビにもE2E用のページが並ぶ。通常のビルドでは何も変わらない。
 
 `PRERENDER_ALL=1`で作った`dist/`には、原稿に対応しないページがあるので`npm run check`が落ちる。E2Eを流したあとに`check`をかけるときは、`npm run build`を通常どおりやり直す。
 
@@ -101,7 +101,7 @@ npx playwright show-report e2e/playwright-report
 | `MemberList` | `islands` |
 | `ModelViewer` | `model-viewer` |
 | `prose.css`、`ArticlePage`、`tokens.css`、`global.css`、`EcoliNav`、`Footer` | `prose`、`visual` |
-| `HomePage` | `nav`(Homeのカード) |
+| `HomePage` | `visual` |
 | `vite.config.ts`、`base.ts`、`prerender.mjs` | 全件(特に`chromium-base`) |
 | `content/`のページの増減 | `nav`、`mobile/nav` |
 
