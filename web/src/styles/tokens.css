@@ -48,6 +48,60 @@
   --radius-media: 14.4px;
 
   --space-frame-x: 56px;
+
+  /* 固定ヘッダーの高さ。大腸菌の行が折り返す幅ごとの実測値(切り上げ)で、2段目の分は hover: none のときだけ足す。目次の位置と見出しの scroll-margin-top が使う */
+  --size-header-bar: 231px;
+  --size-header-sub: 0px;
+  --size-header: calc(var(--size-header-bar) + var(--size-header-sub));
+  --space-toc-top: 24px;
+}
+
+@media (min-width: 341px) {
+  :root {
+    --size-header-bar: 185px;
+  }
+}
+
+@media (min-width: 416px) {
+  :root {
+    --size-header-bar: 139px;
+  }
+}
+
+@media (min-width: 715px) {
+  :root {
+    --size-header-bar: 93px;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --size-header-bar: 159px;
+  }
+}
+
+@media (min-width: 930px) {
+  :root {
+    --size-header-bar: 127px;
+  }
+}
+
+@media (min-width: 1100px) {
+  :root {
+    --size-header-bar: 107px;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --size-header-bar: 84px;
+  }
+}
+
+@media (hover: none) {
+  :root {
+    --size-header-sub: 57px;
+  }
 }
 
 :root[data-palette="a"] {

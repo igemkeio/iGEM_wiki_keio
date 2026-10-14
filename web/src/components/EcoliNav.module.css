@@ -2,9 +2,11 @@
   .root {
     --cell-height: 44px;
 
-    position: relative;
+    position: sticky;
+    top: 0;
     z-index: 10;
     padding: 24px var(--space-frame-x) 0;
+    background: var(--color-page);
     font-family: var(--font-heading);
   }
 
