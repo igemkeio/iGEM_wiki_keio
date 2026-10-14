@@ -70,8 +70,11 @@
   });
 
   // 一時停止の間、ホバー中、帯の中にフォーカスがある間は自動で送らない。
+  // 一時停止と再生のボタンへのホバーとフォーカスは数えない。
   setInterval(() => {
-    if (paused || root.matches(":hover") || root.matches(":focus-within")) {
+    const hovering = root.matches(":hover") && !toggle.matches(":hover");
+    const focusing = root.matches(":focus-within") && !toggle.matches(":focus");
+    if (paused || hovering || focusing) {
       return;
     }
     forward();
