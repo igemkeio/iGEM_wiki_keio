@@ -38,6 +38,14 @@ function path(from: Point, to: Point, steps: number): [number, number][] {
   return points;
 }
 
+const unescapeHtml = (text: string) =>
+  text
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#x27;", "'")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&amp;", "&");
+
 // 全ページをたどる重いテストはbase付きのprojectでは流さない。base付きはhrefに/keio/が付くことだけを見る。
 const skipInBase = (testInfo: TestInfo) =>
   testInfo.skip(
@@ -77,17 +85,44 @@ for (const locale of locales) {
     const all = await header(page)
       .locator("ul a")
       .evaluateAll((els) => els.map((el) => el.getAttribute("href") ?? ""));
-    const published = articles.map((p) => hrefOf(p.path, baseURL));
-    // 確認用ページ(PRERENDER_ALLで出る)も並ぶので、公開ページが漏れなく含まれることを見る
-    expect(all).toEqual(expect.arrayContaining(published));
-    // 各ページが開けることを、遷移せずにHTTPのステータスで並列に確かめる
+    // 分類順に、対応表の順でページを連ねたもの。順序、漏れ、重複を1回で見る。
+    // 確認用ページ(PRERENDER_ALLで出る)はProjectの末尾に混ざるので、公開ページだけを比べる。
+    const expected = categoryLabels.flatMap((label) =>
+      pagesOfCategory(articles, label).map((p) => hrefOf(p.path, baseURL))
+    );
+    const published = new Set(articles.map((p) => hrefOf(p.path, baseURL)));
+    expect(all.filter((h) => published.has(h))).toStrictEqual(expected);
+    // 各ページが開けることを、遷移せずにHTTPで並列に確かめる。
+    // previewは存在しないパスにもHomeを200で返すので、ステータスに加えてtitleも見る。
+    const titleOf = new Map(
+      articles.map((p) => [
+        hrefOf(p.path, baseURL),
+        `${p.title} | iGEM Keio 2026`,
+      ])
+    );
+    const home = pages.find((p) => p.slug === "home");
+    const homeTitle = `${home?.title} | iGEM Keio 2026`;
     const responses = await Promise.all(
       [...new Set(all)].map(async (href) => {
         const response = await page.request.get(href);
-        return { href, status: response.status() };
+        const html = await response.text();
+        const title = /<title>(.*?)<\/title>/u.exec(html)?.[1] ?? "";
+        return { href, status: response.status(), title: unescapeHtml(title) };
       })
     );
     expect(responses.filter((r) => r.status !== 200)).toStrictEqual([]);
+    // 公開ページはtitleが一致し、確認用ページはHomeのtitleではない
+    for (const r of responses) {
+      const want = titleOf.get(r.href);
+      if (want) {
+        expect({ href: r.href, title: r.title }).toStrictEqual({
+          href: r.href,
+          title: want,
+        });
+      } else {
+        expect(r.title, r.href).not.toBe(homeTitle);
+      }
+    }
   });
 
   test(`[${locale}] Homeのパネルから代表のページへクリックで移れる`, async ({
@@ -340,6 +375,35 @@ for (const locale of locales) {
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL((url) => url.pathname === href);
   });
+
+  for (const width of [1280, 768]) {
+    test(`[${locale}] ${width}px幅で、全分類のパネルのリンクが画面内にあり、他に覆われない`, async ({
+      page,
+    }, testInfo) => {
+      skipInBase(testInfo);
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto(start);
+      for (const label of categoryLabels) {
+        await cell(page, label).hover();
+        const links = item(page, label).locator("ul a");
+        const count = await links.count();
+        expect(count).toBeGreaterThan(0);
+        for (let i = 0; i < count; i += 1) {
+          const link = links.nth(i);
+          await expect(link).toBeInViewport({ ratio: 1 });
+          const covered = await link.evaluate((el) => {
+            const r = el.getBoundingClientRect();
+            const top = document.elementFromPoint(
+              r.x + r.width / 2,
+              r.y + r.height / 2
+            );
+            return !(top && el.contains(top));
+          });
+          expect(covered, `${label} ${i}`).toBe(false);
+        }
+      }
+    });
+  }
 
   for (const width of [768, 900, 1000, 1100]) {
     test(`[${locale}] ${width}px幅でも、ヘッダーの5匹が収まり押せる`, async ({
