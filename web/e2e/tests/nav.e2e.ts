@@ -300,7 +300,7 @@ for (const locale of locales) {
     await page.goto(`${start}description/`);
     // 幅wのscroll-padding-topが、幅wと幅w-20(スクロールバーで折り返しが遅れる分)のヘッダーの高さ以上か
     const sizes = new Map<number, { padding: number; header: number }>();
-    for (let width = 300; width <= 1500; width += 10) {
+    for (let width = 768; width <= 1500; width += 10) {
       await page.setViewportSize({ width, height: 800 });
       sizes.set(
         width,
@@ -323,7 +323,7 @@ for (const locale of locales) {
       const lagged =
         width >= 1280 && width < 1300 ? undefined : sizes.get(width - 20);
       const tallest = Math.max(size.header, lagged?.header ?? 0);
-      if (width >= 320 && size.padding < tallest) {
+      if (size.padding < tallest) {
         short.push({ width, padding: size.padding, header: tallest });
       }
     }
@@ -532,6 +532,65 @@ for (const locale of locales) {
       }
     });
   }
+
+  // 固定は幅768px以上かつ高さ501px以上。目次は幅1100px以上で、固定とは別に出る
+  for (const [width, height, stuck] of [
+    [767, 800, false],
+    [768, 800, true],
+    [1280, 500, false],
+    [1280, 501, true],
+  ] as const) {
+    test(`[${locale}] ${width}x${height}でヘッダーは${stuck ? "固定される" : "固定されない"}`, async ({
+      page,
+    }, testInfo) => {
+      skipInBase(testInfo);
+      await page.setViewportSize({ width, height });
+      await page.goto(longPath);
+      await expect(page.locator("header")).toHaveCSS(
+        "position",
+        stuck ? "sticky" : "relative"
+      );
+      await scrollTo(page, 900);
+      const bar = await headerBox(page);
+      if (stuck) {
+        expect(bar.top).toBe(0);
+        // 本文が透けないよう、ページと同じ背景を敷き、下端に影を付ける
+        await expect(page.locator("header")).toHaveCSS(
+          "background-color",
+          "rgb(223, 228, 234)"
+        );
+        await expect(page.locator("header")).not.toHaveCSS(
+          "box-shadow",
+          "none"
+        );
+      } else {
+        expect(bar.bottom).toBeLessThanOrEqual(0);
+      }
+      // 固定しないときはscroll-padding-topに固定分を足さない
+      const padding = await page.evaluate(
+        () => getComputedStyle(document.documentElement).scrollPaddingTop
+      );
+      const value = Number(padding.replace("px", ""));
+      if (stuck) {
+        expect(value).toBeGreaterThanOrEqual(bar.bottom + 16);
+      } else {
+        expect(value).toBe(16);
+      }
+    });
+  }
+
+  test(`[${locale}] 高さ500px以下でも幅1100px以上なら目次は出て、ヘッダーの高さを足さずに上へ付く`, async ({
+    page,
+  }, testInfo) => {
+    skipInBase(testInfo);
+    await page.setViewportSize({ width: 1280, height: 500 });
+    await page.goto(longPath);
+    await scrollTo(page, 900);
+    await expect(toc(page)).toBeVisible();
+    const box = await toc(page).locator("xpath=..").boundingBox();
+    expect(box?.y ?? -1).toBeGreaterThanOrEqual(0);
+    expect(box?.y ?? 999).toBeLessThanOrEqual(24 + 1);
+  });
 
   test(`[${locale}] 全ページの目次のリンク先が、リンクで移るとヘッダーの下に出る`, async ({
     page,

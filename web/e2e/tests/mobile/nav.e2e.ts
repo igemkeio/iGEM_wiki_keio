@@ -64,38 +64,37 @@ for (const locale of locales) {
     await expect(pagesNav(page).locator("ul")).toHaveCSS("overflow-x", "auto");
   });
 
-  test(`[${locale}] スクロールしても、2段目を含むヘッダーが上に残り、移った見出しが隠れない`, async ({
-    page,
-  }) => {
-    await page.goto(`${start}description/`);
-    const header = () =>
-      page.locator("header").evaluate((el) => {
-        const r = el.getBoundingClientRect();
-        return { top: r.top, bottom: r.bottom };
-      });
-    const before = await header();
-    await page.evaluate(() => window.scrollTo(0, 900));
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(900);
-    const after = await header();
-    expect(after.top).toBe(0);
-    expect(after.bottom).toBeCloseTo(before.bottom, 0);
-    // 2段目がヘッダーの中で画面内にある
-    const sub = await pagesNav(page).boundingBox();
-    expect(sub?.y ?? -1).toBeGreaterThanOrEqual(0);
-    expect((sub?.y ?? 0) + (sub?.height ?? 0)).toBeLessThanOrEqual(
-      after.bottom + 0.5
-    );
-    await expect(pagesNav(page)).toBeInViewport({ ratio: 1 });
-    // 見出しへのリンクで移っても、ヘッダーの下に出る
-    const id = await page
-      .locator("main h2[id]")
-      .nth(2)
-      .evaluate((el) => el.id);
-    await page.goto(`${start}description/#${id}`);
-    const box = await page.locator(`[id="${id}"]`).boundingBox();
-    const bar = await header();
-    expect(box?.y ?? 0).toBeGreaterThanOrEqual(bar.bottom);
-  });
+  for (const size of [
+    { width: 375, height: 812 },
+    { width: 812, height: 375 },
+  ]) {
+    test(`[${locale}] ${size.width}x${size.height}では、スクロールするとヘッダーが画面の外へ流れ、移った見出しが上端に隠れない`, async ({
+      page,
+    }) => {
+      await page.setViewportSize(size);
+      await page.goto(`${start}description/`);
+      expect(
+        await page.evaluate(() => matchMedia("(hover: none)").matches)
+      ).toBe(true);
+      await expect(page.locator("header")).toHaveCSS("position", "relative");
+      await page.evaluate(() => window.scrollTo(0, 900));
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(900);
+      // 2段目を含むヘッダー全体が画面の上へ出ている
+      const bottom = await page
+        .locator("header")
+        .evaluate((el) => el.getBoundingClientRect().bottom);
+      expect(bottom).toBeLessThanOrEqual(0);
+      // 見出しへのリンクで移っても、画面の上端に隠れない
+      const id = await page
+        .locator("main h2[id]")
+        .nth(2)
+        .evaluate((el) => el.id);
+      await page.goto(`${start}description/#${id}`);
+      const box = await page.locator(`[id="${id}"]`).boundingBox();
+      expect(box?.y ?? -1).toBeGreaterThanOrEqual(0);
+      await expect(page.locator(`[id="${id}"]`)).toBeInViewport();
+    });
+  }
 
   test(`[${locale}] hover: noneで幅を動かしても、scroll-padding-topが2段目を含むヘッダーの高さ以上(スクロールバー分の遅れも見込む)になる`, async ({
     page,
@@ -103,7 +102,7 @@ for (const locale of locales) {
     await page.goto(`${start}description/`);
     // 幅wのscroll-padding-topが、幅wと幅w-20(スクロールバーで折り返しが遅れる分)のヘッダーの高さ以上か
     const sizes = new Map<number, { padding: number; header: number }>();
-    for (let width = 300; width <= 1500; width += 10) {
+    for (let width = 768; width <= 1500; width += 10) {
       await page.setViewportSize({ width, height: 812 });
       sizes.set(
         width,
@@ -126,7 +125,7 @@ for (const locale of locales) {
       const lagged =
         width >= 1280 && width < 1300 ? undefined : sizes.get(width - 20);
       const tallest = Math.max(size.header, lagged?.header ?? 0);
-      if (width >= 320 && size.padding < tallest) {
+      if (size.padding < tallest) {
         short.push({ width, padding: size.padding, header: tallest });
       }
     }
