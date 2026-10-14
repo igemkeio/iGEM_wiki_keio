@@ -1,0 +1,9 @@
+{
+  "email": "contact@example.com",
+  "social": [
+    { "label": "Instagram", "href": "https://www.instagram.com/example" },
+    { "label": "X", "href": "https://x.com/example" },
+    { "label": "YouTube", "href": "https://www.youtube.com/@example" }
+  ],
+  "repository": "https://gitlab.igem.org/2026/keio"
+}
