@@ -166,7 +166,7 @@
     fill: var(--color-accent-blue);
   }
 
-  /* パネルは大腸菌の真下に隙間なく付けるので、マウスが移っても閉じない */
+  /* パネルは大腸菌の真下に隙間なく付けるので、マウスが移っても閉じない。展開のclip-pathは内側のpanelListに掛け、外側の箱は展開中も全体が当たり判定を持つ */
   .panel {
     position: absolute;
     top: 100%;
@@ -282,8 +282,8 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .item:hover .panel,
-    .item:focus-within .panel {
+    .item:hover .panelList,
+    .item:focus-within .panelList {
       animation: unfold 0.2s ease-out;
     }
   }
