@@ -1,0 +1,169 @@
+@layer components {
+  .root {
+    --cell-height: 44px;
+
+    padding: 24px var(--space-frame-x) 0;
+    font-family: var(--font-heading);
+  }
+
+  .chain {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px 0;
+    margin: 0;
+    padding: 8px 0;
+    list-style: none;
+  }
+
+  .tail,
+  .item,
+  .head {
+    flex: none;
+  }
+
+  .flagella {
+    display: block;
+    width: 46px;
+    height: var(--cell-height);
+    margin-right: -6px;
+    overflow: visible;
+    fill: none;
+    stroke: var(--color-muted);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+
+  .cell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: var(--cell-height);
+    padding: 0 18px 0 16px;
+    background: var(--color-surface);
+    border: 3px solid var(--color-accent-blue);
+    border-radius: 999px;
+    color: var(--color-ink);
+    text-decoration: none;
+    line-height: 1.1;
+    transition: transform 0.15s ease;
+  }
+
+  .cell:hover {
+    transform: translateY(-2px);
+  }
+
+  .cell:focus-visible {
+    outline: 3px solid var(--color-accent-orange);
+    outline-offset: 3px;
+  }
+
+  /* 隣の個体と重ねて連結して見せ、つなぎ目に青いくびれを置く */
+  .item + .item {
+    margin-left: -3px;
+  }
+
+  .item + .item .cell::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: -5px;
+    width: 4px;
+    border-radius: 2px;
+    background: var(--color-accent-blue);
+  }
+
+  .arrow {
+    display: block;
+    flex: none;
+    width: 30px;
+    height: 12px;
+    fill: var(--color-accent-orange);
+  }
+
+  .label {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  .cell[aria-current] {
+    background: var(--color-accent-orange);
+    box-shadow: 0 0 0 4px
+      color-mix(in srgb, var(--color-accent-orange) 30%, transparent);
+  }
+
+  .cell[aria-current] .arrow {
+    fill: var(--color-accent-blue);
+  }
+
+  .head {
+    width: 12px;
+    height: 12px;
+    margin-left: 8px;
+    border-radius: 50%;
+    background: var(--color-accent-orange);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .head {
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+  }
+
+  @keyframes pulse {
+    50% {
+      opacity: 0.8;
+      transform: scale(1.35);
+    }
+  }
+
+  /* 1段に収まらない幅では折り返すので、連結をやめて個体ごとに間を空ける */
+  @media (max-width: 1279px) {
+    .chain {
+      gap: 8px 6px;
+    }
+
+    .item + .item {
+      margin-left: 0;
+    }
+
+    .item + .item .cell::before {
+      display: none;
+    }
+  }
+
+  /* 狭い幅では尾と頭を外し、詰めて並べる */
+  @media (max-width: 767px) {
+    .root {
+      --cell-height: 38px;
+
+      padding: 16px 24px 0;
+    }
+
+    .chain {
+      justify-content: flex-start;
+    }
+
+    .tail,
+    .head {
+      display: none;
+    }
+
+    .cell {
+      padding: 0 14px 0 12px;
+    }
+
+    .arrow {
+      width: 22px;
+    }
+
+    .label {
+      font-size: 13px;
+    }
+  }
+}

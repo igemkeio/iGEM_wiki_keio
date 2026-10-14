@@ -13,12 +13,14 @@ import {
   isExternalCheckTarget,
   isInternalCheckTarget,
 } from "./lib/check/html.mjs";
+import { findUnmappedPages } from "./lib/check/nav.mjs";
 import { comparePages, toPage } from "./lib/check/pages.mjs";
 import { checkExternalUrl, checkInternalLink } from "./lib/check/urls.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const dist = join(root, "dist");
 const contentDir = join(root, "..", "content");
+const navConfigFile = join(root, "src", "data", "nav-categories.json");
 const base = process.env.WIKI_BASE ?? "/";
 
 async function walk(dir) {
@@ -91,6 +93,12 @@ async function main() {
       console.error(line);
     }
     process.exit(1);
+  }
+
+  // 分類の対応表に載っていないページは警告だけで、終了コードには影響しない。
+  const navConfig = JSON.parse(await readFile(navConfigFile, "utf-8"));
+  for (const w of findUnmappedPages(pages, navConfig)) {
+    console.warn(`警告: ${w.file}: ${w.reason}`);
   }
 
   const violations = [];

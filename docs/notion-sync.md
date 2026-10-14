@@ -26,7 +26,7 @@ Notion(Markdownで執筆) → API取得 → Markdown化 → HTML化 → content/
 | `locale` | Select | `en`または`ja` |
 | `heading` | Rich text | ページの見出し(JSONの`title`) |
 | `lead` | Rich text | リード文(簡単なHTMLを含んでよい) |
-| `order` | Number | 任意。ナビとHomeのカードの並び順 |
+| `order` | Number | 任意。Homeのカードの並び順。ナビでは、`web/src/data/nav-categories.json`にないページだけがこの順に並ぶ |
 | `subtitle` | Rich text | 任意。見出しの下の小見出し |
 | `published` | Checkbox | 任意。チェックを外した行は同期しない |
 

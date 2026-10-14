@@ -1,7 +1,14 @@
 import type { Page } from "@playwright/test";
 
 import { expect, hrefOf, test } from "../../fixtures";
-import { labels, locales, publishedPages } from "../../pages";
+import {
+  categoryLabelOf,
+  firstPageOf,
+  labels,
+  locales,
+  navConfig,
+  publishedPages,
+} from "../../pages";
 
 for (const locale of locales) {
   const start = locale === "en" ? "" : "ja/";
@@ -21,16 +28,46 @@ for (const locale of locales) {
     await expect(nav(page)).toBeHidden();
   });
 
-  test(`[${locale}] 開いたナビに、publishedな全ページへのリンクがある`, async ({
+  test(`[${locale}] 開いたHomeのナビに、home以外のpublishedな全ページへのリンクがある`, async ({
     page,
     baseURL,
   }) => {
     await page.goto(start);
     await page.getByLabel(labels[locale].menu, { exact: true }).click();
-    for (const entry of publishedPages(locale)) {
+    for (const entry of publishedPages(locale).filter(
+      (p) => p.slug !== "home"
+    )) {
       await expect(
         nav(page).locator(`a[href="${hrefOf(entry.path, baseURL)}"]`)
       ).toBeVisible();
     }
+  });
+
+  test(`[${locale}] ヘッダーの5分類すべてが375pxの幅に収まり、末尾にも届く`, async ({
+    page,
+  }) => {
+    await page.goto(start);
+    const links = page
+      .getByRole("navigation", { name: labels[locale].category })
+      .getByRole("link");
+    await expect(links).toHaveCount(5);
+    const width = page.viewportSize()?.width ?? 375;
+    for (const link of await links.all()) {
+      const box = await link.boundingBox();
+      expect(box?.x ?? -1).toBeGreaterThanOrEqual(0);
+      expect((box?.x ?? width) + (box?.width ?? width)).toBeLessThanOrEqual(
+        width
+      );
+    }
+    await links.last().click();
+    const lastLabel = navConfig.categories.at(-1)?.label ?? "";
+    const target = firstPageOf(
+      publishedPages(locale).filter((p) => categoryLabelOf(p.slug)),
+      lastLabel
+    );
+    expect(target).toBeDefined();
+    await expect(page).toHaveURL((url) =>
+      url.pathname.endsWith(target?.path ?? "")
+    );
   });
 }

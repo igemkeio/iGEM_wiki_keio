@@ -1,5 +1,6 @@
 import { withBase } from "../base";
 import type { Locale, WikiPage } from "../content";
+import { categoryIdOf, groupRoutes } from "../lib/navGroups";
 import type { Route } from "../routes";
 
 import styles from "./Sidebar.module.css";
@@ -28,7 +29,13 @@ const labels = {
 
 export function Sidebar({ page, routes }: { page: WikiPage; routes: Route[] }) {
   const label = labels[page.locale];
-  const items = routes.filter((r) => r.page.locale === page.locale);
+  const current = categoryIdOf(page.slug);
+  // Homeは全分類を見出し付きで、それ以外はいまの分類だけを並べる。
+  const groups = groupRoutes(page.locale, routes).filter(
+    (g) =>
+      g.routes.length > 0 &&
+      (current === undefined || g.category.id === current)
+  );
   const alternate = otherLocale(page.locale);
   const alternateHref = alternatePath(page, routes);
   return (
@@ -36,6 +43,7 @@ export function Sidebar({ page, routes }: { page: WikiPage; routes: Route[] }) {
       <a
         className={styles.logo}
         href={withBase(homePath(page.locale, routes) ?? "/")}
+        aria-current={page.slug === "home" ? "page" : undefined}
       >
         <span>iGEM</span>
         <span className={styles.logoSub}>Keio 2026</span>
@@ -46,15 +54,22 @@ export function Sidebar({ page, routes }: { page: WikiPage; routes: Route[] }) {
         </summary>
         <div className={styles.panel}>
           <nav className={styles.nav} aria-label={label.nav}>
-            {items.map(({ page: p, path }) => (
-              <a
-                key={path}
-                className={styles.link}
-                href={withBase(path)}
-                aria-current={p.slug === page.slug ? "page" : undefined}
-              >
-                {p.title}
-              </a>
+            {groups.map(({ category, routes: items }) => (
+              <div key={category.id} className={styles.group}>
+                {current === undefined && (
+                  <p className={styles.groupTitle}>{category.label}</p>
+                )}
+                {items.map(({ page: p, path }) => (
+                  <a
+                    key={path}
+                    className={styles.link}
+                    href={withBase(path)}
+                    aria-current={p.slug === page.slug ? "page" : undefined}
+                  >
+                    {p.title}
+                  </a>
+                ))}
+              </div>
             ))}
           </nav>
           {alternateHref && (

@@ -22,12 +22,14 @@ test("toPageはJSONのslugとlocaleを優先し、なければファイル名と
     toPage("en", "model.json", { slug: "model", locale: "en", islands: ["x"] }),
     {
       file: "content/en/model.json",
+      slug: "model",
       dist: "model/index.html",
       islands: ["x"],
     }
   );
   assert.deepEqual(toPage("ja", "team.json", {}), {
     file: "content/ja/team.json",
+    slug: "team",
     dist: "ja/team/index.html",
     islands: [],
   });
