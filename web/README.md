@@ -49,7 +49,7 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 | Vercel | `vercel.json` | PRのプレビュー。Root Directoryが`web`なので、そこでビルドと`npm run check`を流し、`dist`を配信する |
 
 - `main`の必須チェックは`ci-passed`だけにする。ジョブを足すときは、`ci.yml`の`ci-passed`の`needs`に加える。
-- `gitleaks`ジョブは、固定バージョン(v8.30.1)の公式バイナリをチェックサムを確かめて実行し、秘密情報と署名付きURLの混入を止める。PRでは、そのPRで増えるコミット(`base..head`)だけを検査する。pushと`workflow_dispatch`では作業ツリーのファイルを検査する。出力は`--redact`で値を伏せる。誤検知のときは、リポジトリ直下の`.gitleaks.toml`で除外し、範囲はできるだけ狭くする。巨大ファイルの検査は対象外。
+- `gitleaks`ジョブは、固定バージョン(v8.30.1)の公式バイナリをチェックサムを確かめて実行し、秘密情報と署名付きURLの混入を止める。PRでは、そのPRで増えるコミット(`base..head`)だけを検査する。pushと`workflow_dispatch`では作業ツリーのファイルを検査する。出力は`--redact`で値を伏せる。誤検知のときは、リポジトリ直下の`.gitleaks.toml`で除外し、範囲はできるだけ狭くする。`.gitleaks.toml`を置くと既定のルールの代わりになるので、先頭に`[extend]`と`useDefault = true`を書いてから`allowlist`を足す。PRがこのファイルを変えると検査を緩められるので、レビューで見る。巨大ファイルの検査は対象外。
 - GitLabのキャッシュはnpmのキャッシュ`web/.npm/`(`npm ci --cache .npm --prefer-offline`)で、キーは`web/package-lock.json`のハッシュ。
 - GitLabでは`WIKI_BASE=/$CI_PROJECT_NAME/`としている。前提は、iGEMのwikiが`https://2026.igem.wiki/<team>/`で配信され、GitLabのプロジェクト名(URLの末尾)が`<team>`と一致していること。違っていたら`.gitlab-ci.yml`の`WIKI_BASE`の2か所(buildとcheck)を実際の配信パスに直す。
 - `WIKI_FONT_BASE`と`WIKI_IMAGE_BASE`は、`static.igem.wiki`のURLが決まるまで未指定にしてある(baseを付けた`/fonts`と`/images`になる)。決まったら`.gitlab-ci.yml`のbuildに足す。
