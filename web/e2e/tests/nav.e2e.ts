@@ -120,6 +120,15 @@ for (const locale of locales) {
     const [label] = categoryLabels;
     const panelLinks = item(page, label).locator("ul a");
     await cell(page, label).hover();
+    // 展開を途中(20ms)で止め、移る間も展開中のままにする
+    await item(page, label)
+      .locator("ul")
+      .evaluate((e) => {
+        for (const a of e.getAnimations()) {
+          a.pause();
+          a.currentTime = 20;
+        }
+      });
     const last = await centerOf(panelLinks.last());
     // ホバー直後に、まだ展開中の最後のリンクの位置へ1回で移る
     await page.mouse.move(last.x, last.y);
@@ -127,6 +136,13 @@ for (const locale of locales) {
     await expect(panelLinks.first()).toBeVisible();
     await expect(panelLinks.last()).toBeVisible();
     const href = await panelLinks.last().getAttribute("href");
+    await item(page, label)
+      .locator("ul")
+      .evaluate((e) => {
+        for (const a of e.getAnimations()) {
+          a.finish();
+        }
+      });
     await panelLinks.last().click();
     await expect(page).toHaveURL((url) => url.pathname === href);
   });
