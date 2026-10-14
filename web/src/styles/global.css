@@ -35,6 +35,11 @@
 }
 
 @layer reset {
+  /* 固定ヘッダーの下に、リンクで移った先が隠れないようにする */
+  html {
+    scroll-padding-top: calc(var(--size-header-fixed) + 16px);
+  }
+
   *,
   *::before,
   *::after {
@@ -59,12 +64,5 @@
 
   a {
     color: inherit;
-  }
-
-  @media (max-width: 767px) {
-    h2,
-    h3 {
-      scroll-margin-top: var(--size-topbar);
-    }
   }
 }

@@ -106,14 +106,14 @@ describe("Home", () => {
     order: 30,
   });
 
-  it("slugがhomeならヒーローとContentsを描き、本文ページの型は使わない", () => {
+  it("slugがhomeならヒーローを描き、本文ページの型は使わない", () => {
     const html = renderToStaticMarkup(
       <Page page={home} routes={routesFor(home, model)} assets={assets} />
     );
     expect(html).toContain("one-direction.png");
     expect(html).toContain("<picture");
     expect(html).toContain("hero-ukiyoe.webp");
-    expect(html).toContain("Contents");
+    expect(html).not.toContain("Contents");
     expect(scripts(parse(html))).toHaveLength(0);
   });
 

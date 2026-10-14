@@ -32,6 +32,8 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${previewPort}/`,
     trace: ci ? "on-first-retry" : "off",
+    // 既定ではアニメーションを止める。アニメーションを確かめるテストだけがテスト内で戻す。
+    reducedMotion: "reduce",
     launchOptions,
   },
   projects: [

@@ -93,10 +93,11 @@ MPAではページを移るとJSのメモリが消えるので、状態はブラ
 
 Figmaのデザイン案(iGEM Keio 2026 Wiki Pages)を正とする。
 
-- レイアウトは左に固定のサイドバー(ロゴとナビ)、右に幅1200pxの本文。本文の上に、分類を選ぶ大腸菌のヘッダー(`EcoliNav`)を置く。
-- 375pxでは、上部に細いバー(ロゴと開くボタン)を置き、押すとナビが降りてくる。この形はこちらで決め、実装後にFigmaへ書き戻す。
-- ナビはNotionにある`published`なページから生成する。ページの分類(Project、Wet Lab、Dry Lab、Human Practices、Team)と、分類内の並び、ヘッダーのリンク先(分類の先頭のページ)は`src/data/nav-categories.json`のslugの対応表で決め、ヘッダーで分類を、サイドバーでその中のページを選ぶ。対応表にない公開ページはProjectの末尾にNotionの`order`順で並べ、`npm run check`が警告する。ヘッダーとサイドバーはビルド時に決まる静的なマークアップで、JSは使わない。
-- Homeは専用のテンプレート(ヒーロー、Contentsのカード)。カードはページ一覧から生成する。
+- レイアウトは上にヘッダー(`EcoliNav`)、その下に幅1200pxの本文(中央寄せ)。ヘッダーの1段目は左にロゴ、中央に分類を選ぶ大腸菌、右に言語の切り替え。1279px以下では、大腸菌がロゴと言語の下の行に移る。ヘッダーは幅768px以上かつ高さ501px以上でだけ`position: sticky`で上に固定し(`hover: none`の2段目も一緒)、ヘッダーはページと同じ背景色と下端の薄い影を、固定の有無によらず画面の幅いっぱいに敷く(中身は幅1200pxのフレームに揃える)。幅767px以下、または高さ500px以下(横向きの端末など)では画面を占めすぎるので固定せず、ページと一緒に流す。
+- 大腸菌にホバーかフォーカスが入ると、その分類のページ一覧のパネルが下に開く。`hover: none`の端末ではパネルを使わず、いまの分類のページ一覧をヘッダーの下に2段目として出す(Homeでは出さない)。この形はこちらで決め、実装後にFigmaへ書き戻す。
+- ナビはNotionにある`published`なページから生成する。ページの分類(Project、Wet Lab、Dry Lab、Human Practices、Team)と、分類内の並び、ヘッダーのリンク先(分類の先頭のページ)は`src/data/nav-categories.json`のslugの対応表で決め、ヘッダーの大腸菌で分類を、パネル(または2段目)でその中のページを選ぶ。対応表にない公開ページはProjectの末尾にNotionの`order`順で並べ、`npm run check`が警告する。ヘッダーはビルド時に決まる静的なマークアップで、開閉はCSSの`:hover`と`:focus-within`だけで行い、JSは使わない。
+- 目次(`Toc`)は本文の左に置き、1100px以上でだけ出す。ヘッダーが固定されるときはその高さ分だけ下げて`sticky`にする(幅1100px以上かつ高さ500px以下では目次は出るがヘッダーは固定されないので、高さを足さない)。固定分の高さは`--size-header-fixed`(既定は0で、固定する条件のmedia queryで`--size-header`にする)で、目次の位置と`scroll-padding-top`はこれを使う。ヘッダーの高さは、大腸菌の行が折り返す幅と`hover: none`の2段目で変わるので、`tokens.css`の`--size-header`(固定する幅768px以上の分だけ)を幅ごとの実測値で持ち、目次の`top`と`html`の`scroll-padding-top`(見出しや目次のリンク先が隠れない余白)が使う。大腸菌の行の折り返す幅や高さを変えたら、この値を測り直す。E2Eの、幅を10px刻みで動かして`--size-header`が実際の高さ以上かを見るテストが、ずれを検出する。
+- Homeは専用のテンプレート(ヒーローのみ。ページ一覧はヘッダーのナビが担う)。
 - 本文ページの型は、見出し、日本語の小見出し、リード、本文、Figureカード、Note。Membersもこの型を使う。
 - Figureカード(図と説明を点線で区切る2カラム)とNoteは、Notionのブロックから同期時に出す。対応はnotion-sync.mdに書く。
 - フォントは見出しとナビがMontserrat、本文がNoto Sans JP。どちらもSIL Open Font License。Noto Sans JPはサブセット化してwoff2にし、`static.igem.wiki`に置いて`@font-face`で読む。
@@ -137,7 +138,7 @@ GitLab Pagesは`https://2026.igem.wiki/keio/`のようにサブパスで配信�
 | 型 | `tsc --noEmit` | Node側とブラウザ側の境界 |
 | ユニット | Vitest | `toc.ts`、`routes.ts`、`usePersistedState`、`applyBase` |
 | スクリプト | `node:test` | Notion同期の変換、`check`の検査関数 |
-| コンポーネント | Vitest、Testing Library、happy-dom | `Sidebar`、`Toc`、各島 |
+| コンポーネント | Vitest、Testing Library、happy-dom | `EcoliNav`、`Toc`、各島 |
 | プリレンダー | Vitest | サンプルJSONからのHTML生成をスナップショットで固定 |
 | 出力の検査 | `npm run check` | ページ数の一致、外部URL、リンク切れ、`alt`の欠落 |
 | E2E | Playwright(chromium、mobile-chromium 375px、`/keio/`配信のchromium-base) | ページをまたぐ状態の保持、島の動作、島のないページでReactが読まれないこと、3Dの遅延読み込み |

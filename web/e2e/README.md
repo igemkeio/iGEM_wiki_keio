@@ -28,7 +28,7 @@
 
 `content/en/e2e-model.json`(3Dのページ。enだけにあり、言語切り替えがhomeに向く場合の確認にも使う)と`content/{en,ja}/e2e-plain.json`(島のないページ。両言語にあり、切り替えが同じslugに向く場合の確認に使う)。3つとも`published: false`。
 
-ビルドを`PRERENDER_ALL=1`で走らせると、`scripts/prerender.mjs`が`published: false`のページも書き出す。このとき書き出し数の突き合わせは、`content/`の全ページ数と行う。ナビとHomeのContentsカードにもE2E用のページが並ぶ。通常のビルドでは何も変わらない。
+ビルドを`PRERENDER_ALL=1`で走らせると、`scripts/prerender.mjs`が`published: false`のページも書き出す。このとき書き出し数の突き合わせは、`content/`の全ページ数と行う。ナビにもE2E用のページが並ぶ。通常のビルドでは何も変わらない。
 
 `PRERENDER_ALL=1`で作った`dist/`には、原稿に対応しないページがあるので`npm run check`が落ちる。E2Eを流したあとに`check`をかけるときは、`npm run build`を通常どおりやり直す。
 
@@ -95,15 +95,15 @@ npx playwright show-report e2e/playwright-report
 
 | 変えたもの | 流すテスト |
 | --- | --- |
-| `Sidebar`、`PageShell`、ナビ | `nav`、`mobile/sidebar`、`locale` |
+| `EcoliNav`、`PageShell`、ナビ | `nav`、`mobile/nav`、`locale` |
 | `src/client/`(島の起動、保存、言語) | `islands`、`locale` |
 | `Island`、`islands.ts`、`Page.tsx`の`<script>`の出し分け | `islands`、`model-viewer` |
 | `MemberList` | `islands` |
 | `ModelViewer` | `model-viewer` |
-| `prose.css`、`ArticlePage`、`tokens.css`、`global.css`、`Sidebar`、`Footer` | `prose`、`visual` |
-| `HomePage` | `nav`(Homeのカード) |
+| `prose.css`、`ArticlePage`、`tokens.css`、`global.css`、`EcoliNav`、`Footer` | `prose`、`visual` |
+| `HomePage` | `visual` |
 | `vite.config.ts`、`base.ts`、`prerender.mjs` | 全件(特に`chromium-base`) |
-| `content/`のページの増減 | `nav`、`mobile/sidebar` |
+| `content/`のページの増減 | `nav`、`mobile/nav` |
 
 ## ビジュアル回帰
 
@@ -113,7 +113,7 @@ npx playwright show-report e2e/playwright-report
 - 比較は`maxDiffPixelRatio: 0.02`で緩める。LinuxのCIとmacOSでは字形のずれがわずかに出るため。
 - 基準にするのはLinuxのCIで撮った画像。ローカルで`--update-snapshots`をかけて、そのまま上書きしない。
 - 基準画像はCI(Linux)で生成する。更新手順は下記。
-- サイドバーのナビにはE2E用ページがProjectの末尾に並ぶ(`PRERENDER_ALL=1`で出る。対応表にないページはProjectに入る)ので、E2E用ページを足したときは画像を撮り直す。
+- 2段目は`hover: none`のときだけ出るので、基準画像のうちパネルは閉じた状態で撮られ、E2E用ページ(`PRERENDER_ALL=1`で出る。対応表にないページはProjectに入る)の有無は画像に出ない。ヘッダーの構造を変えたときは画像を撮り直す。
 
 ### 基準画像の作り直し
 

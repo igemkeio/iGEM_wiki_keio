@@ -1,7 +1,7 @@
 @layer components {
   .frame {
     max-width: var(--size-frame);
-    margin-left: var(--size-sidebar);
+    margin-inline: auto;
   }
 
   .inner {
@@ -12,11 +12,6 @@
   }
 
   @media (max-width: 767px) {
-    .frame {
-      margin-left: 0;
-      padding-top: var(--size-topbar);
-    }
-
     .inner {
       padding-inline: 24px;
       padding-bottom: 64px;

@@ -27,10 +27,7 @@
   --size-prose: 672px;
   --size-lead-max: 576px;
   --size-frame: 1200px;
-  --size-sidebar: 300px;
-  --size-topbar: 56px;
   --size-toc: 200px;
-  --size-card-height: 178px;
   --space-card: 48px;
   --radius-card: 24px;
   --size-hero: 993px;
@@ -50,8 +47,46 @@
   --radius-media: 14.4px;
 
   --space-frame-x: 56px;
-  --space-sidebar-x: 56px;
-  --space-nav-gap: 2px;
+
+  /* 固定ヘッダーの高さ(幅768px以上の分だけ)。大腸菌の行が折り返す幅ごとの実測値(切り上げ)で、2段目の分は hover: none のときだけ足す。高さが下がる側の切り替え幅は、スクロールバーで折り返しが遅れる分を見て、実測の幅より20px上に置く */
+  --size-header-bar: 159px;
+  --size-header-sub: 0px;
+  --size-header: calc(var(--size-header-bar) + var(--size-header-sub));
+
+  /* ヘッダーを固定するときだけ、固定分の高さ。目次の位置と html の scroll-padding-top が使う */
+  --size-header-fixed: 0px;
+  --space-toc-top: 24px;
+}
+
+@media (min-width: 950px) {
+  :root {
+    --size-header-bar: 127px;
+  }
+}
+
+@media (min-width: 1100px) {
+  :root {
+    --size-header-bar: 107px;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --size-header-bar: 84px;
+  }
+}
+
+@media (hover: none) {
+  :root {
+    --size-header-sub: 57px;
+  }
+}
+
+/* ヘッダーを固定する条件は EcoliNav.module.css と同じ文字列にする */
+@media (min-width: 768px) and (min-height: 501px) {
+  :root {
+    --size-header-fixed: var(--size-header);
+  }
 }
 
 :root[data-palette="a"] {
