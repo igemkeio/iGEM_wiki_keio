@@ -142,6 +142,38 @@ jobs:
             web/e2e/test-results/
           retention-days: 7
 
+  gitleaks:
+    runs-on: ubuntu-latest
+    env:
+      GITLEAKS_VERSION: 8.30.1
+    steps:
+      # blob:none で blob を後取りにし、履歴の取得を軽くする。検査対象の範囲の blob だけが取得される。
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: ${{ github.event_name == 'pull_request' && 0 || 1 }}
+          filter: blob:none
+      - name: gitleaks を取得してチェックサムを確かめる
+        run: |
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          mkdir -p "$RUNNER_TEMP/gitleaks"
+          cd "$RUNNER_TEMP/gitleaks"
+          curl -sSfL -O "$base/$archive"
+          curl -sSfL -O "$base/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          grep " ${archive}\$" "gitleaks_${GITLEAKS_VERSION}_checksums.txt" | sha256sum --check --strict -
+          tar -xzf "$archive" gitleaks
+      - name: PR で増えるコミットを検査する
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          "$RUNNER_TEMP/gitleaks/gitleaks" git --redact --no-banner --log-opts="${BASE_SHA}..${HEAD_SHA}" .
+      - name: 作業ツリーを検査する
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          "$RUNNER_TEMP/gitleaks/gitleaks" dir --redact --no-banner .
+
   # ruleset の必須チェックはこのジョブだけにする。
   ci-passed:
     if: always()
@@ -152,6 +184,7 @@ jobs:
       - test-scripts
       - build-check
       - e2e
+      - gitleaks
     runs-on: ubuntu-latest
     steps:
       - name: 依存ジョブがすべて成功したか確認する
