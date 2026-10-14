@@ -113,7 +113,7 @@ npx playwright show-report e2e/playwright-report
 - 比較は`maxDiffPixelRatio: 0.02`で緩める。LinuxのCIとmacOSでは字形のずれがわずかに出るため。
 - 基準にするのはLinuxのCIで撮った画像。ローカルで`--update-snapshots`をかけて、そのまま上書きしない。
 - 基準画像はCI(Linux)で生成する。更新手順は下記。
-- サイドバーのナビにはE2E用ページがProjectの末尾に並ぶ(`PRERENDER_ALL=1`で出る。対応表にないページはProjectに入る)ので、E2E用ページを足したときは画像を撮り直す。
+- 2段目は`hover: none`のときだけ出るので、基準画像のうちパネルは閉じた状態で撮られ、E2E用ページ(`PRERENDER_ALL=1`で出る。対応表にないページはProjectに入る)の有無は画像に出ない。ヘッダーの構造を変えたときは画像を撮り直す。
 
 ### 基準画像の作り直し
 
