@@ -64,6 +64,16 @@
     list-style: none;
   }
 
+  .socialIcon {
+    display: block;
+  }
+
+  .socialIcon svg {
+    display: block;
+    width: 24px;
+    height: 24px;
+  }
+
   /* ボタンはJSが、帯がはみ出すときだけ hidden を外す。JSが無いときは横スクロールで見る */
   .sponsors[data-sponsors-js] {
     display: flex;

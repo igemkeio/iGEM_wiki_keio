@@ -1,6 +1,7 @@
 import type { Locale } from "../content";
 import footer from "../data/footer.json";
 import sponsors from "../data/sponsors.json";
+import { socialIconPath } from "../lib/socialIcons";
 
 import styles from "./Footer.module.css";
 
@@ -28,6 +29,45 @@ const labels = {
   },
 } as const;
 
+interface SocialItem {
+  label: string;
+  href: string;
+}
+
+// SNSのリンク。リンク先に対応するアイコンがあればアイコンで、無ければ文字で出す。
+export function SocialLinks({
+  items,
+  label,
+}: {
+  items: SocialItem[];
+  label: string;
+}) {
+  return (
+    <ul className={styles.social} aria-label={label}>
+      {items.map((item) => {
+        const path = socialIconPath(item.href);
+        return (
+          <li key={item.label}>
+            {path ? (
+              <a
+                className={styles.socialIcon}
+                href={item.href}
+                aria-label={item.label}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d={path} fill="currentColor" />
+                </svg>
+              </a>
+            ) : (
+              <a href={item.href}>{item.label}</a>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 // ロゴ、連絡先、SNSの1段目、スポンサーの帯の2段目、ライセンスとリポジトリの3段目。
 // 帯はJSが無くても横スクロールで見られ、送りのボタンはJS(public/footer-sponsors.js)が出す。
 export function Footer({ locale }: { locale: Locale }) {
@@ -45,13 +85,7 @@ export function Footer({ locale }: { locale: Locale }) {
             <a href={`mailto:${footer.email}`}>{footer.email}</a>
           </p>
         </div>
-        <ul className={styles.social} aria-label={label.social}>
-          {footer.social.map((item) => (
-            <li key={item.label}>
-              <a href={item.href}>{item.label}</a>
-            </li>
-          ))}
-        </ul>
+        <SocialLinks items={footer.social} label={label.social} />
       </div>
       <section
         className={styles.sponsors}

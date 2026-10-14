@@ -1,9 +1,11 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
 
 import footer from "../data/footer.json";
 import sponsors from "../data/sponsors.json";
-import { Footer } from "./Footer";
+import { Footer, SocialLinks } from "./Footer";
+
+afterEach(cleanup);
 
 describe(Footer, () => {
   it("3段が出る: 連絡先とSNS、スポンサー、ライセンスとリポジトリ", () => {
@@ -44,5 +46,28 @@ describe(Footer, () => {
       [true, "Previous"],
       [true, "Next"],
     ]);
+  });
+});
+
+describe(SocialLinks, () => {
+  const items = [
+    { label: "Instagram", href: "https://www.instagram.com/example" },
+    { label: "Example", href: "https://example.com/" },
+  ];
+
+  it("対応するアイコンがあればaria-hiddenのSVGで、サービス名をaria-labelにする", () => {
+    const { container } = render(<SocialLinks items={items} label="SNS" />);
+    const link = screen.getByRole("link", { name: "Instagram" });
+    expect(link).toHaveAttribute("aria-label", "Instagram");
+    const svg = link.querySelector("svg");
+    expect(svg).toHaveAttribute("aria-hidden", "true");
+    expect(container.querySelectorAll("svg")).toHaveLength(1);
+  });
+
+  it("対応するアイコンが無いときは文字で出す", () => {
+    render(<SocialLinks items={items} label="SNS" />);
+    const link = screen.getByRole("link", { name: "Example" });
+    expect(link).toHaveTextContent("Example");
+    expect(link.querySelector("svg")).toBeNull();
   });
 });
