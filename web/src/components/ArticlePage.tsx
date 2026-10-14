@@ -7,7 +7,7 @@ import { Toc } from "./Toc";
 
 import styles from "./ArticlePage.module.css";
 
-// h1、subtitle、lead、本文と、本文の右の目次を描く。
+// h1、subtitle、lead、本文と、本文の左の目次を描く。
 export function ArticlePage({ page }: { page: WikiPage }) {
   for (const name of page.islands) {
     if (!(name in ISLANDS)) {
@@ -19,6 +19,7 @@ export function ArticlePage({ page }: { page: WikiPage }) {
   );
   return (
     <>
+      <Toc items={buildToc(page.html)} locale={page.locale} />
       <main className={styles.main}>
         <div className={styles.header}>
           <h1 className={styles.title}>{page.title}</h1>
@@ -42,7 +43,6 @@ export function ArticlePage({ page }: { page: WikiPage }) {
           <Island key={name} name={name} props={ISLANDS[name].props(page)} />
         ))}
       </main>
-      <Toc items={buildToc(page.html)} locale={page.locale} />
     </>
   );
 }
