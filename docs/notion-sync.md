@@ -67,7 +67,20 @@ Notionにアップロードされた動画は同期のログに警告を出し�
 
 ### 画像の扱い(暫定)
 
-Notionの本文に貼った画像は、同期時に`web/public/notion-images/<ハッシュ>.<拡張子>`に取り込まれ(内容ハッシュで重複を排除する)、`/notion-images/...`として配信される。外部URL(例: `static.igem.wiki`の画像を埋め込みで貼った場合)はそのまま通す。
+Notionの本文に貼った画像は、同期時に`web/public/notion-images/<ハッシュ>.webp`に取り込まれ(内容ハッシュで重複を排除する)、`/notion-images/...`として配信される。外部URL(例: `static.igem.wiki`の画像を埋め込みで貼った場合)はそのまま通す。
+
+取り込むときに、sharpで縮小してWebPに変換する(`web/scripts/lib/image.mjs`)。元画像はNotionに残るので、リポジトリには変換後だけを置く。ハッシュは元画像のバイト列のsha256の先頭16桁で、同じ名前のファイルがあれば変換を飛ばす。
+
+- 向き: EXIFの向きを画素に反映する。
+- 色: sRGBに変換する。
+- 大きさ: 長い辺を1600pxまでに縮める。小さい画像は拡大しない。
+- 品質: lossyでquality 80、effort 6。
+- メタデータ: EXIFとGPSは残さない。
+- 透明: アルファチャンネルを保つ。
+- GIF: 全フレームを読み、アニメーションWebPにする。変換後が1枚2MBを超えたら、同期のログに警告を出す(動画にしてVideo Universeへ移す候補)。
+- HEIC: heic-convertで一度JPEGにしてからsharpに渡す。
+
+図やグラフもまずはquality 80で揃える。文字が潰れる図があれば、そのページだけ見直す。
 
 同期のたびに、`static.igem.wiki`以外を指す画像を`content/images-todo.json`(`[{ "slug", "locale", "src" }]`)に出す。人が`static.igem.wiki`に上げ直すための一覧で、gitには入れない。自動アップロードは行わない。
 
