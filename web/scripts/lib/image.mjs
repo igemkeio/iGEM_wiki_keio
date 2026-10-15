@@ -31,7 +31,7 @@ export async function convertToWebp(buf, srcExt) {
         await heicConvert({ buffer: buf, format: "JPEG", quality: 0.9 })
       )
     : buf;
-  const image = sharp(input, { animated: srcExt === "gif" });
+  const image = sharp(input, { animated: true });
   const { pages } = await image.metadata();
   const data = await image
     .rotate()

@@ -134,3 +134,38 @@ test("convertToWebp: TIFFもWebPにする", async () => {
   const meta = await sharp(data).metadata();
   assert.equal(meta.format, "webp");
 });
+
+const animatedGif = (w, h, frames = 2) =>
+  sharp(
+    Buffer.concat(
+      Array.from({ length: frames }, (_, i) =>
+        Buffer.alloc(w * h * 3, (i * 255) / Math.max(frames - 1, 1))
+      )
+    ),
+    { raw: { width: w, height: h * frames, channels: 3, pageHeight: h } }
+  )
+    .gif({ loop: 0, delay: Array.from({ length: frames }, () => 100) })
+    .toBuffer();
+
+test("convertToWebp: 拡張子がgifでなくても全フレームを保つ", async () => {
+  const gif = await animatedGif(20, 10);
+  const awebp = await sharp(gif, { animated: true }).webp().toBuffer();
+  for (const [buf, ext] of [
+    [gif, "png"],
+    [awebp, "webp"],
+  ]) {
+    const { data, animated } = await convertToWebp(buf, ext);
+    const meta = await sharp(data, { animated: true }).metadata();
+    assert.equal(animated, true, ext);
+    assert.equal(meta.pages, 2, ext);
+  }
+});
+
+test("convertToWebp: 大きいアニメーションは各フレームを縮める", async () => {
+  const src = await animatedGif(2000, 1000);
+  const { data } = await convertToWebp(src, "gif");
+  const meta = await sharp(data, { animated: true }).metadata();
+  assert.equal(meta.pages, 2);
+  assert.equal(meta.width, 1600);
+  assert.equal(meta.pageHeight, 800);
+});
