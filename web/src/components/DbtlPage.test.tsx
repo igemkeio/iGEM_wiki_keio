@@ -21,7 +21,7 @@ const doc = new DOMParser().parseFromString(
 );
 
 describe(DbtlPage, () => {
-  it("h1はページの題で、introの先頭のh2は出さない", () => {
+  it("h1はページの題で、introの先頭にある重複したh2は出さない", () => {
     expect(doc.querySelectorAll("h1")).toHaveLength(1);
     expect(doc.querySelector("h1")?.textContent).toBe("エンジニアリング成功");
     expect(doc.body.textContent).not.toContain("Engineering");

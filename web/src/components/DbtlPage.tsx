@@ -160,7 +160,9 @@ export function DbtlPage({ page, dbtl }: { page: WikiPage; dbtl: Dbtl }) {
       )}
       <div
         className={`${styles.body} prose`}
-        dangerouslySetInnerHTML={html(stripLeadingHeading(dbtl.intro))}
+        dangerouslySetInnerHTML={html(
+          stripLeadingHeading(dbtl.intro, page.title)
+        )}
       />
       <section className={styles.stage} id="dbtl-stage">
         <Island name="dbtl-stage" props={props}>

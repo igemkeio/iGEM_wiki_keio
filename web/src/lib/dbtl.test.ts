@@ -56,16 +56,27 @@ describe(doneAtOf, () => {
 });
 
 describe(stripLeadingHeading, () => {
-  it("先頭のh2を落とす", () => {
-    expect(stripLeadingHeading(dbtlFixture.intro)).toBe(
+  it("ページの題と重複する先頭のh2を落とす", () => {
+    expect(stripLeadingHeading(dbtlFixture.intro, "Engineering")).toBe(
       "<p>このページの読み方。</p>"
     );
+    expect(
+      stripLeadingHeading(
+        '<h2 id="a">エンジニアリング成功</h2><p>本文</p>',
+        "エンジニアリング成功"
+      )
+    ).toBe("<p>本文</p>");
+  });
+
+  it("題と違う見出しは残す", () => {
+    const html = '<h2 id="a">概要 — 6つのサイクル</h2><p>本文</p>';
+    expect(stripLeadingHeading(html, "エンジニアリング成功")).toBe(html);
   });
 
   it("先頭がh2でなければ何も変えない", () => {
-    expect(stripLeadingHeading("<p>本文</p><h2>節</h2>")).toBe(
-      "<p>本文</p><h2>節</h2>"
-    );
+    expect(
+      stripLeadingHeading("<p>本文</p><h2>Engineering</h2>", "Engineering")
+    ).toBe("<p>本文</p><h2>Engineering</h2>");
   });
 });
 

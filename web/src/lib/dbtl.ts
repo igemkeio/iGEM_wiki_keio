@@ -148,7 +148,14 @@ export function doneAtOf(stops: Stop[]): Record<number, number> {
 export const allCycles = (dbtl: Dbtl): DbtlCycle[] =>
   dbtl.parts.flatMap((part) => part.cycles);
 
-// introの先頭にあるh2は、ページのh1と同じ見出しが重複して入ったもの。描く前に落とす。
-export function stripLeadingHeading(html: string): string {
-  return html.replace(/^\s*<h2\b[^>]*>[\s\S]*?<\/h2>\s*/u, "");
+// introの先頭にあるh2のうち、ページの題と重複するものだけを落とす。別の見出しなら残す。
+export function stripLeadingHeading(html: string, title: string): string {
+  const found = /^\s*<h2\b[^>]*>([\s\S]*?)<\/h2>\s*/u.exec(html);
+  if (!found) {
+    return html;
+  }
+  const text = found[1].replaceAll(/<[^>]*>/gu, "").trim();
+  return text === title.trim() || text === "Engineering"
+    ? html.slice(found[0].length)
+    : html;
 }
