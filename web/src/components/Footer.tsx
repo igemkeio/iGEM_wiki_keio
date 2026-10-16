@@ -76,6 +76,11 @@ export function SocialLinks({
 // 帯はJSが無くても横スクロールで見られ、送りのボタンはJS(public/footer-sponsors.js)が出す。
 export function Footer({ locale }: { locale: Locale }) {
   const label = labels[locale];
+  // 切れ目なく回すために2組ぶん並べる。2組目は読み上げとタブ送りから外し、JSが無いときはCSSで消す。
+  const slides = [...sponsors, ...sponsors].map((sponsor, index) => ({
+    sponsor,
+    clone: index >= sponsors.length,
+  }));
   return (
     <footer className={styles.root}>
       <div className={styles.top}>
@@ -106,9 +111,16 @@ export function Footer({ locale }: { locale: Locale }) {
           <span aria-hidden="true">‹</span>
         </button>
         <ul className={styles.track} data-sponsors-track="">
-          {sponsors.map((sponsor) => (
-            <li key={sponsor.name} className={styles.slide}>
-              <a href={sponsor.href}>
+          {slides.map(({ sponsor, clone }) => (
+            <li
+              key={clone ? `clone-${sponsor.name}` : sponsor.name}
+              className={
+                clone ? `${styles.slide} ${styles.clone}` : styles.slide
+              }
+              aria-hidden={clone || undefined}
+              data-sponsors-clone={clone ? "" : undefined}
+            >
+              <a href={sponsor.href} tabIndex={clone ? -1 : undefined}>
                 <img
                   src={`${imageBase}/${sponsor.logo}`}
                   alt={sponsor.alt}
