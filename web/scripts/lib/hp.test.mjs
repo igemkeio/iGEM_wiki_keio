@@ -217,12 +217,30 @@ test("章のアンカーが欠けた原稿(テンプレート)は警告なしで
   assert.deepEqual(readHp(""), { hp: null });
 });
 
-test("章のアンカーが1つ欠けても警告なしで hp を付けない", () => {
-  const withoutCh4 = page({ chapter4: "" }).replace(
-    /<h2 id="c4">[\s\S]*$/u,
-    ""
+test("章のアンカーが一部だけ欠けた原稿は警告を出して hp を付けない", () => {
+  const withoutCh4 = page().replace(/<h2 id="c4">[\s\S]*$/u, "");
+  const result = readHp(withoutCh4);
+  assert.equal(result.hp, null);
+  assert.equal(typeof result.warning, "string");
+});
+
+test("末尾のコメントや void 要素があっても読める", () => {
+  const { hp, warning } = readHp(
+    `${page()}\n<!-- メモ -->`.replace(
+      "<p>0章の本文。</p>",
+      '<p>0章の本文。</p><video><source src="a.mp4"></video>'
+    )
   );
-  assert.deepEqual(readHp(withoutCh4), { hp: null });
+  assert.equal(warning, undefined);
+  assert.ok(hp.chapter0.html.includes("<source"));
+});
+
+test("括弧内が2要素で後ろが敬称で終わるなら全体を人名にする", () => {
+  const { hp } = readHp(
+    page({ chapter1: interview("1.1　題（山田 太郎先生）") })
+  );
+  const [i] = hp.chapter1.interviews;
+  assert.deepEqual([i.person, i.affiliation], ["山田 太郎先生", ""]);
 });
 
 test("4章まで揃っていて中が崩れた原稿は警告を出して hp を付けない", () => {

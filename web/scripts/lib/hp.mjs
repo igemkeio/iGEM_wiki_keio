@@ -1,6 +1,21 @@
 // Human Practices の原稿HTMLから章・用途・面談を読み取る。形式は content/README.md の hp。
 
-const VOID_TAGS = new Set(["hr", "br", "img", "input", "wbr"]);
+const VOID_TAGS = new Set([
+  "hr",
+  "br",
+  "img",
+  "input",
+  "wbr",
+  "source",
+  "col",
+  "track",
+  "embed",
+  "area",
+  "base",
+  "link",
+  "meta",
+  "param",
+]);
 
 // silent が true のときは構造そのものが無い(読み取り対象でない)ことを表し、呼び出し側で警告にしない。
 class HpError extends Error {
@@ -51,6 +66,7 @@ function splitBlocks(html) {
   for (const token of tokens) {
     const [raw, closing, name] = token;
     if (!name) {
+      last = token.index + raw.length;
       continue;
     }
     const tag = name.toLowerCase();
@@ -115,7 +131,6 @@ const CONCLUSION = /^結論$/u;
 const PURPOSE = /^目的$/u;
 const TAKE_HOME = /^take[\s-]?home/iu;
 const NAME_SUFFIX = /(?:先生|さん|氏)$/u;
-const LATIN_NAME = /^[A-Za-z\u00C0-\u024F.-]+$/u;
 const NAME_THEN_REST = /^(.*?(?:先生|さん|氏))[\s・]+(.+)$/u;
 const TRAILING_PAREN = /^(.*?)\s*[（(]([^（()）]*)[）)]$/u;
 
@@ -132,11 +147,7 @@ function splitTrailingParen(text) {
 // 括弧の中から人名と所属を取る。取れなければ空。
 function parsePersonAffiliation(inner) {
   const parts = inner.split(/[\s・]+/u).filter((part) => part !== "");
-  if (
-    parts.length === 2 &&
-    LATIN_NAME.test(parts[0]) &&
-    NAME_SUFFIX.test(parts[1])
-  ) {
+  if (parts.length === 2 && NAME_SUFFIX.test(parts[1])) {
     return { person: parts.join(" "), affiliation: "" };
   }
   if (parts.length === 2) {
@@ -281,14 +292,18 @@ function parseChapter2(blocks) {
 
 const chapterTitle = (block, pattern) => pattern.exec(block.text)[1].trim();
 
-// 章のアンカー(0章・1章・2章・4章の h2)の位置を探す。1つでも無ければ構造化された原稿ではない。
+// 章のアンカー(0章・1章・2章・4章の h2)の位置を探す。1つも無ければ構造化された原稿ではない。
 function findAnchors(blocks) {
   const patterns = [CHAPTER_0, CHAPTER_1, CHAPTER_2, CHAPTER_4];
   const indexes = patterns.map((pattern) =>
     blocks.findIndex((block) => isH2(block) && pattern.test(block.text))
   );
-  if (indexes.includes(-1)) {
-    throw new HpError("章の見出しが揃っていません", { silent: true });
+  const found = indexes.filter((at) => at !== -1).length;
+  if (found === 0) {
+    throw new HpError("章の見出しがありません", { silent: true });
+  }
+  if (found < indexes.length) {
+    throw broken("0章・1章・2章・4章の見出しのうち、足りないものがあります");
   }
   if (indexes.some((at, i) => i > 0 && at <= indexes[i - 1])) {
     throw broken("0章・1章・2章・4章の見出しの順序が崩れています");
