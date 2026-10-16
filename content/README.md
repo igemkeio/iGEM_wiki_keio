@@ -19,6 +19,7 @@ Notion同期とプリレンダーをつなぐ受け渡し形式。同期スク�
 | `order`     | number               | 任意 | Homeのカードの並び順。ナビでは`web/src/data/nav-categories.json`にないページだけがこの順に並ぶ。省略時は末尾。同値はslugの辞書順 |
 | `islands`   | string[]             | 任意 | このページで使う島の名前。省略時は空配列                                 |
 | `models`    | `{ src, poster, alt }[]` | 任意 | 3Dモデルの一覧。省略時は空配列。`model-viewer`島は先頭の1件を表示する |
+| `hp`        | object               | 任意 | `human-practices`の章・用途・面談の構造。Notion同期が`html`から読み取って書く。形は[hp](#hp)の節 |
 | `published` | boolean              | 任意 | 省略時はtrue。falseのページはビルドから除く                              |
 | `source`    | `"notion"` または `"local"` | 任意 | 省略時はnotion。localはリポジトリ側で置く確認用ページで、Notion同期が消さない |
 | `dbtl`      | object               | 任意 | `engineering`のDBTLの構造(サイクルと反復)。Notion同期が`html`から読み取って書く。形は[dbtl](#dbtl)の節 |
@@ -66,6 +67,34 @@ Notion同期とプリレンダーをつなぐ受け渡し形式。同期スク�
 - 本番では.glbとposterを`static.igem.wiki`に置く。暫定のサンプルは`web/public/models/`にある。
 - `model-viewer`島は`models`の先頭1件だけを表示する。`models`が空のページに島を指定すると、器だけが出て何も描かれない。
 - Notion同期(#27)がこのフィールドを出す対応は別Issueで扱う。それまでは原稿JSONを手で書く。
+
+## hp
+
+`human-practices`のページだけに付く。`web/scripts/lib/hp.mjs`が同期のときに`html`を読んで作る。`html`は変えずに残るので、`hp`が無いページは`html`をそのまま表示する。
+
+読み取れる原稿の形は次のとおり。
+
+- 章の見出し(h2): `0章　題`、`1章　題`、`2章　題`、`４章　題`。区切りの空白と章番号の数字は、全角と半角のどちらでもよい。章の見出しの後ろが`title`になる
+- 1章: 見出しの下に、面談の見出し(h2)の`1.1　題（人名　所属）`が並ぶ
+- 2章: 用途の見出し(h2)の`2.1　題（副題）`の下に、面談の見出し(h2)の`2.1.A　題（人名・所属）`が並び、最後に`結論`のh2が付く。用途は複数並ぶ
+- 面談の中: h3の`目的`と`Take home`(`Take-home message`でもよい)、その後にサブパート(h3か折りたたみのdetails)が続く。`目的`と`Take home`が無い面談もあり、その場合は空になる
+- 太字の残骸の`**`は題から除く
+
+| フィールド | 型 | 内容 |
+| --- | --- | --- |
+| `intro` | string(HTML) | 0章より前の本文 |
+| `chapter0` | object | `title`、`html` |
+| `chapter1` | object | `title`、`introHtml`(最初の面談より前の本文)、`interviews[]` |
+| `chapter2` | object | `title`、`introHtml`(最初の用途より前の本文)、`uses[]` |
+| `uses[]` | object[] | `no`(`2.1`など)、`title`、`subtitle`(括弧の中。無ければ空)、`introHtml`、`interviews[]`、`conclusionHtml`(`結論`の本文。無ければ空) |
+| `interviews[]` | object[] | `no`(`1.1`、`2.1.A`など)、`title`、`person`、`affiliation`、`purposeHtml`、`takeHomeHtml`、`detailHtml`(目的とTake home以外の本文。見出し直後の導入とサブパートを含む)。題に`XXX`を含むときだけ`draft: true` |
+| `chapter4` | object | `title`、`html`(4章の見出し以降の残り全部。4.1、4.2を含み、構造化しない) |
+
+- 文字列の`*Html`と`html`はHTMLのまま持つ。`title`、`subtitle`、`person`、`affiliation`はテキストで、空白は半角1つにまとめる
+- `person`と`affiliation`は題の末尾の括弧の中から取る。空白(全角を含む)か`・`で分ける。2つに分かれたとき、後ろが`先生`、`さん`、`氏`で終わるなら全体を人名にする(`山田 太郎先生`、`Benoît Ladoux先生`)。そうでなければ前が人名、後ろが所属。1つだけのときは、末尾が`先生`、`さん`、`氏`なら人名、そうでなければ所属。3つ以上のときは最初の`先生`、`さん`、`氏`までを人名(途中の空白は残す)、残りを所属とする。取れなければ空で、警告は出さない
+- 面談の日付と聞き方(対面、メール、予定)は原稿に無いので読み取らない
+- 0章・1章・2章・4章の見出しが1つも無いページ(iGEMのテンプレートのままの`en`など)には`hp`を付けず、警告も出さない
+- 4つの見出しのうち1〜3つだけがあるとき、または4つが揃っていて面談が1つも無い章や用途、番号が取れない面談の見出し、読み取れない2章の見出し、本文の無い0章と4章などがあるときは、同期が警告を出して`hp`を書き出さない。一部だけは出さない
 
 ## 規定
 

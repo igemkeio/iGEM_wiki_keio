@@ -15,9 +15,9 @@ export interface Assets {
 }
 
 // ページの型の出し分け。homeはヒーロー、dbtlがあればDBTLの画面、それ以外は本文。
-function Body({ page }: { page: WikiPage }) {
+function Body({ page, routes }: { page: WikiPage; routes: Route[] }) {
   if (page.slug === "home") {
-    return <HomePage page={page} />;
+    return <HomePage page={page} routes={routes} />;
   }
   if (page.dbtl) {
     return <DbtlPage page={page} dbtl={page.dbtl} />;
@@ -53,7 +53,7 @@ export function Page({
       </head>
       <body>
         <PageShell page={page} routes={routes}>
-          <Body page={page} />
+          <Body page={page} routes={routes} />
         </PageShell>
         <script src={withBase("/footer-sponsors.js")} defer />
         {(page.islands.some((name) => name in ISLANDS) ||

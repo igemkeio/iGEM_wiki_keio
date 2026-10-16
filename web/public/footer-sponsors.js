@@ -1,4 +1,5 @@
 // フッターのスポンサーの帯を1枚ずつ送る。全ページが読む素のJSで、Reactもライブラリも使わない。
+// ロゴは2組ぶん並んでいて、1組ぶん進んだら位置だけ黙って引き戻す。見た目が同じなので切れ目なく回る。
 // JSが無いときは、帯が横スクロールのまま残り、送りと一時停止のボタンは hidden のまま出ない。帯がはみ出さないときもボタンは出ない。
 (() => {
   const INTERVAL = 3000;
@@ -11,22 +12,69 @@
     return;
   }
   const slides = [...track.children];
+  const count = slides.filter(
+    (s) => s.dataset.sponsorsClone === undefined
+  ).length;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
 
   const goTo = (left) =>
     track.scrollTo({ left, behavior: reduced.matches ? "auto" : "smooth" });
+  // CSSのscroll-behaviorがsmoothなので、位置だけ動かすときはinstantを明に指定する。
+  const jump = (left) => track.scrollTo({ left, behavior: "instant" });
 
-  // 先頭が左端より右にある最初の1枚へ送る。末尾まで来ていれば先頭に戻る。
-  const forward = () => {
-    const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 1;
-    const target = slides.find((s) => s.offsetLeft > track.scrollLeft + 1);
-    goTo(atEnd || !target ? 0 : target.offsetLeft);
+  // 1組ぶんの送り幅。2組目の先頭がここに来ると、1組目の先頭と同じ見た目になる。
+  const loopWidth = () => slides[count]?.offsetLeft ?? 0;
+
+  // 1組ぶん送れて、かつ引き戻せる余地があるときだけ回せる。
+  const canLoop = () => {
+    const loop = loopWidth();
+    return loop > 0 && loop <= track.scrollWidth - track.clientWidth;
   };
 
-  // 左端より左にある最後の1枚へ戻す。先頭にいれば末尾へ回る。
+  // 前へで1組ぶん右へ移している間は引き戻さない。左へ戻りきるまで待つ。
+  let wrapping = false;
+
+  // 1組ぶんより右へ出たら、アニメーションなしで同じ見た目の位置へ戻す。
+  const normalize = () => {
+    const loop = loopWidth();
+    if (!canLoop()) {
+      return;
+    }
+    // なめらかな送りは端数で止まることがあるので、1pxだけ手前から戻す。
+    if (wrapping) {
+      wrapping = track.scrollLeft >= loop - 1;
+      return;
+    }
+    if (track.scrollLeft >= loop - 1) {
+      jump(Math.max(track.scrollLeft - loop, 0));
+    }
+  };
+
+  // 左端より左にある最後の1枚。
+  const slideBefore = (left) => slides.findLast((s) => s.offsetLeft < left - 1);
+
+  // 左端より右にある最初の1枚へ送る。
+  const forward = () => {
+    wrapping = false;
+    normalize();
+    const target = slides.find((s) => s.offsetLeft > track.scrollLeft + 1);
+    if (target) {
+      goTo(target.offsetLeft);
+    }
+  };
+
+  // 左端より左にある最後の1枚へ戻す。左に無いときは1組ぶん右へ移してから戻す。
   const backward = () => {
-    const target = slides.findLast((s) => s.offsetLeft < track.scrollLeft - 1);
-    goTo(target ? target.offsetLeft : track.scrollWidth - track.clientWidth);
+    wrapping = false;
+    normalize();
+    let from = track.scrollLeft;
+    if (!slideBefore(from) && canLoop()) {
+      wrapping = true;
+      from += loopWidth();
+      jump(from);
+    }
+    const target = slideBefore(from);
+    goTo(target ? target.offsetLeft : 0);
   };
 
   // 一時停止の間は、ホバーやフォーカスが外れても自動で送らない。reduced-motionのときは初めから一時停止にする。
@@ -39,12 +87,12 @@
     );
   };
 
-  // 帯がはみ出すときだけボタンを出す。幅が変わるたびに付け直す。
+  // 1組ぶん回せるときだけボタンを出す。幅が変わるたびに付け直す。
   const sync = () => {
-    const overflows = track.scrollWidth > track.clientWidth + 1;
-    prev.hidden = !overflows;
-    next.hidden = !overflows;
-    toggle.hidden = !overflows;
+    const loops = canLoop();
+    prev.hidden = !loops;
+    next.hidden = !loops;
+    toggle.hidden = !loops;
   };
 
   // 一時停止の間、ホバー中、帯の中にフォーカスがある間は自動で送らない。
@@ -73,6 +121,7 @@
   for (const slide of slides) {
     observer.observe(slide);
   }
+  track.addEventListener("scroll", normalize);
   prev.addEventListener("click", backward);
   next.addEventListener("click", forward);
   toggle.addEventListener("click", () => {

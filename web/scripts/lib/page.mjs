@@ -30,6 +30,7 @@ export function buildPage({
   order,
   islands,
   dbtl,
+  hp,
 }) {
   const page = { slug, locale, title };
   if (subtitle) {
@@ -47,6 +48,9 @@ export function buildPage({
   }
   if (dbtl) {
     page.dbtl = dbtl;
+  }
+  if (hp) {
+    page.hp = hp;
   }
   return page;
 }

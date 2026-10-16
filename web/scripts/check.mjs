@@ -1,6 +1,6 @@
 // vite buildとprerenderの後に実行し、dist/のHTMLとdist/assets/のCSSを検査する。
 // 検査の関数はscripts/lib/check/にあり、ここはファイルの読み取り、集計、出力、終了コードを受け持つ。
-import { readdir, readFile } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 import { join, relative, resolve, sep } from "node:path";
 
 import { extractCssUrls } from "./lib/check/css.mjs";
@@ -15,6 +15,7 @@ import {
 } from "./lib/check/html.mjs";
 import { findUnmappedPages } from "./lib/check/nav.mjs";
 import { comparePages, toPage } from "./lib/check/pages.mjs";
+import { checkTotalSize, shouldCheckSize } from "./lib/check/size.mjs";
 import { checkExternalUrl, checkInternalLink } from "./lib/check/urls.mjs";
 
 const root = resolve(import.meta.dirname, "..");
@@ -78,6 +79,11 @@ async function readContent() {
     }
   }
   return { pages, errors };
+}
+
+async function fileSize(path) {
+  const info = await stat(path);
+  return info.size;
 }
 
 async function main() {
@@ -168,6 +174,17 @@ async function main() {
     for (const url of extractCssUrls(css)) {
       checkUrl(`dist/${file}`, url, { external: true, internal: true });
     }
+  }
+
+  // 容量はWIKI_CHECK_SIZE=1のときだけ見る(本番の配信用のビルド)。
+  if (shouldCheckSize(process.env)) {
+    const sized = await Promise.all(
+      [...files].map(async (path) => ({
+        path,
+        size: await fileSize(join(dist, path)),
+      }))
+    );
+    report("dist/", checkTotalSize(sized));
   }
 
   for (const line of violations) {

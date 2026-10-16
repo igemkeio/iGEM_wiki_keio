@@ -67,3 +67,49 @@ describe(applyBase, () => {
     );
   });
 });
+
+describe("applyBaseのnotionBase", () => {
+  const notion = "https://static.igem.wiki/teams/1234";
+
+  it("notion-imagesとnotion-filesにはbaseの代わりにnotionBaseを付ける", () => {
+    expect(
+      applyBase(
+        '<img src="/notion-images/a.webp"><a href="/notion-files/b.pdf">b</a>',
+        "/keio-japan/",
+        notion
+      )
+    ).toBe(
+      `<img src="${notion}/notion-images/a.webp"><a href="${notion}/notion-files/b.pdf">b</a>`
+    );
+  });
+
+  it("それ以外のroot相対URLにはbaseを付ける", () => {
+    expect(
+      applyBase('<a href="/model/">m</a>', "/keio-japan/", `${notion}/`)
+    ).toBe('<a href="/keio-japan/model/">m</a>');
+  });
+
+  it("srcsetでもnotionBaseを付ける", () => {
+    expect(
+      applyBase(
+        '<img srcset="/notion-images/a.webp 1x, /x.png 2x">',
+        "/keio-japan/",
+        notion
+      )
+    ).toBe(
+      `<img srcset="${notion}/notion-images/a.webp 1x, /keio-japan/x.png 2x">`
+    );
+  });
+
+  it("baseが/でもnotionBaseを付ける", () => {
+    expect(applyBase('<img src="/notion-images/a.webp">', "/", notion)).toBe(
+      `<img src="${notion}/notion-images/a.webp">`
+    );
+  });
+
+  it("未指定ならbaseを付ける", () => {
+    expect(applyBase('<img src="/notion-images/a.webp">', "/keio-japan/")).toBe(
+      '<img src="/keio-japan/notion-images/a.webp">'
+    );
+  });
+});
