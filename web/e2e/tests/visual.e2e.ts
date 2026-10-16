@@ -9,7 +9,6 @@ const pages: { name: string; path: string }[] = [
   { name: "e2e-plain", path: "e2e-plain/" },
 ];
 
-// 基準画像はLinuxのCIで撮ったもの。Linux以外ではフォントの描画が違い、毎回落ちるので飛ばす。
 test.skip(
   process.platform !== "linux",
   "基準画像はLinuxで撮ったもので、Linux以外ではフォントの描画が違って落ちるため飛ばす",
