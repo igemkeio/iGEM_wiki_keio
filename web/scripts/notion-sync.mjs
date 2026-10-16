@@ -27,7 +27,9 @@ import {
   attachmentHref,
   transformAttachment,
 } from "./lib/attachment.mjs";
+import { readDbtl } from "./lib/dbtl.mjs";
 import { collectImageSrcs, isIgemStatic, renderImage } from "./lib/figure.mjs";
+import { readHp } from "./lib/hp.mjs";
 import {
   ANIMATION_WARN_BYTES,
   convertToWebp,
@@ -343,6 +345,22 @@ async function buildPageData(row) {
   const md = n2m.toMarkdownString(mdBlocks).parent ?? "";
   const html = renderMarkdown(md);
 
+  const { dbtl, warning: dbtlWarning } =
+    slug === "engineering" ? readDbtl(html) : { dbtl: null };
+  if (dbtlWarning) {
+    console.warn(
+      `[notion-sync] ${locale}/${slug} のDBTLの構造を読み取れないため dbtl を書き出しません: ${dbtlWarning}`
+    );
+  }
+
+  const { hp, warning: hpWarning } =
+    slug === "human-practices" ? readHp(html) : { hp: null };
+  if (hpWarning) {
+    console.warn(
+      `[notion-sync] ${locale}/${slug} の章と面談の構造を読み取れないため hp を書き出しません: ${hpWarning}`
+    );
+  }
+
   return {
     rawSlug,
     page: buildPage({
@@ -354,6 +372,8 @@ async function buildPageData(row) {
       html,
       order: numberValue(props.order),
       islands: islandsFor(slug),
+      dbtl,
+      hp,
     }),
   };
 }

@@ -16,6 +16,7 @@
     "test:e2e:ui": "playwright test -c e2e --ui",
     "notion:sync": "node scripts/notion-sync.mjs",
     "fonts:subset": "node scripts/fonts-subset.mjs",
+    "igem:upload": "node scripts/igem-upload.mjs",
     "test:sync": "node --test \"scripts/lib/*.test.mjs\"",
     "check:code": "ultracite check",
     "fix": "ultracite fix",

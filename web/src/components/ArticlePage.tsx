@@ -1,6 +1,7 @@
 import type { WikiPage } from "../content";
 import { ISLANDS } from "../islands";
 import { applyBase } from "../lib/applyBase";
+import { notionBase } from "../lib/notionBase";
 import { buildToc } from "../lib/toc";
 import { Island } from "./Island";
 import { Toc } from "./Toc";
@@ -29,14 +30,18 @@ export function ArticlePage({ page }: { page: WikiPage }) {
           <p
             className={styles.lead}
             dangerouslySetInnerHTML={{
-              __html: applyBase(page.lead, import.meta.env.BASE_URL),
+              __html: applyBase(
+                page.lead,
+                import.meta.env.BASE_URL,
+                notionBase
+              ),
             }}
           />
         )}
         <div
           className={`${styles.body} prose`}
           dangerouslySetInnerHTML={{
-            __html: applyBase(page.html, import.meta.env.BASE_URL),
+            __html: applyBase(page.html, import.meta.env.BASE_URL, notionBase),
           }}
         />
         {islands.map((name) => (

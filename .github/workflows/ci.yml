@@ -99,6 +99,14 @@ jobs:
         run: WIKI_BASE=/ npm run build && WIKI_BASE=/ npm run check
       - name: GitLab Pages 想定(base は /keio/)
         run: WIKI_BASE=/keio/ npm run build && WIKI_BASE=/keio/ npm run check
+      - name: 本番相当(重いファイルをstatic.igem.wikiへ向け、distが5MB以下か見る)
+        env:
+          WIKI_BASE: /keio-japan/
+          WIKI_NOTION_BASE: https://static.igem.wiki/teams/0000
+          WIKI_FONT_BASE: https://static.igem.wiki/teams/0000/fonts
+          WIKI_IMAGE_BASE: https://static.igem.wiki/teams/0000/images
+          WIKI_CHECK_SIZE: "1"
+        run: npm run build && npm run check
 
   e2e:
     needs:
