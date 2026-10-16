@@ -22,6 +22,7 @@ Notion同期とプリレンダーをつなぐ受け渡し形式。同期スク�
 | `hp`        | object               | 任意 | `human-practices`の章・用途・面談の構造。Notion同期が`html`から読み取って書く。形は[hp](#hp)の節 |
 | `published` | boolean              | 任意 | 省略時はtrue。falseのページはビルドから除く                              |
 | `source`    | `"notion"` または `"local"` | 任意 | 省略時はnotion。localはリポジトリ側で置く確認用ページで、Notion同期が消さない |
+| `dbtl`      | object               | 任意 | `engineering`のDBTLの構造(サイクルと反復)。Notion同期が`html`から読み取って書く。形は[dbtl](#dbtl)の節 |
 
 - 任意フィールドの既定値は`readPage`が埋める。`WikiPage`型では`subtitle`と`lead`が空文字、`order`が`Number.MAX_SAFE_INTEGER`、`islands`と`models`が空配列、`published`がtrueに、`source`が`"notion"`になる。
 - JSONを直接importすると`locale`がstringに広がるので、`readPage`を通して読む。
@@ -30,6 +31,28 @@ Notion同期とプリレンダーをつなぐ受け渡し形式。同期スク�
 - `slug`と`locale`の組がURLになる。`en`は`/model/`、`ja`は`/ja/model/`。
 - `html`は同期時にMarkdownから変換済みで、見出しには`id`が付いている。
 - `html`と`lead`の中の`/`で始まるURL(`/notion-images/...`など)は、ビルド時に`src`、`href`、`poster`、`srcset`の先頭へbaseが付く。`//`で始まるURLと絶対URLは変えない。
+
+## dbtl
+
+`engineering`のページだけに付く。`web/scripts/lib/dbtl.mjs`が同期のときに`html`を読んで作る。`html`は変えずに残るので、`dbtl`が無いページは`html`をそのまま表示する。
+
+読み取れる原稿の形は次のとおり。
+
+- 層の見出し(h1かh2): `第 I 部　道具をつくる（基盤サイクル）`。ラベル(`第 I 部`)と題に分ける
+- サイクルの見出し(h1かh2): `〔基盤〕① クローニング技術 — 鋳型をいかに取り除くか`。層(`〔基盤〕`は`base`、`〔設計〕`は`design`)、番号(①〜⑥)、題、キャッチに分ける。区切りはem dash
+- サイクルの中: 見出しの後に`h3`(なぜこの仮説に至ったか)と本文、仮説と成功基準の2列表、`<strong>反復N — 題</strong>`の段落と直後のDESIGN/BUILD/TEST/LEARNの4列表(反復の数だけ)、`このサイクルで確立したこと`(または`このサイクルの現状`)の段落と本文、`↳ 次のサイクルへ`の段落
+
+| フィールド | 型 | 内容 |
+| --- | --- | --- |
+| `intro` | string(HTML) | 最初の層の見出しより前の本文 |
+| `parts[]` | object[] | `label`、`title`、`introHtml`(層の見出しから最初のサイクルまでの本文)、`cycles[]` |
+| `cycles[]` | object[] | `no`(1から連番)、`layer`(`base`か`design`)、`title`、`tagline`、`whyHtml`、`hypothesis`、`criteria`、`iterations[]`、`outcomesHtml`、`handoffHtml`。サイクルの見出しとh3の間に本文があるときだけ`leadHtml` |
+| `iterations[]` | object[] | `no`(1から連番)、`title`、`design`、`build`、`test`、`learn`、`notesHtml`(反復の表の後、次の反復か確立したことまでの本文。図のキャプションなど) |
+| `outro` | string(HTML) | 最後のサイクルより後の本文 |
+
+- 表のセルと本文はHTMLのまま持つ。太字、リンク、文献番号が残る
+- 層とサイクルの見出しが1つも無いページには`dbtl`を付けず、警告も出さない
+- 見出しがあって読み取れないサイクルが1つでもあるときは、同期が警告を出して`dbtl`を書き出さない。一部のサイクルだけは出さない
 
 ## models
 

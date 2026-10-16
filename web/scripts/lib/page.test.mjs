@@ -86,3 +86,12 @@ test("islandsForはmembersとattributionsで島の名前を返し、他のslug�
   assert.deepEqual(islandsFor("attributions"), ["attribution-form"]);
   assert.deepEqual(islandsFor("home"), []);
 });
+
+test("dbtlは値があるときだけ、islandsの後に出す", () => {
+  const base = { slug: "engineering", locale: "ja", title: "t", html: "" };
+  assert.equal("dbtl" in buildPage({ ...base, dbtl: null }), false);
+  assert.deepEqual(
+    Object.keys(buildPage({ ...base, islands: ["x"], dbtl: { parts: [] } })),
+    ["slug", "locale", "title", "html", "islands", "dbtl"]
+  );
+});
