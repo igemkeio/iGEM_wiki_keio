@@ -15,8 +15,8 @@ interface SlideFigure {
   heading?: string;
   // 仮の枠に書く図の内容。
   content: string;
-  // 差し替え後の画像。imageBaseからの相対パスとalt。
-  image?: { src: string; alt: string };
+  // 差し替え後の画像。imageBaseからの相対パス、alt、実寸。
+  image?: { src: string; alt: string; width: number; height: number };
 }
 
 interface Slide {
@@ -96,6 +96,8 @@ function FigureItem({ figure }: { figure: SlideFigure }) {
           className={styles.figureImage}
           src={`${imageBase}/${figure.image.src}`}
           alt={figure.image.alt}
+          width={figure.image.width}
+          height={figure.image.height}
         />
       ) : (
         <div className={styles.placeholder}>
@@ -182,9 +184,9 @@ export function HomePage({ page }: { page: WikiPage }) {
                 { "--figure-count": slide.figures.length } as CSSProperties
               }
             >
-              {slide.figures.map((figure) => (
+              {slide.figures.map((figure, index) => (
                 <FigureItem
-                  key={figure.heading ?? figure.number}
+                  key={`${index}-${figure.content}`}
                   figure={figure}
                 />
               ))}
