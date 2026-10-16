@@ -85,6 +85,8 @@ HTMLレポートは、ローカルでもCIでも実行のたびに`e2e/playwrigh
 npx playwright show-report e2e/playwright-report
 ```
 
+手元で流すのは、下の対応表にあるE2Eのファイルだけを`--project=chromium`で絞ったもの。全件、`/keio/`付きのビルド(`chromium-base`)、見た目の比較は手元で流さず、pushしてCIで確かめ、落ちたらログを見て直す。
+
 ローカルでは`reuseExistingServer`が有効で、4173番と4174番が起動していればビルドを省く。ソースを変えたあとは、サーバーを止めてから流す。
 
 3Dのテストはヘッドレスで`--use-angle=swiftshader --enable-unsafe-swiftshader`を付けて、ソフトウェアのWebGLを使う。マシンが重いと`loaded`になるまで数秒かかる。
@@ -109,6 +111,7 @@ npx playwright show-report e2e/playwright-report
 
 `tests/visual.e2e.ts`が`prose-sample`と`e2e-plain`を1280pxと375pxで撮る。どちらもリポジトリ側で原稿を固定した確認用ページで、Notionの原稿が変わっても画像は変わらない。homeとmembersは原稿で見た目が変わるので撮らない。`auto-rotate`で動く3Dのページは撮らない。アニメーションは止めて(`animations: "disabled"`)、フォントの読み込みを待ってから撮る。
 
+- `process.platform`がlinuxでないときは`test.skip`で飛ばす(基準画像と字形が合わず、macOSでは毎回落ちるため)。CIとLinuxでは比べる。
 - 基準画像は`tests/visual.e2e.ts-snapshots/`にあり、git管理に入れる。ファイル名にOSを含めず、どの環境でも同じ画像と比べる。
 - 比較は`maxDiffPixelRatio: 0.02`で緩める。LinuxのCIとmacOSでは字形のずれがわずかに出るため。
 - 基準にするのはLinuxのCIで撮った画像。ローカルで`--update-snapshots`をかけて、そのまま上書きしない。
