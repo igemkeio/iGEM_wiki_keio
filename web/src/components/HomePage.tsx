@@ -132,7 +132,7 @@ const slides: Slide[] = [
         { d: "M30,160 V300", tone: "lit" },
       ],
     },
-    figures: [{ number: 7, content: "Units aligned in one direction" }],
+    figures: [],
     note: {
       title: "ONE DIRECTION",
       text: "Giving direction to cellular system",
@@ -350,18 +350,14 @@ export function HomePage({
         </section>
       ))}
       <section className={styles.outro}>
-        <span className={styles.rail} aria-hidden="true">
-          <svg viewBox="0 0 60 300" preserveAspectRatio="none">
-            <path
-              className={`${styles.thread} ${styles.lit}`}
-              d="M30,0 V300"
-              pathLength={1}
-            />
-          </svg>
-        </span>
+        <RailLine
+          rail={{ height: 300, paths: [{ d: "M30,0 V300", tone: "lit" }] }}
+        />
         <div>
           <p className={styles.lede}>
-            Four poles, one direction. Start anywhere.
+            Four poles, one direction.
+            <br />
+            Start anywhere.
           </p>
           <div className={styles.doors}>
             {doors.map(({ category, routes: items }) => (

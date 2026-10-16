@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { HomePage } from "./components/HomePage";
 import type { WikiPage } from "./content";
+import { NAV_CONFIG } from "./lib/navGroups";
 import { pagePath } from "./routes";
 import type { Route } from "./routes";
 
@@ -74,7 +75,7 @@ describe(HomePage, () => {
 
   it("図の数が0から3のスライドを出し、仮の枠に見出しを付ける", () => {
     const html = render();
-    expect(html.match(/<figure /gu)).toHaveLength(12);
+    expect(html.match(/<figure /gu)).toHaveLength(11);
     expect(html).toContain("Figure 6 (placeholder)");
     expect(html).toContain("ENERGY");
     expect(html).toContain("ONE DIRECTION");
@@ -92,6 +93,21 @@ describe(HomePage, () => {
       ["Dry Lab", "/model/"],
       ["Team", "/members/"],
     ]);
+  });
+
+  it("分類のすべてに入口と説明文がある", () => {
+    const all = NAV_CONFIG.categories.map((c) => {
+      const page = pageOf(c.slugs[0]);
+      return { page, path: pagePath(page) };
+    });
+    const html = render(home, all);
+    const texts = [
+      ...html.matchAll(
+        /<a class="[^"]*" href="[^"]*"><b>.*?<\/b><span>(.*?)<\/span>/gu
+      ),
+    ].map((m) => m[1]);
+    expect(texts).toHaveLength(NAV_CONFIG.categories.length);
+    expect(texts.every((t) => t.length > 0)).toBe(true);
   });
 
   it("入口は表示中の言語のページへ張る", () => {

@@ -1,4 +1,9 @@
 @layer components {
+  /* Homeは地をほぼ白一色にし、抑揚は線と文字の大きさで出す。 */
+  :global(body):has(.main) {
+    background: var(--color-surface);
+  }
+
   .main {
     --rail: clamp(40px, 5vw, 72px);
     --rail-gap: clamp(10px, 1.6vw, 20px);
@@ -166,12 +171,6 @@
     grid-template-columns: var(--rail) minmax(0, 1fr);
     column-gap: var(--rail-gap);
     padding-bottom: 60px;
-    background: linear-gradient(
-      180deg,
-      #9fc0c4 0%,
-      #d6dee2 40%,
-      var(--color-surface) 100%
-    );
   }
 
   .bridge .rail {
@@ -254,7 +253,7 @@
   }
 
   .light {
-    stroke: rgba(255, 255, 255, 0.35);
+    stroke: color-mix(in srgb, var(--color-surface) 35%, transparent);
   }
 
   .body {
@@ -346,7 +345,7 @@
     padding: 18px clamp(12px, 2vw, 26px);
     border: 1.5px dashed var(--color-line);
     border-radius: 14px;
-    background: var(--color-code-bg);
+    background: color-mix(in srgb, var(--color-page) 30%, var(--color-surface));
     color: var(--color-muted);
     font-size: 14px;
     text-align: center;
@@ -366,7 +365,7 @@
     box-shadow: 0 0 0 100vmax var(--color-navy);
     clip-path: inset(0 -100vmax);
     padding: clamp(80px, 13vh, 150px) 0;
-    color: #fff;
+    color: var(--color-surface);
   }
 
   .turn .body {
@@ -375,17 +374,7 @@
 
   .turn .sentence {
     max-width: 30ch;
-    color: rgba(255, 255, 255, 0.9);
-  }
-
-  .turn .figure {
-    max-width: 480px;
-  }
-
-  .turn .placeholder {
-    border-color: rgba(255, 255, 255, 0.35);
-    background: transparent;
-    color: rgba(255, 255, 255, 0.75);
+    color: color-mix(in srgb, var(--color-surface) 90%, transparent);
   }
 
   .note {
@@ -426,8 +415,10 @@
       var(--color-surface)
     );
 
-    box-shadow: 0 0 0 100vmax var(--color-outro);
-    clip-path: inset(0 -100vmax);
+    box-shadow:
+      0 0 0 100vmax var(--color-outro),
+      0 -1px 0 100vmax var(--color-rule);
+    clip-path: inset(-1px -100vmax 0);
     padding: clamp(56px, 8vh, 96px) 0;
     background: var(--color-outro);
   }
