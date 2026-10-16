@@ -28,26 +28,35 @@ interface Slide {
 const slides: Slide[] = [
   {
     sentence: "Individually, we may be weak. But together, we become stronger.",
-    figures: [{ number: 1, content: "Individuals joining into a group" }],
+    figures: [{ content: "Individuals joining into a group" }],
   },
   {
     sentence:
       "The more diverse a collective is, the more challenges it can overcome.",
     figures: [
-      { heading: "ENERGY", content: "Energy applications" },
+      { number: 1, heading: "ENERGY", content: "Energy applications" },
       {
+        number: 2,
         heading: "MATERIAL / HEALTHCARE",
         content: "Material and healthcare applications",
       },
-      { heading: "BIOPRODUCTION", content: "Bioproduction applications" },
+      {
+        number: 3,
+        heading: "BIOPRODUCTION",
+        content: "Bioproduction applications",
+      },
     ],
   },
   {
     sentence:
       "But what happens when everyone is moving in a different direction?",
     figures: [
-      { heading: "Conflict?", content: "Units pushing against each other" },
-      { heading: "Gridlock?", content: "Units blocking each other" },
+      {
+        number: 4,
+        heading: "Conflict?",
+        content: "Units pushing against each other",
+      },
+      { number: 5, heading: "Gridlock?", content: "Units blocking each other" },
     ],
   },
   {
@@ -72,9 +81,9 @@ const slides: Slide[] = [
   {
     sentence: "A new dimension in cellular engineering",
     figures: [
-      { heading: "linear", content: "Linear assembly" },
-      { heading: "circular", content: "Circular assembly" },
-      { heading: "planar", content: "Planar assembly" },
+      { number: 8, heading: "linear", content: "Linear assembly" },
+      { number: 8, heading: "circular", content: "Circular assembly" },
+      { number: 8, heading: "planar", content: "Planar assembly" },
     ],
   },
   {
