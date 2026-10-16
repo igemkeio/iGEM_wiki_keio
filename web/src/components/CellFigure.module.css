@@ -1,8 +1,10 @@
 @layer components {
+  /* 絵は横幅を使う。高さは抑えて、箱が潰れないようにする */
   .figure {
     display: block;
     width: 100%;
-    height: 128px;
+    height: auto;
+    max-height: min(150px, 20vh);
   }
 
   .part {
@@ -68,13 +70,13 @@
   .name {
     fill: var(--color-ink);
     font-family: var(--font-body);
-    font-size: 20px;
+    font-size: 15px;
     text-anchor: middle;
   }
 
   @media (max-width: 1099px) {
     .figure {
-      height: 84px;
+      max-height: min(104px, 14vh);
     }
   }
 

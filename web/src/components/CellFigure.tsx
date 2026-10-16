@@ -58,7 +58,7 @@ export function CellFigure({
   };
   return (
     // role="img" を付けると中のリンクが支援技術から読まれなくなるので、titleだけで名前を付ける
-    <svg className={styles.figure} viewBox="0 0 760 200">
+    <svg className={styles.figure} viewBox="105 44 570 112">
       <title>{alt}</title>
       <rect
         className={styles.body}
