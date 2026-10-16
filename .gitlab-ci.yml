@@ -11,8 +11,19 @@ pages:
   script:
     - cd web
     - npm ci --cache .npm --prefer-offline
-    - WIKI_BASE=/$CI_PROJECT_NAME/ npm run build
-    - WIKI_BASE=/$CI_PROJECT_NAME/ npm run check
+    - |
+      set -e
+      if [ -z "$IGEM_TEAM_ID" ]; then
+        echo "GitLabのCI/CD変数IGEM_TEAM_IDが未設定です。iGEMのチームidを設定してから流してください(未設定だと画像やPDFがdistに入り、5MBを超えます)" >&2
+        exit 1
+      fi
+      export WIKI_BASE=/$CI_PROJECT_NAME/
+      export WIKI_NOTION_BASE=https://static.igem.wiki/teams/$IGEM_TEAM_ID
+      export WIKI_FONT_BASE=https://static.igem.wiki/teams/$IGEM_TEAM_ID/fonts
+      export WIKI_IMAGE_BASE=https://static.igem.wiki/teams/$IGEM_TEAM_ID/images
+      export WIKI_CHECK_SIZE=1
+      npm run build
+      npm run check
     - mv dist ../public
   artifacts:
     paths:

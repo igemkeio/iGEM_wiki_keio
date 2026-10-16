@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 
 import type { WikiPage } from "../content";
 import { applyBase } from "../lib/applyBase";
+import { notionBase } from "../lib/notionBase";
 
 import styles from "./HomePage.module.css";
 
@@ -153,7 +154,11 @@ export function HomePage({ page }: { page: WikiPage }) {
           <p
             className={styles.catch}
             dangerouslySetInnerHTML={{
-              __html: applyBase(page.lead, import.meta.env.BASE_URL),
+              __html: applyBase(
+                page.lead,
+                import.meta.env.BASE_URL,
+                notionBase
+              ),
             }}
           />
         )}
@@ -165,7 +170,11 @@ export function HomePage({ page }: { page: WikiPage }) {
               data-testid="home-description"
               className={styles.description}
               dangerouslySetInnerHTML={{
-                __html: applyBase(page.html, import.meta.env.BASE_URL),
+                __html: applyBase(
+                  page.html,
+                  import.meta.env.BASE_URL,
+                  notionBase
+                ),
               }}
             />
           )}
