@@ -16,6 +16,7 @@ const home: WikiPage = {
   models: [],
   published: true,
   source: "notion",
+  dbtl: null,
 };
 
 const render = (page = home) => renderToStaticMarkup(<HomePage page={page} />);

@@ -8,7 +8,7 @@ export function pagePath({ locale, slug }) {
     : `${prefix}${slug}/index.html`;
 }
 
-// 原稿JSONを { file, slug, dist, islands } にする。publishedがfalseならnull。
+// 原稿JSONを { file, slug, dist, islands, dbtl } にする。publishedがfalseならnull。
 // slugとlocaleはJSONの値を使い、なければファイル名とディレクトリ名で補う。
 export function toPage(locale, fileName, json) {
   if (json?.published === false) {
@@ -25,6 +25,8 @@ export function toPage(locale, fileName, json) {
     slug,
     dist: pagePath({ locale: loc, slug }),
     islands: Array.isArray(json?.islands) ? json.islands : [],
+    // dbtlのあるページは、islandsが空でも島とJSを出す。
+    dbtl: Boolean(json?.dbtl),
   };
 }
 

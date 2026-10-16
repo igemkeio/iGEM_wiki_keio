@@ -149,7 +149,7 @@ async function main() {
     report(name, checkStructure(html));
     report(name, checkLang(html));
     const page = pageByDist.get(file);
-    if (page && page.islands.length === 0) {
+    if (page && page.islands.length === 0 && !page.dbtl) {
       report(name, checkNoScript(html, base));
     }
     for (const ref of extractRefs(html)) {

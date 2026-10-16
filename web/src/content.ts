@@ -8,6 +8,45 @@ export interface Model {
   alt: string;
 }
 
+// DBTLの構造。形はcontent/README.mdのdbtlの節が正で、中身の深い検査はしない。
+export interface DbtlIteration {
+  no: number;
+  title: string;
+  design: string;
+  build: string;
+  test: string;
+  learn: string;
+  notesHtml?: string;
+}
+
+export interface DbtlCycle {
+  no: number;
+  layer: "base" | "design";
+  title: string;
+  tagline: string;
+  whyHtml: string;
+  hypothesis: string;
+  criteria: string;
+  iterations: DbtlIteration[];
+  outcomesHtml: string;
+  handoffHtml: string;
+  // サイクルの見出しとh3の間に本文があるときだけ付く。
+  leadHtml?: string;
+}
+
+export interface DbtlPart {
+  label: string;
+  title: string;
+  introHtml: string;
+  cycles: DbtlCycle[];
+}
+
+export interface Dbtl {
+  intro: string;
+  parts: DbtlPart[];
+  outro: string;
+}
+
 export interface RawWikiPage {
   slug: string;
   locale: Locale;
@@ -20,6 +59,7 @@ export interface RawWikiPage {
   models?: Model[];
   published?: boolean;
   source?: "notion" | "local";
+  dbtl?: Dbtl | null;
 }
 
 export type WikiPage = Required<RawWikiPage>;
@@ -53,5 +93,6 @@ export function readPage(raw: unknown, source?: string): WikiPage {
     models: page.models ?? [],
     published: page.published ?? true,
     source: page.source ?? "notion",
+    dbtl: page.dbtl ?? null,
   };
 }
