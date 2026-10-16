@@ -2,6 +2,7 @@ import { readdirSync, rmSync } from "node:fs";
 import { resolve } from "node:path";
 
 import react from "@vitejs/plugin-react";
+import type { Declaration, Plugin as PostcssPlugin } from "postcss";
 import { defineConfig } from "vite";
 import type { Plugin } from "vite";
 
@@ -92,6 +93,44 @@ function dropExternalPublicDirs(): Plugin {
   };
 }
 
+// KaTeXのCSSはwoff2、woff、ttfの3形式を並べる。woff2より後ろの形式を落として、woff2だけを出力に残す。
+const katexWoff2Only: PostcssPlugin = {
+  postcssPlugin: "katex-woff2-only",
+  Declaration: {
+    src(decl: Declaration) {
+      const isKatex = decl.parent?.some(
+        (node) =>
+          node.type === "decl" &&
+          node.prop === "font-family" &&
+          node.value.includes("KaTeX_")
+      );
+      if (!isKatex) {
+        return;
+      }
+      decl.value = decl.value.replaceAll(
+        /,\s*url\([^)]+\)\s*format\("(?:woff|truetype)"\)/gu,
+        ""
+      );
+    },
+  },
+};
+
+// 上のCSSから参照されなくなったKaTeXのwoffとttfは、アセットとしては先に出力されるので、バンドルから外す。
+function dropKatexLegacyFonts(): Plugin {
+  return {
+    name: "drop-katex-legacy-fonts",
+    apply: "build",
+    generateBundle(_, bundle) {
+      for (const name of Object.keys(bundle)) {
+        if (/KaTeX_[^/]+\.(?:woff|ttf)$/u.test(name)) {
+          // oxlint-disable-next-line typescript/no-dynamic-delete -- Rollupのバンドルからアセットを外す手段がdeleteしかない
+          delete bundle[name];
+        }
+      }
+    },
+  };
+}
+
 // 部品のCSSはSSRでしか参照されないので、tree-shakeで捨てられないようにしてクライアントのCSSに束ねる。
 function keepCssModules(): Plugin {
   return {
@@ -118,9 +157,11 @@ export default defineConfig({
     react(),
     watchContent(),
     assetBase(base),
+    dropKatexLegacyFonts(),
     dropExternalPublicDirs(),
     keepCssModules(),
   ],
+  css: { postcss: { plugins: [katexWoff2Only] } },
   build: {
     manifest: true,
   },
