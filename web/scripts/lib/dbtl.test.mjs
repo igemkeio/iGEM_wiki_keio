@@ -208,3 +208,53 @@ test("層の見出しだけでサイクルが無いと警告する", () => {
     /サイクル/u
   );
 });
+
+test("反復の見出しが太字でなくなっても、最後の反復の表を黙って落とさない", () => {
+  const broken = baseCycle.replace(
+    "<p><strong>反復2 — 題2</strong></p>",
+    "<p>反復2 — 題2</p>"
+  );
+  expectWarning(page(broken, designCycle), /サイクル1.*反復の見出し/u);
+});
+
+test("最後のサイクルの見出しが読めないと、outroに落とさず警告する", () => {
+  const secondDesign = designCycle
+    .replace("②", "③")
+    .replace('id="c-③"', 'id="c-3"');
+  const brokenLast = secondDesign.replace(
+    "接着モジュール — 相手を選ぶ",
+    "接着モジュール – 相手を選ぶ"
+  );
+  expectWarning(
+    page(baseCycle, `${designCycle}\n${brokenLast}`),
+    /最後のサイクルより後/u
+  );
+});
+
+test("次のサイクルへの受け渡しが読めないと警告する", () => {
+  const broken = designCycle.replace("↳ 次のサイクルへ", "→ 次へ");
+  expectWarning(page(baseCycle, broken), /サイクル2.*受け渡し/u);
+});
+
+test("反復の表の形が崩れた警告にもサイクル番号が付く", () => {
+  const broken = baseCycle.replace("<td>学び2</td>\n", "");
+  expectWarning(page(broken, designCycle), /サイクル1: 反復の表/u);
+});
+
+test("pに属性が付いていても太字の段落を読める", () => {
+  const html = page(baseCycle, designCycle).replaceAll(
+    "<p><strong>",
+    '<p class="x"><strong>'
+  );
+  assert.equal(readDbtl(html).dbtl.parts[0].cycles[0].iterations.length, 2);
+});
+
+test("&nbsp;が入っていても読み取れる", () => {
+  const html = page(baseCycle, designCycle).replace(
+    "<strong>DESIGN</strong>",
+    "<strong>DESIGN&nbsp;</strong>"
+  );
+  const { dbtl, warning } = readDbtl(html);
+  assert.equal(warning, undefined);
+  assert.equal(dbtl.parts[0].cycles[0].iterations.length, 2);
+});
