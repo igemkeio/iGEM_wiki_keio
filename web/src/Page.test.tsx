@@ -5,6 +5,7 @@ import { readPage } from "./content";
 import { Page } from "./Page";
 import { pagePath } from "./routes";
 import type { Route } from "./routes";
+import { dbtlFixture } from "./test/fixtures/dbtl";
 
 const assets = { css: ["assets/index-abc.css"], js: "assets/index-abc.js" };
 
@@ -38,6 +39,14 @@ const withUnknownIsland = readPage({
   title: "Model",
   html: "<h2>Section</h2>",
   islands: ["x"],
+});
+
+const withDbtl = readPage({
+  slug: "engineering",
+  locale: "ja",
+  title: "エンジニアリング成功",
+  html: "<h2>Engineering</h2>",
+  dbtl: dbtlFixture,
 });
 
 // ナビに出す一覧はテストごとに固定し、content/ の実データに依存させない。
@@ -91,6 +100,19 @@ describe(Page, () => {
       expect(found).toHaveLength(1);
       expect(found[0]).toHaveAttribute("defer");
     }
+  });
+
+  it("dbtlがあればDBTLの画面にし、islandsが空でもscriptを入れる", () => {
+    const doc = parse(render(withDbtl));
+    expect(doc.querySelector("#dbtl-stage")).not.toBeNull();
+    expect(doc.querySelector('[data-island="dbtl-stage"]')).not.toBeNull();
+    expect(scripts(doc)).toHaveLength(1);
+  });
+
+  it("dbtlが無ければ今までの本文を出す", () => {
+    const doc = parse(render(ja));
+    expect(doc.querySelector("#dbtl-stage")).toBeNull();
+    expect(scripts(doc)).toHaveLength(0);
   });
 
   it("対応表に無い島の名前だけならscriptも器も出さない", () => {
