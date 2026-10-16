@@ -1,0 +1,324 @@
+@layer components {
+  .main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .header {
+    padding-top: 144px;
+  }
+
+  .title {
+    font-family: var(--font-heading);
+    font-size: var(--size-h1);
+    font-weight: 400;
+    line-height: var(--size-h1-leading);
+    letter-spacing: var(--size-h1-tracking);
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+  }
+
+  .subtitle {
+    padding-top: 8px;
+    color: var(--color-muted);
+    font-size: var(--size-subtitle);
+    line-height: var(--size-subtitle-leading);
+    letter-spacing: var(--size-subtitle-tracking);
+  }
+
+  .pageLead {
+    max-width: var(--size-lead-max);
+    padding-top: 48px;
+    font-size: var(--size-lead);
+    font-weight: 500;
+    line-height: var(--size-lead-leading);
+  }
+
+  .body {
+    padding-top: 32px;
+  }
+
+  /* ステージ。箱の中だけが別にスクロールする */
+  .stage {
+    display: grid;
+    grid-template-areas:
+      "top top"
+      "side box"
+      "foot foot";
+    grid-template-columns: 4fr 6fr;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 10px clamp(20px, 3vw, 48px);
+    height: calc(100dvh - var(--size-header-fixed) - 24px);
+    min-height: 560px;
+    margin: 56px 0;
+  }
+
+  /* 島の器は枠だけにして、中の3つをステージの升目に置く */
+  .stage > [data-island] {
+    display: contents;
+  }
+
+  .box {
+    position: relative;
+    grid-area: box;
+    min-height: 0;
+    padding: 0 clamp(16px, 3vw, 40px);
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    background: var(--color-surface);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .part {
+    padding: 32px 0 8px;
+  }
+
+  .partTitle {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.5;
+  }
+
+  .eyebrow {
+    color: var(--color-muted);
+    font-family: var(--font-heading);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .cycle {
+    display: block;
+  }
+
+  /* 表のセルの本文はpで包まれていないので、ここで行長を抑える */
+  .text {
+    max-width: var(--size-prose);
+  }
+
+  .intro,
+  .focus,
+  .phase,
+  .lap,
+  .outcomes,
+  .handoff {
+    scroll-margin-top: 16px;
+  }
+
+  .intro {
+    min-height: 50%;
+    padding: 40px 0 16px;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .cycleTitle {
+    font-size: clamp(22px, 2.4vw, 28px);
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .tagline {
+    padding-bottom: 8px;
+    color: var(--color-muted);
+    font-size: 14px;
+  }
+
+  .lead {
+    margin: 16px 0;
+    padding: 14px 18px;
+    border-left: 3px solid var(--color-dbtl-learn);
+    background: rgba(31, 26, 107, 0.06);
+  }
+
+  .summary {
+    display: grid;
+    grid-template-columns: 88px 1fr;
+    gap: 8px 16px;
+    max-width: var(--size-prose);
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--color-line);
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  .summary dt {
+    color: var(--color-muted);
+    font-family: var(--font-heading);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+  }
+
+  .summary dd {
+    margin: 0;
+  }
+
+  .learn {
+    color: var(--color-dbtl-learn);
+  }
+
+  .focus {
+    min-height: 60%;
+    display: grid;
+    gap: 10px;
+    align-content: center;
+    padding: 24px 0;
+  }
+
+  .no,
+  .cap,
+  .go,
+  .next {
+    color: var(--color-muted);
+    font-family: var(--font-heading);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+  }
+
+  .focusTitle {
+    font-size: clamp(20px, 2.2vw, 26px);
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .phase {
+    margin-left: 6px;
+    padding: 24px 0 24px 24px;
+    border-left: 3px solid var(--color-line);
+  }
+
+  .phase[data-dbtl-current] {
+    border-color: var(--dbtl-phase);
+  }
+
+  .phaseName {
+    margin-bottom: 6px;
+    color: var(--dbtl-phase);
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+  }
+
+  .quote {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    align-items: start;
+    max-width: var(--size-prose);
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: rgba(31, 26, 107, 0.06);
+    color: var(--color-dbtl-learn);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  .quote b {
+    padding-top: 3px;
+    font-family: var(--font-heading);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    white-space: nowrap;
+  }
+
+  .lap {
+    min-height: 45%;
+    display: grid;
+    gap: 10px;
+    align-content: center;
+    margin-left: 6px;
+    padding: 24px 0 24px 24px;
+    border-left: 3px dashed var(--color-line);
+  }
+
+  .lapSum {
+    max-width: var(--size-prose);
+    padding-left: 12px;
+    border-left: 3px solid var(--color-dbtl-learn);
+    color: var(--color-muted);
+    font-size: 14px;
+  }
+
+  .notes {
+    color: var(--color-muted);
+    font-size: 13px;
+  }
+
+  .outcomes {
+    padding: 24px 0;
+  }
+
+  .outcomesTitle {
+    margin-bottom: 8px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .handoff {
+    padding: 8px 0 32px;
+    color: var(--color-muted);
+    font-size: 14px;
+  }
+
+  .end {
+    height: 45%;
+  }
+
+  @media (max-width: 1099px) {
+    .stage {
+      grid-template-areas:
+        "top"
+        "side"
+        "box"
+        "foot";
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      gap: 8px;
+      height: calc(100dvh - var(--size-header-fixed) - 16px);
+      min-height: 520px;
+      margin: 40px 0;
+    }
+
+    .box {
+      padding: 0 16px;
+      border-radius: 12px;
+    }
+
+    .cycleTitle {
+      font-size: 20px;
+    }
+
+    .focusTitle {
+      font-size: 19px;
+    }
+
+    .summary {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+
+    .phase,
+    .lap {
+      padding-left: 16px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .header {
+      padding-top: 56px;
+    }
+
+    .title {
+      font-size: 44px;
+      line-height: 1.05;
+      letter-spacing: 0.44px;
+    }
+
+    .pageLead {
+      padding-top: 32px;
+    }
+  }
+}

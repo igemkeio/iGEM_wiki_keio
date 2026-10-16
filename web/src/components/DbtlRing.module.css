@@ -1,0 +1,101 @@
+@layer components {
+  .ring {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .arc {
+    fill: none;
+    stroke-width: 34;
+    stroke-linecap: butt;
+    opacity: 0.28;
+    cursor: pointer;
+    transition:
+      opacity 0.25s,
+      stroke-width 0.25s;
+  }
+
+  .arc.lit {
+    opacity: 1;
+    stroke-width: 38;
+  }
+
+  .arc.on {
+    stroke-width: 46;
+  }
+
+  .arc:not(.lit):hover {
+    opacity: 0.7;
+  }
+
+  .label {
+    fill: #ffffff;
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+  }
+
+  .arrow {
+    fill: var(--color-ink);
+    opacity: 0.5;
+  }
+
+  .caption {
+    fill: var(--color-muted);
+    font-family: var(--font-heading);
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-anchor: middle;
+  }
+
+  .number {
+    fill: var(--color-ink);
+    font-family: var(--font-heading);
+    font-size: 92px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    transform-box: view-box;
+    transform-origin: 200px 200px;
+  }
+
+  .number.bump {
+    animation: dbtl-bump 0.4s cubic-bezier(0.3, 1.6, 0.4, 1);
+  }
+
+  @keyframes dbtl-bump {
+    45% {
+      transform: scale(1.3);
+    }
+  }
+
+  .dot {
+    r: 6;
+    fill: none;
+    stroke: var(--color-ink);
+    stroke-width: 2;
+  }
+
+  .dot.done {
+    fill: var(--color-ink);
+  }
+
+  .dot.current {
+    r: 9;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .arc {
+      transition: none;
+    }
+
+    .number.bump {
+      animation: none;
+    }
+  }
+}
