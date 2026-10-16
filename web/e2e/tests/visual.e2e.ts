@@ -11,7 +11,7 @@ const pages: { name: string; path: string }[] = [
 
 test.skip(
   process.platform !== "linux",
-  "基準画像はLinuxで撮ったもので、Linux以外ではフォントの描画が違って落ちるため飛ばす",
+  "基準画像はLinuxで撮ったもので、Linux以外ではフォントの描画が違って落ちるため飛ばす"
 );
 
 for (const { name, path } of pages) {
