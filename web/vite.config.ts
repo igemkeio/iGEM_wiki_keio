@@ -1,4 +1,4 @@
-import { readdirSync } from "node:fs";
+import { readdirSync, rmSync } from "node:fs";
 import { resolve } from "node:path";
 
 import react from "@vitejs/plugin-react";
@@ -29,6 +29,7 @@ function watchContent(): Plugin {
 
 // 目印を本番の配信元に置き換える。global.cssの@font-faceにある__WIKI_FONT_BASE__は環境変数WIKI_FONT_BASE(未指定ならbaseを付けた/fonts)に、
 // ソース中の__WIKI_IMAGE_BASE__は環境変数WIKI_IMAGE_BASE(未指定ならbaseを付けた/images)にする。末尾のスラッシュは落とす。
+// __WIKI_NOTION_BASE__は環境変数WIKI_NOTION_BASE(notion-imagesとnotion-filesの親のURL)に置き換え、未指定なら空にする(空のときはsrc/lib/applyBase.tsがbaseを付ける)。
 function assetBase(base: string): Plugin {
   const prefix = base.replace(/\/$/u, "");
   const markers = [
@@ -40,6 +41,11 @@ function assetBase(base: string): Plugin {
     {
       marker: "__WIKI_IMAGE_BASE__",
       dir: process.env.WIKI_IMAGE_BASE || `${prefix}/images`,
+      ext: /\.[jt]sx?$/u,
+    },
+    {
+      marker: "__WIKI_NOTION_BASE__",
+      dir: process.env.WIKI_NOTION_BASE || "",
       ext: /\.[jt]sx?$/u,
     },
   ];
@@ -56,6 +62,31 @@ function assetBase(base: string): Plugin {
       }
       if (out !== code) {
         return { code: out, map: null };
+      }
+    },
+  };
+}
+
+// 配信元を環境変数で外へ向けたディレクトリは、web/public/の暫定の置き場から出力へ入れない。
+// footer-sponsors.jsなど、これらのディレクトリ以外のpublic/の中身は常にdistへ入る。
+function dropExternalPublicDirs(): Plugin {
+  const external = [
+    ["WIKI_NOTION_BASE", ["notion-images", "notion-files"]],
+    ["WIKI_FONT_BASE", ["fonts"]],
+    ["WIKI_IMAGE_BASE", ["images"]],
+  ] as const;
+  const dirs = external.flatMap(([name, list]) =>
+    process.env[name] ? list : []
+  );
+  return {
+    name: "drop-external-public-dirs",
+    apply: "build",
+    writeBundle(options) {
+      if (!options.dir) {
+        return;
+      }
+      for (const dir of dirs) {
+        rmSync(resolve(options.dir, dir), { recursive: true, force: true });
       }
     },
   };
@@ -83,7 +114,13 @@ export default defineConfig({
       process.env.WIKI_PALETTE_SWITCHER ?? ""
     ),
   },
-  plugins: [react(), watchContent(), assetBase(base), keepCssModules()],
+  plugins: [
+    react(),
+    watchContent(),
+    assetBase(base),
+    dropExternalPublicDirs(),
+    keepCssModules(),
+  ],
   build: {
     manifest: true,
   },
