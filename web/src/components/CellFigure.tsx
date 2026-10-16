@@ -57,8 +57,8 @@ export function CellFigure({
     );
   };
   return (
-    // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- SVGの図なのでimg要素には置き換えられない
-    <svg className={styles.figure} viewBox="0 0 760 200" role="img">
+    // role="img" を付けると中のリンクが支援技術から読まれなくなるので、titleだけで名前を付ける
+    <svg className={styles.figure} viewBox="0 0 760 200">
       <title>{alt}</title>
       <rect
         className={styles.body}
