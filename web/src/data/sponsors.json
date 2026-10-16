@@ -16,5 +16,17 @@
     "href": "https://www.cosmobio.co.jp/",
     "logo": "sponsors/cosmo-bio.png",
     "alt": "コスモ・バイオ株式会社のロゴ"
+  },
+  {
+    "name": "Twist Bioscience",
+    "href": "https://www.twistbioscience.com/",
+    "logo": "sponsors/twist-bioscience.svg",
+    "alt": "Twist Bioscienceのロゴ"
+  },
+  {
+    "name": "Anthropic",
+    "href": "https://www.anthropic.com/",
+    "logo": "sponsors/anthropic.svg",
+    "alt": "Anthropicのロゴ"
   }
 ]
