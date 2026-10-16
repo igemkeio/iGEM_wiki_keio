@@ -135,6 +135,11 @@
     scroll-snap-align: start;
   }
 
+  /* 2組目はJSで回すためのもの。JSが無いときは1組だけ見せる */
+  .sponsors:not([data-sponsors-js]) .clone {
+    display: none;
+  }
+
   .slide a {
     display: block;
   }
