@@ -272,7 +272,7 @@
   @media (prefers-reduced-motion: no-preference) {
     @supports (animation-timeline: view()) {
       .sentence,
-      .figures,
+      .figure,
       .note {
         animation: slide-rise linear both;
         animation-timeline: view();
@@ -282,7 +282,7 @@
         animation-range: entry 0% entry 40%;
       }
 
-      .figures {
+      .figure {
         animation-range: entry 10% entry 55%;
       }
 
