@@ -59,6 +59,28 @@ test("islandsは空でないときだけ出し、orderの後ろに置く", () =>
   assert.equal("islands" in buildPage(base), false);
 });
 
+test("hpは値があるときだけ、islandsの後ろに置く", () => {
+  const base = {
+    slug: "human-practices",
+    locale: "ja",
+    title: "Human Practices",
+    html: "",
+    islands: ["x"],
+  };
+  const hp = { intro: "" };
+  assert.deepEqual(Object.keys(buildPage({ ...base, hp })), [
+    "slug",
+    "locale",
+    "title",
+    "html",
+    "islands",
+    "hp",
+  ]);
+  assert.equal(buildPage({ ...base, hp }).hp, hp);
+  assert.equal("hp" in buildPage({ ...base, hp: null }), false);
+  assert.equal("hp" in buildPage(base), false);
+});
+
 test("islandsForはmembersとattributionsで島の名前を返し、他のslugでは空配列を返す", () => {
   assert.deepEqual(islandsFor("members"), ["member-list"]);
   assert.deepEqual(islandsFor("attributions"), ["attribution-form"]);

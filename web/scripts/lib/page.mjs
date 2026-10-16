@@ -29,6 +29,7 @@ export function buildPage({
   html,
   order,
   islands,
+  hp,
 }) {
   const page = { slug, locale, title };
   if (subtitle) {
@@ -43,6 +44,9 @@ export function buildPage({
   }
   if (islands?.length) {
     page.islands = islands;
+  }
+  if (hp) {
+    page.hp = hp;
   }
   return page;
 }

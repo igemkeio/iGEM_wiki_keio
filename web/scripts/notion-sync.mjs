@@ -28,6 +28,7 @@ import {
   transformAttachment,
 } from "./lib/attachment.mjs";
 import { collectImageSrcs, isIgemStatic, renderImage } from "./lib/figure.mjs";
+import { readHp } from "./lib/hp.mjs";
 import {
   ANIMATION_WARN_BYTES,
   convertToWebp,
@@ -343,6 +344,14 @@ async function buildPageData(row) {
   const md = n2m.toMarkdownString(mdBlocks).parent ?? "";
   const html = renderMarkdown(md);
 
+  const { hp, warning } =
+    slug === "human-practices" ? readHp(html) : { hp: null };
+  if (warning) {
+    console.warn(
+      `[notion-sync] ${locale}/${slug} の章と面談の構造を読み取れないため hp を書き出しません: ${warning}`
+    );
+  }
+
   return {
     rawSlug,
     page: buildPage({
@@ -354,6 +363,7 @@ async function buildPageData(row) {
       html,
       order: numberValue(props.order),
       islands: islandsFor(slug),
+      hp,
     }),
   };
 }
