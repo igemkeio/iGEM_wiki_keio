@@ -180,14 +180,12 @@ async function localizeImage(url) {
       throw new Error(`HTTP ${res.status}`);
     }
     const buf = Buffer.from(await res.arrayBuffer());
-    const fileName = imageFileName(buf);
+    const srcExt = guessExt(res.headers.get("content-type"), url);
+    const fileName = imageFileName(buf, srcExt);
     const outPath = path.join(IMAGES_DIR, fileName);
     if (!fs.existsSync(outPath)) {
       fs.mkdirSync(IMAGES_DIR, { recursive: true });
-      const { data, animated } = await convertToWebp(
-        buf,
-        guessExt(res.headers.get("content-type"), url)
-      );
+      const { data, animated } = await convertToWebp(buf, srcExt);
       fs.writeFileSync(outPath, data);
       console.log(
         `[notion-sync] image saved ${fileName} (${data.length} bytes)`

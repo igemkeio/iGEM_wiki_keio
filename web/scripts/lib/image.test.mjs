@@ -3,7 +3,14 @@ import test from "node:test";
 
 import sharp from "sharp";
 
-import { convertToWebp, imageFileName, MAX_EDGE } from "./image.mjs";
+import {
+  ANIMATION_WEBP_EFFORT,
+  convertToWebp,
+  imageFileName,
+  MAX_EDGE,
+  WEBP_EFFORT,
+  WEBP_QUALITY,
+} from "./image.mjs";
 
 const solid = (width, height, channels = 3, background = "#336699") =>
   sharp({ create: { width, height, channels, background } });
@@ -168,4 +175,80 @@ test("convertToWebp: 大きいアニメーションは各フレームを縮め�
   assert.equal(meta.pages, 2);
   assert.equal(meta.width, 1600);
   assert.equal(meta.pageHeight, 800);
+});
+
+test("imageFileName: SVGだけ .svg になり、ハッシュは元のバイト列から作る", () => {
+  const buf = Buffer.from("<svg/>");
+  const svg = imageFileName(buf, "svg");
+  assert.match(svg, /^[0-9a-f]{16}\.svg$/u);
+  assert.equal(
+    svg.replace(".svg", ""),
+    imageFileName(buf, "png").replace(".webp", "")
+  );
+  for (const ext of ["png", "jpg", "gif", "webp", "heic", "tiff", undefined]) {
+    assert.match(imageFileName(buf, ext), /^[0-9a-f]{16}\.webp$/u, String(ext));
+  }
+});
+
+test("convertToWebp: SVGは変換せずバイト列のまま返す", async () => {
+  const svg = Buffer.from(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10"/></svg>'
+  );
+  const { data, animated } = await convertToWebp(svg, "svg");
+  assert.ok(data.equals(svg));
+  assert.equal(animated, false);
+});
+
+const options = (effort) => ({ quality: WEBP_QUALITY, effort });
+
+// effortで出力が変わるよう、ノイズ画像のフレームを縦に連結した生データを作る。
+const noisyFrames = async (w, h, frames) => {
+  const parts = [];
+  for (let i = 0; i < frames; i += 1) {
+    parts.push(
+      await sharp({
+        create: {
+          width: w,
+          height: h,
+          channels: 3,
+          background: "#808080",
+          noise: { type: "gaussian", mean: 128, sigma: 60 },
+        },
+      })
+        .raw()
+        .toBuffer()
+    );
+  }
+  return Buffer.concat(parts);
+};
+
+test("convertToWebp: アニメーションはeffort 4、静止画はeffort 6で符号化する", async () => {
+  const w = 96;
+  const h = 96;
+  const raw = (frames) => ({
+    raw: { width: w, height: h * frames, channels: 3, pageHeight: h },
+  });
+
+  const gif = await sharp(await noisyFrames(w, h, 3), raw(3))
+    .gif({ loop: 0, delay: [100, 100, 100] })
+    .toBuffer();
+  const animEncode = (effort) =>
+    sharp(gif, { animated: true }).webp(options(effort)).toBuffer();
+  const a4 = await animEncode(ANIMATION_WEBP_EFFORT);
+  const a6 = await animEncode(WEBP_EFFORT);
+  assert.ok(!a4.equals(a6), "effortで出力が変わる入力");
+  const anim = await convertToWebp(gif, "gif");
+  assert.ok(anim.data.equals(a4));
+  const again = await convertToWebp(gif, "gif");
+  assert.ok(again.data.equals(anim.data));
+
+  const png = await sharp(await noisyFrames(w, h, 1), raw(1))
+    .png()
+    .toBuffer();
+  const stillEncode = (effort) => sharp(png).webp(options(effort)).toBuffer();
+  const s4 = await stillEncode(ANIMATION_WEBP_EFFORT);
+  const s6 = await stillEncode(WEBP_EFFORT);
+  assert.ok(!s4.equals(s6), "effortで出力が変わる入力");
+  const still = await convertToWebp(png, "png");
+  assert.ok(still.data.equals(s6));
 });
