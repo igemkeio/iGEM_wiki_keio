@@ -8,33 +8,50 @@ import { locales, publishedPages } from "../pages";
 
 const footer = (page: Page) => page.locator("footer");
 const track = (page: Page) => page.locator("[data-sponsors-track]");
+// 2組目は回すための複製で、読み上げとタブ送りから外してある。
+const realSlides = (page: Page) =>
+  page.locator("[data-sponsors-track] li:not([data-sponsors-clone])");
 
 // 各ロゴの左端と、いまのスクロール位置。1枚ずつ送れていることを位置で確かめる。
 const offsets = (locator: Locator) =>
   locator.evaluate((el) =>
     [...el.children].map((child) => (child as HTMLElement).offsetLeft)
   );
-const maxScroll = (locator: Locator) =>
-  locator.evaluate((el) => el.scrollWidth - el.clientWidth);
 const scrollLeft = (locator: Locator) =>
   locator.evaluate((el) => Math.round(el.scrollLeft));
 
-// 先頭から送っていったときに止まる位置。はみ出しが1枚ぶんに満たないと末尾で頭打ちになるので、
-// ロゴの左端をそのまま使わず末尾の位置で丸め、同じ位置が続いたら打ち切る。
+// 並んでいるロゴの画像のパスを、左から順に返す。
+const logoSrcs = (locator: Locator) =>
+  locator.evaluate((el) =>
+    [...el.querySelectorAll("img")].map((img) => img.getAttribute("src") ?? "")
+  );
+
+// 帯の中に見えているロゴを、左から順に返す。
+const visibleLogos = (locator: Locator) =>
+  locator.evaluate((el) =>
+    [...el.children]
+      .filter((child) => {
+        const slide = child as HTMLElement;
+        return (
+          slide.offsetLeft + slide.offsetWidth > el.scrollLeft &&
+          slide.offsetLeft < el.scrollLeft + el.clientWidth
+        );
+      })
+      .map((child) => child.querySelector("img")?.getAttribute("src") ?? "")
+  );
+
+// 右端まで帯で埋まっているか。送りの途中で空きが出ないことを確かめる。
+const filledToRight = (locator: Locator) =>
+  locator.evaluate((el) => {
+    const last = el.lastElementChild as HTMLElement;
+    return last.offsetLeft + last.offsetWidth >= el.scrollLeft + el.clientWidth;
+  });
+
+// 先頭から送っていったときに止まる位置。1組ぶん進むと黙って引き戻されるので、1周すると0へ戻る。
 const forwardStops = async (locator: Locator) => {
-  const end = await maxScroll(locator);
   const all = await offsets(locator);
-  const stops: number[] = [];
-  for (const offset of all.slice(1)) {
-    const stop = Math.min(offset, end);
-    if (stops.at(-1) !== stop) {
-      stops.push(stop);
-    }
-    if (stop === end) {
-      break;
-    }
-  }
-  return stops;
+  const count = all.length / 2;
+  return [...all.slice(1, count), 0];
 };
 
 // 時計を止め、以後は runFor だけで進める。実時間で自動送りが発火しないようにする。
@@ -43,12 +60,14 @@ const freezeClock = async (page: Page) => {
   await page.clock.pauseAt(1000);
 };
 
-// 帯がはみ出さないときは送りのテストを飛ばす。はみ出すのにボタンが出ないとき(JSが読まれていない)は失敗させる。
+// 1組ぶん回せないときは送りのテストを飛ばす。回せるのにボタンが出ないとき(JSが読まれていない)は失敗させる。
 const skipUnlessOverflow = async (page: Page) => {
-  const overflows = await track(page).evaluate(
-    (el) => el.scrollWidth > el.clientWidth
-  );
-  test.skip(!overflows, "帯がはみ出さないので送らない");
+  const loops = await track(page).evaluate((el) => {
+    const loop = (el.children[el.children.length / 2] as HTMLElement)
+      .offsetLeft;
+    return loop > 0 && loop <= el.scrollWidth - el.clientWidth;
+  });
+  test.skip(!loops, "帯がはみ出さないので送らない");
   await expect(page.locator("[data-sponsors-prev]")).toBeVisible();
   await expect(page.locator("[data-sponsors-next]")).toBeVisible();
 };
@@ -72,7 +91,7 @@ test.describe("フッターの3段", () => {
         await expect(
           f.getByRole("list", { name: /Social|SNS/u })
         ).toBeVisible();
-        await expect(f.locator("[data-sponsors-track] img")).toHaveCount(
+        await expect(realSlides(page).locator("img")).toHaveCount(
           sponsors.length
         );
         await expect(f.getByText("CC BY 4.0")).toBeVisible();
@@ -109,7 +128,9 @@ test.describe("スポンサーの帯", () => {
     await skipUnlessOverflow(page);
   });
 
-  test("3秒ごとに1枚ずつ左へ送られ、最後から先頭へ戻る", async ({ page }) => {
+  test("3秒ごとに1枚ずつ左へ送られ、1周して先頭の位置に戻る", async ({
+    page,
+  }) => {
     const t = track(page);
     const [first, ...rest] = await forwardStops(t);
     await page.clock.runFor(2900);
@@ -119,16 +140,13 @@ test.describe("スポンサーの帯", () => {
     for (const stop of rest) {
       await page.clock.runFor(3000);
       await settledAt(t, stop);
+      expect(await filledToRight(t)).toBe(true);
     }
-    await page.clock.runFor(3000);
-    await settledAt(t, 0);
   });
 
   test("ボタンで1枚ずつ前後に送れ、キーボードでも押せる", async ({ page }) => {
     const t = track(page);
-    const [first, next2] = await forwardStops(t);
-    // 末尾まで来ていれば、次の送りは先頭へ戻る。
-    const second = next2 ?? 0;
+    const [first, second] = await forwardStops(t);
     const next = page.getByRole("button", { name: "Next" });
     const prev = page.getByRole("button", { name: "Previous" });
     await next.click();
@@ -233,8 +251,44 @@ test.describe("スポンサーの帯", () => {
 
   test("先頭で前へを押すと末尾へ回る", async ({ page }) => {
     const t = track(page);
+    const all = await offsets(t);
     await page.getByRole("button", { name: "Previous" }).click();
-    await settledAt(t, await maxScroll(t));
+    await settledAt(t, all[all.length / 2 - 1]);
+    expect(await filledToRight(t)).toBe(true);
+  });
+
+  // 端で巻き戻らず回ること。1周を越えて押しても並びが続き、右端に空きが出ないことを位置で確かめる。
+  test("次へを押し続けると、先頭を通り越しても途切れずに回る", async ({
+    page,
+  }) => {
+    const t = track(page);
+    const stops = await forwardStops(t);
+    const srcs = await logoSrcs(t);
+    const logos = srcs.slice(0, stops.length);
+    const next = page.getByRole("button", { name: "Next" });
+    for (let i = 0; i < stops.length * 2; i += 1) {
+      await next.click();
+      await settledAt(t, stops[i % stops.length]);
+      expect(await filledToRight(t)).toBe(true);
+      const visible = await visibleLogos(t);
+      expect(visible[0]).toBe(logos[(i + 1) % logos.length]);
+    }
+  });
+
+  test("前へを押し続けると、逆向きにも途切れずに回る", async ({ page }) => {
+    const t = track(page);
+    const all = await offsets(t);
+    const count = all.length / 2;
+    const srcs = await logoSrcs(t);
+    const logos = srcs.slice(0, count);
+    const prev = page.getByRole("button", { name: "Previous" });
+    for (let i = 0; i < count * 2; i += 1) {
+      await prev.click();
+      await settledAt(t, all[(count * 2 - 1 - i) % count]);
+      expect(await filledToRight(t)).toBe(true);
+      const visible = await visibleLogos(t);
+      expect(visible[0]).toBe(logos[(count * 2 - 1 - i) % count]);
+    }
   });
 
   test("一時停止で自動の送りが止まり、再生で再開する(クリック)", async ({
@@ -333,6 +387,8 @@ test.describe("JSを切ったとき", () => {
 
   test("ボタンは出ず、横スクロールでロゴを全部見られる", async ({ page }) => {
     await page.goto("e2e-plain/");
+    // 回すための2組目はJSが無いと出ない。
+    await expect(page.locator("[data-sponsors-clone]").first()).toBeHidden();
     await expect(page.locator("[data-sponsors-prev]")).toBeHidden();
     await expect(page.locator("[data-sponsors-next]")).toBeHidden();
     await expect(page.locator("[data-sponsors-toggle]")).toBeHidden();
@@ -345,7 +401,7 @@ test.describe("JSを切ったとき", () => {
     // 社数が変わって帯がはみ出さないときは、末尾のロゴが見えることだけを確かめる。
     if (!scrollable.wider) {
       await t.scrollIntoViewIfNeeded();
-      await expect(t.locator("li").last()).toBeInViewport({ ratio: 1 });
+      await expect(realSlides(page).last()).toBeInViewport({ ratio: 1 });
       return;
     }
     const pageOverflows = await page.evaluate(
@@ -353,7 +409,7 @@ test.describe("JSを切ったとき", () => {
     );
     expect(pageOverflows).toBe(false);
     await t.scrollIntoViewIfNeeded();
-    const last = t.locator("li").last();
+    const last = realSlides(page).last();
     await t.evaluate((el) => {
       el.scrollLeft = el.scrollWidth;
     });
