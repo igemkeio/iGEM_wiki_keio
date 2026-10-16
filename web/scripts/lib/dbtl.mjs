@@ -22,6 +22,7 @@ function decodeEntities(text) {
     .replaceAll(/&#x([0-9a-f]+);/giu, (_, n) =>
       String.fromCodePoint(Number.parseInt(n, 16))
     )
+    .replaceAll("&nbsp;", " ")
     .replaceAll("&lt;", "<")
     .replaceAll("&gt;", ">")
     .replaceAll("&quot;", '"')
@@ -127,9 +128,10 @@ function strongParagraph(block) {
   if (block.tag !== "p") {
     return null;
   }
-  const match = /^<p>\s*<strong>([\s\S]*?)<\/strong>([\s\S]*)<\/p>$/u.exec(
-    block.html
-  );
+  const match =
+    /^<p\b[^>]*>\s*<strong>([\s\S]*?)<\/strong>([\s\S]*)<\/p>$/u.exec(
+      block.html
+    );
   return match ? { label: textOf(match[1]), rest: match[2].trim() } : null;
 }
 
@@ -151,18 +153,26 @@ function parseHypothesisTable(block) {
   return { hypothesis: byLabel.get("仮説"), criteria: byLabel.get("成功基準") };
 }
 
-function parseIterationTable(block) {
+// ヘッダが DESIGN/BUILD/TEST/LEARN の4列の表か。
+function isIterationTable(block) {
   if (block.tag !== "table") {
+    return false;
+  }
+  const [header = []] = rowsOf(block.html);
+  return (
+    header.map((cell) => textOf(cell).toUpperCase()).join(",") ===
+    DBTL_HEADERS.join(",")
+  );
+}
+
+function parseIterationTable(block, fail) {
+  if (!isIterationTable(block)) {
     return null;
   }
   const rows = rowsOf(block.html);
-  const header = (rows[0] ?? []).map((cell) => textOf(cell).toUpperCase());
-  if (header.join(",") !== DBTL_HEADERS.join(",")) {
-    return null;
-  }
-  const [, body] = rows;
+  const [, body = []] = rows;
   if (rows.length !== 2 || body.length !== 4) {
-    throw broken("反復の表が見出しの1行と本文の1行になっていません");
+    fail("反復の表が見出しの1行と本文の1行になっていません");
   }
   const [design, build, test, learn] = body;
   return { design, build, test, learn };
@@ -197,6 +207,21 @@ function parseOpening(blocks, fail) {
   };
 }
 
+function assertComplete(
+  { iterations, hasOutcomes, outcomes, handoffHtml },
+  fail
+) {
+  if (handoffHtml === "") {
+    fail("次のサイクルへの受け渡し(↳ 次のサイクルへ)が読み取れません");
+  }
+  if (iterations.length === 0) {
+    fail("反復がありません");
+  }
+  if (!hasOutcomes || outcomes.length === 0) {
+    fail("このサイクルで確立したこと(または現状)の見出しか本文がありません");
+  }
+}
+
 // 反復の表から、確立したことと次のサイクルへの受け渡しまでを読む。
 function parseIterations(blocks, fail) {
   const iterations = [];
@@ -223,7 +248,7 @@ function parseIterations(blocks, fail) {
 
     if (iteration) {
       flushNotes();
-      const cells = parseIterationTable(blocks[i + 1] ?? { tag: "" });
+      const cells = parseIterationTable(blocks[i + 1] ?? { tag: "" }, fail);
       if (!cells) {
         fail(
           `反復${iteration[1]}の直後に DESIGN/BUILD/TEST/LEARN の表がありません`
@@ -253,6 +278,11 @@ function parseIterations(blocks, fail) {
       handoffHtml = strong.rest;
       section = "handoff";
     } else if (section === "iterations" && iterations.length > 0) {
+      if (isIterationTable(block)) {
+        fail(
+          "DESIGN/BUILD/TEST/LEARN の表の直前に、反復の見出し(太字の「反復N — 題」)がありません"
+        );
+      }
       notes.push(block);
     } else if (section === "outcomes") {
       outcomes.push(block);
@@ -264,12 +294,7 @@ function parseIterations(blocks, fail) {
   }
   flushNotes();
 
-  if (iterations.length === 0) {
-    fail("反復がありません");
-  }
-  if (!hasOutcomes || outcomes.length === 0) {
-    fail("このサイクルで確立したこと(または現状)の見出しか本文がありません");
-  }
+  assertComplete({ iterations, hasOutcomes, outcomes, handoffHtml }, fail);
   return { iterations, outcomesHtml: joinHtml(outcomes), handoffHtml };
 }
 
@@ -370,10 +395,21 @@ function parseBlocks(blocks) {
   }
 
   const lastAt = marks.length - 1;
+  const outroBlocks = blocks.slice(stopOf(marks[lastAt], lastAt));
+  const stray = outroBlocks.find(
+    (block) =>
+      (isHeading(block) && /^〔(?:基盤|設計)〕/u.test(block.text)) ||
+      isIterationTable(block)
+  );
+  if (stray) {
+    throw broken(
+      `最後のサイクルより後に、サイクルの見出しか反復の表が残っています(最後のサイクルの見出しが読めない可能性があります): ${stray.text.slice(0, 40)}`
+    );
+  }
   return {
     intro: joinHtml(blocks.slice(0, marks[0].index)),
     parts,
-    outro: joinHtml(blocks.slice(stopOf(marks[lastAt], lastAt))),
+    outro: joinHtml(outroBlocks),
   };
 }
 
