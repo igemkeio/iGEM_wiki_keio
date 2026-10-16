@@ -83,6 +83,16 @@ describe(Page, () => {
     expect(doc.querySelector('[data-island="member-list"]')).not.toBeNull();
   });
 
+  it("島の有無によらず、フッター用のscriptを1本だけ入れる", () => {
+    for (const p of [en, withIsland, withUnknownIsland]) {
+      const found = parse(render(p)).querySelectorAll(
+        'script[src$="/footer-sponsors.js"]'
+      );
+      expect(found).toHaveLength(1);
+      expect(found[0]).toHaveAttribute("defer");
+    }
+  });
+
   it("対応表に無い島の名前だけならscriptも器も出さない", () => {
     const doc = parse(render(withUnknownIsland));
     expect(scripts(doc)).toHaveLength(0);

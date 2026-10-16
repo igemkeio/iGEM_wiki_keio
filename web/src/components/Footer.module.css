@@ -1,9 +1,163 @@
 @layer components {
   .root {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
     padding: 16px var(--space-frame-x) 40px;
     color: var(--color-muted);
     font-size: var(--size-subtitle);
     line-height: var(--size-subtitle-leading);
+  }
+
+  .root a {
+    color: inherit;
+  }
+
+  .root a:focus-visible,
+  .arrow:focus-visible {
+    outline: 3px solid var(--color-accent-orange);
+    outline-offset: 3px;
+  }
+
+  .top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px 32px;
+  }
+
+  .team {
+    display: grid;
+    gap: 8px;
+  }
+
+  .logo {
+    display: flex;
+    gap: 14px;
+    margin: 0;
+    color: var(--color-ink);
+    font-size: var(--size-nav);
+    line-height: var(--size-nav-leading);
+    letter-spacing: var(--size-nav-tracking);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .logoSub {
+    color: var(--color-muted);
+  }
+
+  .contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    margin: 0;
+  }
+
+  .social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .socialIcon {
+    display: block;
+  }
+
+  .socialIcon svg {
+    display: block;
+    width: 24px;
+    height: 24px;
+  }
+
+  /* ボタンはJSが、帯がはみ出すときだけ hidden を外す。JSが無いときは横スクロールで見る */
+  .sponsors[data-sponsors-js] {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .arrow {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--color-line);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-ink);
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .arrow[hidden] {
+    display: none;
+  }
+
+  .iconPlay,
+  .arrow[data-paused] .iconPause {
+    display: none;
+  }
+
+  .arrow[data-paused] .iconPlay {
+    display: block;
+  }
+
+  .track {
+    position: relative;
+    display: flex;
+    gap: 32px;
+    margin: 0;
+    padding: 0;
+    overflow-x: auto;
+    list-style: none;
+    scroll-snap-type: x mandatory;
+  }
+
+  .sponsors[data-sponsors-js] .track {
+    flex: 1;
+    min-width: 0;
+    scrollbar-width: none;
+  }
+
+  .sponsors[data-sponsors-js] .track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .slide {
+    flex: 0 0 200px;
+    scroll-snap-align: start;
+  }
+
+  .slide a {
+    display: block;
+  }
+
+  .slide img {
+    display: block;
+    width: 100%;
+    height: 80px;
+    object-fit: contain;
+  }
+
+  .bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px 24px;
+    margin: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .track {
+      scroll-behavior: smooth;
+    }
   }
 
   @media (max-width: 767px) {

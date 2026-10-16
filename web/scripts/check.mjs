@@ -150,7 +150,7 @@ async function main() {
     report(name, checkLang(html));
     const page = pageByDist.get(file);
     if (page && page.islands.length === 0) {
-      report(name, checkNoScript(html));
+      report(name, checkNoScript(html, base));
     }
     for (const ref of extractRefs(html)) {
       checkUrl(name, ref.value, {

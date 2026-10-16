@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Sponsor 1",
+    "href": "https://example.com/sponsor-1",
+    "logo": "sponsors/sponsor-1.svg",
+    "alt": "Sponsor 1"
+  },
+  {
+    "name": "Sponsor 2",
+    "href": "https://example.com/sponsor-2",
+    "logo": "sponsors/sponsor-2.svg",
+    "alt": "Sponsor 2"
+  },
+  {
+    "name": "Sponsor 3",
+    "href": "https://example.com/sponsor-3",
+    "logo": "sponsors/sponsor-3.svg",
+    "alt": "Sponsor 3"
+  },
+  {
+    "name": "Sponsor 4",
+    "href": "https://example.com/sponsor-4",
+    "logo": "sponsors/sponsor-4.svg",
+    "alt": "Sponsor 4"
+  },
+  {
+    "name": "Sponsor 5",
+    "href": "https://example.com/sponsor-5",
+    "logo": "sponsors/sponsor-5.svg",
+    "alt": "Sponsor 5"
+  },
+  {
+    "name": "Sponsor 6",
+    "href": "https://example.com/sponsor-6",
+    "logo": "sponsors/sponsor-6.svg",
+    "alt": "Sponsor 6"
+  }
+]

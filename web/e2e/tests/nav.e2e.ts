@@ -332,7 +332,9 @@ for (const locale of locales) {
 
   test(`[${locale}] ナビのためのJSがページに入らない`, async ({ page }) => {
     await page.goto(`${start}e2e-plain/`);
-    await expect(page.locator("script")).toHaveCount(0);
+    await expect(
+      page.locator("script:not([src$='/footer-sponsors.js'])")
+    ).toHaveCount(0);
   });
 
   test(`[${locale}] aria-currentが現在のページのリンクだけに付く`, async ({

@@ -220,3 +220,30 @@ test("checkNoScriptはdata-palette-switcherのインラインscriptだけを許�
     ["islandsが空のページに<script>があります"]
   );
 });
+
+const tag = (src) => `<body><script src="${src}" defer></script></body>`;
+
+test("checkNoScriptはbase付きのfooter-sponsors.jsを読むscriptだけを許す", () => {
+  const bad = ["islandsが空のページに<script>があります"];
+  assert.deepEqual(checkNoScript(tag("/footer-sponsors.js")), []);
+  assert.deepEqual(
+    checkNoScript(tag("/keio/footer-sponsors.js"), "/keio/"),
+    []
+  );
+  assert.deepEqual(checkNoScript(tag("/footer-sponsors.js"), "/keio/"), bad);
+  for (const src of [
+    "https://example.com/footer-sponsors.js",
+    "/assets/footer-sponsors.js",
+    "/footer-sponsors.js.map",
+    "/other.js",
+  ]) {
+    assert.deepEqual(checkNoScript(tag(src)), bad);
+  }
+  assert.deepEqual(
+    checkNoScript(
+      `<body><script src="/footer-sponsors.js"></script><script src="/a.js"></script></body>`
+    ),
+    bad
+  );
+  assert.deepEqual(checkNoScript(`<body><script>var a;</script></body>`), bad);
+});

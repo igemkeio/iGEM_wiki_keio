@@ -16,14 +16,19 @@ function trackScripts(page: Page) {
 }
 
 for (const path of ["", "e2e-plain/"]) {
-  test(`島のないページ(/${path})では、scriptタグもJSのリクエストも無い`, async ({
+  test(`島のないページ(/${path})では、フッター用のJSの他にscriptタグもJSのリクエストも無い`, async ({
     page,
   }) => {
     const scripts = trackScripts(page);
     await page.goto(path);
     await page.waitForLoadState("networkidle");
-    await expect(page.locator("script")).toHaveCount(0);
-    expect(scripts).toEqual([]);
+    await expect(page.locator("script")).toHaveCount(1);
+    await expect(page.locator("script")).toHaveAttribute(
+      "src",
+      /\/footer-sponsors\.js$/u
+    );
+    expect(scripts).toHaveLength(1);
+    expect(scripts[0]).toMatch(/\/footer-sponsors\.js$/u);
   });
 }
 

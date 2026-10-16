@@ -76,7 +76,7 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 - 内部リンク: `/`で始まる`href`と`src`(`<a>`を含む)は、`base`を除いたパスが`dist/`のファイルか、`index.html`を持つディレクトリを指すこと。`base`の外を指すリンクも違反。`#`だけの`href`と`mailto:`は見ない。
 - 構造: 各HTMLに`<title>`(SVGの中は数えない)と`<h1>`が1つずつあり、`<img>`に`alt`属性がある(空文字は可)。
 - `<html lang>`が`en`か`ja`。
-- `islands`が空のページに`<script>`がない。ただし`data-palette-switcher`属性を持ち、`src`を持たないインラインのscriptは許す。
+- `islands`が空のページに`<script>`がない。ただし`data-palette-switcher`属性を持ち、`src`を持たないインラインのscriptと、フッター用の`footer-sponsors.js`を`src`に持つscriptは許す。
 - 警告(違反に数えず、終了コードも変えない): `src/data/nav-categories.json`の分類に載っていない公開ページを`警告: <ファイル>: ...`の形で出す。
 
 検査するのは`dist/`のHTMLと、`dist/assets/`配下のCSSだけ。`web/public/`由来のファイル(`fonts/`、`images/`、`models/`、`notion-images/`、`notion-files/`)は読まない。`notion-images/`と`notion-files/`は暫定の置き場で、本番では[Issue #13](https://github.com/igemkeio/iGEM_wiki_keio/issues/13)で`static.igem.wiki`へ移す。HTMLの解析は正規表現で行い、依存は増やさない。検査の関数は`scripts/lib/check/`にあり、`npm run test:check`でテストする。
@@ -160,6 +160,14 @@ GIT_CONFIG_GLOBAL=/dev/null npx lefthook install
 - 島の名前と部品の対応は`src/client/islands.tsx`、差し込み位置とpropsは`src/islands.ts`の`ISLANDS`にある。島は`member-list`、`model-viewer`、`attribution-form`。
 - 原稿JSONの`islands`に挙げた島だけが、そのページに読み込まれる。Notion同期が出すページは、`scripts/lib/page.mjs`の`ISLANDS_BY_SLUG`で決まる。
 - 足し方は`AGENTS.md`のコードの約束にある。
+
+### フッター
+
+`src/components/Footer.tsx`が3段のフッターを描く。1段目は左にロゴと連絡先のメール、右にSNS、2段目はスポンサーのロゴの帯、3段目はCC BY 4.0の表記とwikiのリポジトリへのリンク。連絡先、SNS、リポジトリのURLは`src/data/footer.json`、スポンサーは`src/data/sponsors.json`(名前、リンク先、`logo`、`alt`)にあり、差し替えるのはこのJSONとロゴの画像だけ。`logo`は画像の配信元(`WIKI_IMAGE_BASE`)からの相対パスで、仮のロゴは`public/images/sponsors/`にある。
+
+SNSのリンクは、`href`のホスト名からアイコンを決める。Instagram、X(twitter.comを含む)、YouTubeに対応し、SVGのパスはSimple Icons(CC0)から写して`src/lib/socialIcons.ts`に持つ。アイコンのSVGは`aria-hidden`で、リンクの`aria-label`に`label`(サービス名)が入る。対応するホストが無いときは`label`を文字で出す。
+
+帯は素のJS(`public/footer-sponsors.js`、Reactなし)が全ページで3秒ごとに1枚ずつ左へ送り、最後から先頭へ戻る。ホバー中、帯の中にフォーカスがある間、一時停止の間は自動で送らない。ただし一時停止と再生のボタンへのホバーとフォーカスは数えないので、再生を押した直後も、ポインタやフォーカスがボタンに残ったまま送り始める。`prefers-reduced-motion: reduce`のときは初めから一時停止で、再生を押すと送り始める。前後のボタンは1枚ずつ送り、次へは最後から先頭へ、前へは先頭から末尾へ回る。一時停止と再生は1つのボタンで切り替え、`aria-label`が状態に合わせて変わる(en: Pause/Play、ja: 一時停止/再生)。3つのボタンは`hidden`で出力して、帯がはみ出すときだけJSが`hidden`を外す(幅が変わるたびに付け直す)。JSが無いときは、帯が`scroll-snap`の横スクロールのままでボタンは出ない。
 
 ### 永続化と共有ストア
 

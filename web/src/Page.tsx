@@ -47,6 +47,7 @@ export function Page({
             <ArticlePage page={page} />
           )}
         </PageShell>
+        <script src={withBase("/footer-sponsors.js")} defer />
         {page.islands.some((name) => name in ISLANDS) && (
           <script type="module" src={withBase(`/${assets.js}`)} />
         )}

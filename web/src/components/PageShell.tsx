@@ -22,7 +22,7 @@ export function PageShell({
       <EcoliNav page={page} routes={routes} />
       <div className={styles.frame}>
         <div className={styles.inner}>{children}</div>
-        <Footer />
+        <Footer locale={page.locale} />
       </div>
     </>
   );
