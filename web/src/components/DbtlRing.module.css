@@ -30,7 +30,7 @@
   }
 
   .label {
-    fill: #ffffff;
+    fill: var(--color-surface);
     font-family: var(--font-heading);
     font-size: 12px;
     font-weight: 700;

@@ -35,7 +35,7 @@
 
   .stalk {
     fill: none;
-    stroke: #3b414b;
+    stroke: var(--color-dbtl-stalk);
     stroke-width: 6;
     stroke-linecap: round;
   }
