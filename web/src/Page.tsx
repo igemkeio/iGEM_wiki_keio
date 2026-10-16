@@ -42,7 +42,7 @@ export function Page({
       <body>
         <PageShell page={page} routes={routes}>
           {page.slug === "home" ? (
-            <HomePage page={page} />
+            <HomePage page={page} routes={routes} />
           ) : (
             <ArticlePage page={page} />
           )}
