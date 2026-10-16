@@ -15,13 +15,11 @@
 //   - subtitle (Rich text) … 任意。見出しの下の小見出し
 //   - published (Checkbox) … 任意。存在し false の行はスキップ。
 
-import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 
 import { Client } from "@notionhq/client";
-import heicConvert from "heic-convert";
 import { NotionToMarkdown } from "notion-to-md";
 
 import {
@@ -30,6 +28,11 @@ import {
   transformAttachment,
 } from "./lib/attachment.mjs";
 import { collectImageSrcs, isIgemStatic, renderImage } from "./lib/figure.mjs";
+import {
+  ANIMATION_WARN_BYTES,
+  convertToWebp,
+  imageFileName,
+} from "./lib/image.mjs";
 import {
   renderMarkdown,
   renderNote,
@@ -168,8 +171,8 @@ function guessExt(contentType, url) {
   return m ? m[1].toLowerCase() : "png";
 }
 
-// 画像をダウンロードして web/public/notion-images に保存し、配信用パスを返す。
-// 同じ内容（ハッシュ一致）なら再ダウンロードしない。失敗時は null。
+// 画像をダウンロードし、縮小してWebPにして web/public/notion-images に保存し、配信用パスを返す。
+// 保存名は元画像のハッシュ。同じ名前があれば変換を飛ばす。失敗時は null。
 async function localizeImage(url) {
   try {
     const res = await fetch(url);
@@ -177,29 +180,23 @@ async function localizeImage(url) {
       throw new Error(`HTTP ${res.status}`);
     }
     const buf = Buffer.from(await res.arrayBuffer());
-    const hash = crypto
-      .createHash("sha256")
-      .update(buf)
-      .digest("hex")
-      .slice(0, 16);
-    const srcExt = guessExt(res.headers.get("content-type"), url);
-    // HEIC は多くのブラウザで表示できないため JPEG に変換して保存する。
-    // 写真が大半で、PNG だと1枚10MB超になるため JPEG を選ぶ。
-    const isHeic = srcExt === "heic" || srcExt === "heif";
-    const ext = isHeic ? "jpg" : srcExt;
-    const fileName = `${hash}.${ext}`;
+    const fileName = imageFileName(buf);
     const outPath = path.join(IMAGES_DIR, fileName);
     if (!fs.existsSync(outPath)) {
       fs.mkdirSync(IMAGES_DIR, { recursive: true });
-      const out = isHeic
-        ? Buffer.from(
-            await heicConvert({ buffer: buf, format: "JPEG", quality: 0.9 })
-          )
-        : buf;
-      fs.writeFileSync(outPath, out);
-      console.log(
-        `[notion-sync] image saved ${fileName} (${out.length} bytes)`
+      const { data, animated } = await convertToWebp(
+        buf,
+        guessExt(res.headers.get("content-type"), url)
       );
+      fs.writeFileSync(outPath, data);
+      console.log(
+        `[notion-sync] image saved ${fileName} (${data.length} bytes)`
+      );
+      if (animated && data.length > ANIMATION_WARN_BYTES) {
+        console.warn(
+          `[notion-sync] アニメーション画像が2MBを超えています。動画にしてVideo Universeへ移すことを検討してください: ${fileName} (${data.length} bytes)`
+        );
+      }
     }
     return `${IMAGES_URL_PREFIX}/${fileName}`;
   } catch (error) {
