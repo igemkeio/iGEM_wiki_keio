@@ -65,13 +65,13 @@
 
   .ringBox {
     flex: none;
-    width: min(100%, 26vh);
+    width: min(100%, 23vh);
   }
 
   .meta {
     display: grid;
     gap: 4px;
-    width: min(100%, 26vh);
+    width: min(100%, 23vh);
     text-align: center;
   }
 
