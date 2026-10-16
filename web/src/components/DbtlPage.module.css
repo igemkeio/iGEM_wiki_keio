@@ -88,8 +88,9 @@
     text-transform: uppercase;
   }
 
+  /* 節の高さの%が箱の高さに解決するよう、サイクルの枠は箱を作らない */
   .cycle {
-    display: block;
+    display: contents;
   }
 
   /* 表のセルの本文はpで包まれていないので、ここで行長を抑える */
