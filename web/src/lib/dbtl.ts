@@ -83,11 +83,6 @@ export const cycleUses = (no: number) => CYCLE_META[no]?.uses ?? [];
 
 export const figurePartOf = (no: number) => CYCLE_META[no]?.part;
 
-export const cycleOfPart = (part: FigurePart) =>
-  Number(
-    Object.keys(CYCLE_META).find((no) => CYCLE_META[Number(no)].part === part)
-  );
-
 // 島に渡す、サイクルの軽い要約。本文のHTMLは載せない。
 export interface CycleSummary {
   no: number;
