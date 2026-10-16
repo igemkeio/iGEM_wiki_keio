@@ -17,7 +17,7 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 | `npm run typecheck` | `tsc --noEmit`と`tsc -p e2e` |
 | `npm run check:code` | oxlintとoxfmtの検査(Ultracite経由)。修正はしない |
 | `npm run fix` | oxfmtで整形し、oxlintで自動修正する |
-| `npm run check` | `dist/`のHTMLとCSSを検査する。`npm run build`の後に実行する |
+| `npm run check` | `dist/`のHTMLとCSS、本番相当のビルドでは容量を検査する。`npm run build`の後に実行する |
 | `npm run test:check` | `check`の検査関数のテスト(`node:test`) |
 | `npm test` | Vitestを1回流す |
 | `npm run test:watch` | Vitestをwatchモードで流す |
@@ -26,6 +26,7 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 | `npm run notion:sync` | Notionの原稿を`content/`に書き出す(`docs/notion-sync.md`) |
 | `npm run test:sync` | Notion同期の関数のテスト(`node:test`) |
 | `npm run fonts:subset` | フォントのサブセットを作り直す |
+| `npm run igem:upload` | `public/`の画像、PDF、フォント、3DモデルをiGEMの`static.igem.wiki`へ上げる。手元で人が流す(後述) |
 
 ## 開発
 
@@ -44,7 +45,7 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 
 | 場所 | 設定 | 内容 |
 | --- | --- | --- |
-| GitHub Actions | `.github/workflows/ci.yml` | PRと`feature/vite-mpa`、`main`へのpushで、`lint`、`typecheck`、`test`、`test-scripts`、`build-check`を並列に流し、そのあと`e2e`を流す。`gitleaks`も並列に流す。`ci-passed`が全ジョブの結果を集約する。`build-check`は`WIKI_BASE=/`と`WIKI_BASE=/keio/`の2回、`npm run build && npm run check`を流す |
+| GitHub Actions | `.github/workflows/ci.yml` | PRと`feature/vite-mpa`、`main`へのpushで、`lint`、`typecheck`、`test`、`test-scripts`、`build-check`を並列に流し、そのあと`e2e`を流す。`gitleaks`も並列に流す。`ci-passed`が全ジョブの結果を集約する。`build-check`は`WIKI_BASE=/`と`WIKI_BASE=/keio/`の2回、`npm run build && npm run check`を流し、続けて本番相当(`WIKI_BASE=/keio-japan/`と、配信元の3つの環境変数を指定)でも流して`dist/`が5MB以下かを見る |
 | GitLab Pages | `.gitlab-ci.yml` | 既定ブランチだけで`node:24`の上で`web/`をビルドし、`npm run check`のあと`dist/`を`public/`に移す |
 | Vercel | `vercel.json` | PRのプレビュー。Root Directoryが`web`なので、そこでビルドと`npm run check`を流し、`dist`を配信する |
 
@@ -52,10 +53,52 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 - `gitleaks`ジョブは、固定バージョン(v8.30.1)の公式バイナリをチェックサムを確かめて実行し、秘密情報と署名付きURLの混入を止める。PRでは、そのPRで増えるコミット(`base..head`)だけを検査する。pushと`workflow_dispatch`では作業ツリーのファイルを検査する。出力は`--redact`で値を伏せる。誤検知のときは、リポジトリ直下の`.gitleaks.toml`で除外し、範囲はできるだけ狭くする。`.gitleaks.toml`を置くと既定のルールの代わりになるので、先頭に`[extend]`と`useDefault = true`を書いてから`allowlist`を足す。PRがこのファイルを変えると検査を緩められるので、レビューで見る。巨大ファイルの検査は対象外。
 - GitLabのキャッシュはnpmのキャッシュ`web/.npm/`(`npm ci --cache .npm --prefer-offline`)で、キーは`web/package-lock.json`のハッシュ。
 - GitLabでは`WIKI_BASE=/$CI_PROJECT_NAME/`としている。前提は、iGEMのwikiが`https://2026.igem.wiki/<team>/`で配信され、GitLabのプロジェクト名(URLの末尾)が`<team>`と一致していること。違っていたら`.gitlab-ci.yml`の`WIKI_BASE`の2か所(buildとcheck)を実際の配信パスに直す。
-- `WIKI_FONT_BASE`と`WIKI_IMAGE_BASE`は、`static.igem.wiki`のURLが決まるまで未指定にしてある(baseを付けた`/fonts`と`/images`になる)。決まったら`.gitlab-ci.yml`のbuildに足す。
+- `.gitlab-ci.yml`は、GitLabのCI/CD変数`IGEM_TEAM_ID`から`WIKI_NOTION_BASE`、`WIKI_FONT_BASE`、`WIKI_IMAGE_BASE`を`https://static.igem.wiki/teams/<IGEM_TEAM_ID>`の形で組み立て、`WIKI_CHECK_SIZE=1`と合わせてbuildとcheckに渡す。`IGEM_TEAM_ID`が未設定ならビルドの前に止まる。
 - Vercelは、プロジェクト設定のRoot Directoryが`web`であることを前提にしている(`vercel.json`はリポジトリ直下に置いたまま読まれる)。コマンドは`web`の中で実行されるので`cd web`は付けず、`outputDirectory`は`dist`にしてある。Root Directoryをリポジトリ直下に変えるときは、`cd web`を付け、`outputDirectory`を`web/dist`にする。
 - VercelのプロジェクトのNode.js Versionは24.xを選ぶ。
 - GitLabのURLが決まったら確認すること: プロジェクト名と`WIKI_BASE`が一致していること、GitLabのPagesの設定(公開範囲とURL)、`pages`ジョブが既定ブランチで緑になること、公開されたページのCSSとリンクが404にならないこと。
+
+### 静的ファイルの配信(static.igem.wiki)
+
+iGEMのwikiは成果物が5MBまで。画像、PDF、フォント、3Dモデルは`static.igem.wiki`に置き、`dist/`にはHTMLとJS、CSSだけを残す。`web/public/`の`notion-images/`、`notion-files/`、`fonts/`、`images/`、`models/`は、環境変数で配信元を指定しないビルド(開発とVercelのプレビュー)のための暫定の置き場。
+
+本番ビルドの環境変数。いずれも未指定なら従来どおり、`dist/`に入れて`WIKI_BASE`を付けたパスで配信する。
+
+| 環境変数 | 値の例 | 効果 |
+| --- | --- | --- |
+| `WIKI_NOTION_BASE` | `https://static.igem.wiki/teams/<id>` | 原稿の`/notion-images/...`と`/notion-files/...`の先頭をこの値に替える(`/notion-images`と`/notion-files`は付かないので、値はその親)。`dist/`から`notion-images/`と`notion-files/`を外す |
+| `WIKI_FONT_BASE` | `https://static.igem.wiki/teams/<id>/fonts` | `@font-face`のURLの先頭を替える。`dist/`から`fonts/`を外す |
+| `WIKI_IMAGE_BASE` | `https://static.igem.wiki/teams/<id>/images` | 画像のURLの先頭を替える。`dist/`から`images/`を外す |
+| `WIKI_CHECK_SIZE` | `1` | `npm run check`が`dist/`の合計を5MBと比べる。本番の配信用のビルドで必ず付ける(下記) |
+
+- 原稿JSON(`content/`)は`/notion-images/...`のまま変えない。ビルドのとき、`src/lib/applyBase.ts`が原稿のhtmlのURLを`WIKI_NOTION_BASE`に替える。
+- `public/footer-sponsors.js`と`public/models/`は、どの環境変数を指定しても`dist/`に残る。3Dモデルのsrcとデコーダーの場所は`__WIKI_IMAGE_BASE__`を通らないので、モデルを外に出すのは別Issueで扱う。
+- 本番ビルドの例: `WIKI_BASE=/keio-japan/ WIKI_CHECK_SIZE=1 WIKI_NOTION_BASE=https://static.igem.wiki/teams/<id> WIKI_FONT_BASE=https://static.igem.wiki/teams/<id>/fonts WIKI_IMAGE_BASE=https://static.igem.wiki/teams/<id>/images npm run build && npm run check`
+- GitLabでは、CI/CD変数`IGEM_TEAM_ID`にチームのidを入れると、`.gitlab-ci.yml`が上の3つと`WIKI_CHECK_SIZE=1`を渡す。`IGEM_TEAM_ID`が未設定ならジョブはそれを伝えて、ビルドの前に終了コード1で止まる。
+- KaTeXのフォントはwoff2だけを`dist/assets/`に出す。
+
+#### アップロードの手順
+
+アップロードは手元で人が流す。CIでは流さず、認証情報はGitHubのSecretsにも置かない。
+
+1. ビルドの前に、`web/public/`の中身が最新であることを確かめる(Notion同期のPRを取り込んだあとなど)。
+2. iGEMのアカウントの認証情報を、リポジトリの外の`~/.config/secrets/igem.env`に権限600で置いて読み込む。コマンドラインに直接書くと、シェルの履歴と`ps`に平文が残る。`web/`で実行する。
+   ```sh
+   # ~/.config/secrets/igem.env(chmod 600)
+   export IGEM_USERNAME=<ユーザー名>
+   export IGEM_PASSWORD=<パスワード>
+   ```
+   ```sh
+   . ~/.config/secrets/igem.env && npm run igem:upload
+   ```
+3. 認証情報が無いと、何を設定すればよいかを出して終了コード1で止まる(ネットワークには出ない)。
+4. スクリプトは`api.igem.org`にサインインし、`team_id`を取り(所属チームが複数あるときは一覧を出して止まるので、`IGEM_TEAM_ID`で上げ先を指定する)、`notion-images`、`notion-files`、`fonts`、`images`、`models`の順にファイルを上げる。ディレクトリ名をそのまま`directory`に使う。
+5. 返ってきたURLを`web/upload-manifest.json`に、`public/`からの相対パスをキーとして記録する。記録済みのファイルと、iGEM側の一覧に既にあるファイルは飛ばす(一覧にあって飛ばしたファイルも、URLが取れれば記録する)。途中で止まっても再実行できる。
+6. 失敗したファイルは最後に一覧で出し、終了コード1にする。直して再実行する。
+7. `upload-manifest.json`を確認し、`https://static.igem.wiki/teams/<id>/<ディレクトリ>/<ファイル名>`の形でない行(ファイル名が変わったもの)がないかを見る。あれば、その行のURLに合わせて原稿かビルドの値を直す。
+8. `team_id`が分かったら、`IGEM_TEAM_ID`をGitLabのCI/CD変数に入れる。
+
+APIの文書が公開されていないため、スクリプトは[コミュニティの実装](https://github.com/iGEM-HBUT-China/igem-uploads)の手順に沿って書いた。応答の形が想定と違うと、取り出せなかった旨のメッセージで失敗するので、そのときは応答の内容を見てスクリプトを直す。
 
 ### パレットの切り替え
 
@@ -77,9 +120,10 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 - 構造: 各HTMLに`<title>`(SVGの中は数えない)と`<h1>`が1つずつあり、`<img>`に`alt`属性がある(空文字は可)。
 - `<html lang>`が`en`か`ja`。
 - `islands`が空のページに`<script>`がない。ただし`data-palette-switcher`属性を持ち、`src`を持たないインラインのscriptと、フッター用の`footer-sponsors.js`を`src`に持つscriptは許す。
+- 容量: `WIKI_CHECK_SIZE=1`のとき、`dist/`の全ファイルの合計が5MB(5×1024×1024バイト)を超えたら違反にし、大きい順の上位10件を出す。指定が無いビルド(開発、Vercelのプレビュー)は暫定の置き場を含むので見ない。`PRERENDER_ALL=1`で作った`dist/`(E2E用)は`WIKI_CHECK_SIZE=1`でも見ない。配信元の環境変数が足りないと`dist/`が大きいまま落ちるので、`WIKI_NOTION_BASE`の設定漏れのように、合計が5MBを超える漏れはここで止まる(`WIKI_FONT_BASE`や`WIKI_IMAGE_BASE`だけの漏れは合計が収まるので通る)。
 - 警告(違反に数えず、終了コードも変えない): `src/data/nav-categories.json`の分類に載っていない公開ページを`警告: <ファイル>: ...`の形で出す。
 
-検査するのは`dist/`のHTMLと、`dist/assets/`配下のCSSだけ。`web/public/`由来のファイル(`fonts/`、`images/`、`models/`、`notion-images/`、`notion-files/`)は読まない。`notion-images/`と`notion-files/`は暫定の置き場で、本番では[Issue #13](https://github.com/igemkeio/iGEM_wiki_keio/issues/13)で`static.igem.wiki`へ移す。HTMLの解析は正規表現で行い、依存は増やさない。検査の関数は`scripts/lib/check/`にあり、`npm run test:check`でテストする。
+検査するのは`dist/`のHTMLと、`dist/assets/`配下のCSSだけ。`web/public/`由来のファイル(`fonts/`、`images/`、`models/`、`notion-images/`、`notion-files/`)は読まない。これらは本番では`static.igem.wiki`に置く(前節)。HTMLの解析は正規表現で行い、依存は増やさない。検査の関数は`scripts/lib/check/`にあり、`npm run test:check`でテストする。
 
 ## テスト
 
