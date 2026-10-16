@@ -89,7 +89,18 @@ iGEM Keioチームのwiki。`content/`の原稿JSONから、ViteとReactで静�
 | 出力の検査 | `npm run build && npm run check` | ページ数の一致、外部URL、リンク切れ、`alt` |
 | E2E、ビジュアル回帰 | `npm run test:e2e`(Playwright) | ページをまたぐ状態、島、JSの配信範囲、3D |
 
-- ローカルでは変更範囲に対応するテストだけを流し、全件はCIに任せる。変更箇所とE2Eの対応表は`web/e2e/README.md`にある。
+- ローカルでは変更範囲に対応するテストだけを流し、全件はCIに任せる。
+
+| いつ | 流すもの |
+| --- | --- |
+| いつも | 型とlint(コミット時のlefthookで自動で走る)、変更したファイルに対応するVitest(`npx vitest run <パス>`) |
+| `web/scripts/`を触ったとき | `npm run test:sync`、`npm run test:check` |
+| ビルドの設定、プリレンダー、`public/`、`content/`を触ったとき | `npm run build && npm run check` |
+| 画面の挙動を変えたとき | `web/e2e/README.md`の対応表にあるE2Eのファイルだけを、`--project=chromium`で流す |
+
+- E2Eの全件、`/keio/`付きのビルド、見た目の比較は手元で流さない。pushしてCIで確かめ、落ちたらログを見て直す。
+- `web/e2e/tests/mobile/`のファイルは`--project=mobile-chromium`で流す。
+- `web/e2e/tests/visual.e2e.ts`はLinux以外ではskipになる。
 - `Page`やマークアップを意図して変えたら、スナップショットの差分を確認してから`npx vitest run -u`で更新する。
 - ビジュアル回帰の基準画像は、ローカルで上書きしない。作り直し方は`web/e2e/README.md`にある。
 

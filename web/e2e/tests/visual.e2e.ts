@@ -9,6 +9,11 @@ const pages: { name: string; path: string }[] = [
   { name: "e2e-plain", path: "e2e-plain/" },
 ];
 
+test.skip(
+  process.platform !== "linux",
+  "基準画像はLinuxで撮ったもので、Linux以外ではフォントの描画が違って落ちるため飛ばす"
+);
+
 for (const { name, path } of pages) {
   for (const width of widths) {
     test(`${name} ${width}px`, async ({ page }) => {
