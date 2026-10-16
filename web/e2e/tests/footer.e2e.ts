@@ -19,6 +19,24 @@ const maxScroll = (locator: Locator) =>
 const scrollLeft = (locator: Locator) =>
   locator.evaluate((el) => Math.round(el.scrollLeft));
 
+// 先頭から送っていったときに止まる位置。はみ出しが1枚ぶんに満たないと末尾で頭打ちになるので、
+// ロゴの左端をそのまま使わず末尾の位置で丸め、同じ位置が続いたら打ち切る。
+const forwardStops = async (locator: Locator) => {
+  const end = await maxScroll(locator);
+  const all = await offsets(locator);
+  const stops: number[] = [];
+  for (const offset of all.slice(1)) {
+    const stop = Math.min(offset, end);
+    if (stops.at(-1) !== stop) {
+      stops.push(stop);
+    }
+    if (stop === end) {
+      break;
+    }
+  }
+  return stops;
+};
+
 // 時計を止め、以後は runFor だけで進める。実時間で自動送りが発火しないようにする。
 const freezeClock = async (page: Page) => {
   await page.clock.install({ time: 0 });
@@ -93,40 +111,40 @@ test.describe("スポンサーの帯", () => {
 
   test("3秒ごとに1枚ずつ左へ送られ、最後から先頭へ戻る", async ({ page }) => {
     const t = track(page);
-    const [, second] = await offsets(t);
-    const end = await maxScroll(t);
-    expect(end).toBeGreaterThan(second);
+    const [first, ...rest] = await forwardStops(t);
     await page.clock.runFor(2900);
     expect(await scrollLeft(t)).toBe(0);
     await page.clock.runFor(100);
-    await settledAt(t, second);
-    await page.clock.runFor(3000);
-    await settledAt(t, end);
+    await settledAt(t, first);
+    for (const stop of rest) {
+      await page.clock.runFor(3000);
+      await settledAt(t, stop);
+    }
     await page.clock.runFor(3000);
     await settledAt(t, 0);
   });
 
   test("ボタンで1枚ずつ前後に送れ、キーボードでも押せる", async ({ page }) => {
     const t = track(page);
-    const [, second] = await offsets(t);
+    const [first, next2] = await forwardStops(t);
+    // 末尾まで来ていれば、次の送りは先頭へ戻る。
+    const second = next2 ?? 0;
     const next = page.getByRole("button", { name: "Next" });
     const prev = page.getByRole("button", { name: "Previous" });
     await next.click();
-    await settledAt(t, second);
+    await settledAt(t, first);
     await prev.click();
     await settledAt(t, 0);
     await next.focus();
     await page.keyboard.press("Enter");
-    await settledAt(t, second);
+    await settledAt(t, first);
     await page.keyboard.press("Space");
-    const all = await offsets(t);
-    const third = all.at(2) ?? 0;
-    await settledAt(t, Math.min(third, await maxScroll(t)));
+    await settledAt(t, second);
   });
 
   test("ホバー中は自動で送られず、外れると再開する", async ({ page }) => {
     const t = track(page);
-    const [, second] = await offsets(t);
+    const [first] = await forwardStops(t);
     const box = await t.boundingBox();
     expect(box).not.toBeNull();
     await page.mouse.move((box?.x ?? 0) + 20, (box?.y ?? 0) + 20);
@@ -134,7 +152,7 @@ test.describe("スポンサーの帯", () => {
     expect(await scrollLeft(t)).toBe(0);
     await page.mouse.move(2, 2);
     await page.clock.runFor(3000);
-    await settledAt(t, second);
+    await settledAt(t, first);
   });
 
   test("帯の中にフォーカスがある間は自動で送られない", async ({ page }) => {
@@ -151,7 +169,7 @@ test.describe("スポンサーの帯", () => {
     page,
   }) => {
     const t = track(page);
-    const [, second] = await offsets(t);
+    const [first] = await forwardStops(t);
     await page.getByRole("button", { name: "Pause" }).click();
     // 読み込み時の周期の途中まで進めてから再生し、再生の3秒後に送られることを確かめる。
     await page.clock.runFor(1500);
@@ -161,14 +179,14 @@ test.describe("スポンサーの帯", () => {
     await page.clock.runFor(2900);
     expect(await scrollLeft(t)).toBe(0);
     await page.clock.runFor(100);
-    await settledAt(t, second);
+    await settledAt(t, first);
   });
 
   test("キーボードで再生を押し、フォーカスがボタンに残ったままでも送られる", async ({
     page,
   }) => {
     const t = track(page);
-    const [, second] = await offsets(t);
+    const [first] = await forwardStops(t);
     const toggle = page.locator("[data-sponsors-toggle]");
     await toggle.focus();
     await page.keyboard.press("Enter");
@@ -181,7 +199,7 @@ test.describe("スポンサーの帯", () => {
     await page.clock.runFor(2900);
     expect(await scrollLeft(t)).toBe(0);
     await page.clock.runFor(100);
-    await settledAt(t, second);
+    await settledAt(t, first);
   });
 
   const parts = {
@@ -223,7 +241,7 @@ test.describe("スポンサーの帯", () => {
     page,
   }) => {
     const t = track(page);
-    const [, second] = await offsets(t);
+    const [first] = await forwardStops(t);
     await page.getByRole("button", { name: "Pause" }).click();
     await expect(page.getByRole("button", { name: "Play" })).toBeVisible();
     await leaveBand(page);
@@ -233,7 +251,7 @@ test.describe("スポンサーの帯", () => {
     await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
     await leaveBand(page);
     await page.clock.runFor(3000);
-    await settledAt(t, second);
+    await settledAt(t, first);
   });
 
   test("一時停止と再生はキーボードでも切り替えられる", async ({ page }) => {
@@ -288,12 +306,12 @@ test.describe("prefers-reduced-motion", () => {
     await page.goto("e2e-plain/");
     await skipUnlessOverflow(page);
     const t = track(page);
-    const [, second] = await offsets(t);
+    const [first] = await forwardStops(t);
     await expect(page.getByRole("button", { name: "Play" })).toBeVisible();
     await page.clock.runFor(12_000);
     expect(await scrollLeft(t)).toBe(0);
     await page.getByRole("button", { name: "Next" }).click();
-    await settledAt(t, second);
+    await settledAt(t, first);
   });
 
   test("初めは一時停止で、再生を押すと自動で送られる", async ({ page }) => {
@@ -302,11 +320,11 @@ test.describe("prefers-reduced-motion", () => {
     await page.goto("e2e-plain/");
     await skipUnlessOverflow(page);
     const t = track(page);
-    const [, second] = await offsets(t);
+    const [first] = await forwardStops(t);
     await page.getByRole("button", { name: "Play" }).click();
     await leaveBand(page);
     await page.clock.runFor(3000);
-    await settledAt(t, second);
+    await settledAt(t, first);
   });
 });
 
