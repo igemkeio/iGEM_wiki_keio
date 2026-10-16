@@ -171,7 +171,7 @@ function guessExt(contentType, url) {
   return m ? m[1].toLowerCase() : "png";
 }
 
-// 画像をダウンロードし、縮小してWebPにして web/public/notion-images に保存し、配信用パスを返す。
+// 画像をダウンロードし、縮小してWebPにして(SVGは変換せずそのまま)web/public/notion-images に保存し、配信用パスを返す。
 // 保存名は元画像のハッシュ。同じ名前があれば変換を飛ばす。失敗時は null。
 async function localizeImage(url) {
   try {
