@@ -168,7 +168,7 @@ export function DbtlPage({ page, dbtl }: { page: WikiPage; dbtl: Dbtl }) {
         <Island name="dbtl-stage" props={props}>
           <DbtlStage {...props} />
         </Island>
-        <div className={styles.box} id="dbtl-box">
+        <div className={styles.box} id="dbtl-box" tabIndex={-1}>
           {dbtl.parts.map((part) => (
             <Fragment key={part.label}>
               <header className={styles.part}>
