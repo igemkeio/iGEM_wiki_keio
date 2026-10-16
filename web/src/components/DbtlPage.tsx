@@ -142,6 +142,7 @@ function Cycle({ cycle, locale }: { cycle: DbtlCycle; locale: Locale }) {
 
 // dbtlのあるページ。intro、DBTLのステージ、outroの順に並べる。
 export function DbtlPage({ page, dbtl }: { page: WikiPage; dbtl: Dbtl }) {
+  const t = dbtlText(page.locale);
   const props = {
     locale: page.locale,
     cycles: allCycles(dbtl).map(toSummary),
@@ -168,7 +169,14 @@ export function DbtlPage({ page, dbtl }: { page: WikiPage; dbtl: Dbtl }) {
         <Island name="dbtl-stage" props={props}>
           <DbtlStage {...props} />
         </Island>
-        <div className={styles.box} id="dbtl-box" tabIndex={-1}>
+        {/* スクロールする領域はフォーカスできないと、JSが無いときにキーボードで動かせない */}
+        <section
+          className={styles.box}
+          id="dbtl-box"
+          // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- スクロールする領域はキーボードで到達できる必要がある
+          tabIndex={0}
+          aria-label={t.box}
+        >
           {dbtl.parts.map((part) => (
             <Fragment key={part.label}>
               <header className={styles.part}>
@@ -185,7 +193,7 @@ export function DbtlPage({ page, dbtl }: { page: WikiPage; dbtl: Dbtl }) {
             </Fragment>
           ))}
           <div className={styles.end} />
-        </div>
+        </section>
       </section>
       <div
         className={`${styles.body} prose`}
