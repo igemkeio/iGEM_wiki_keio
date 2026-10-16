@@ -88,7 +88,7 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 8px 0;
+    gap: 8px 6px;
     margin: 0;
     padding: 8px 0;
     list-style: none;
@@ -113,7 +113,6 @@
   }
 
   .cell {
-    position: relative;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -137,24 +136,9 @@
     outline-offset: 3px;
   }
 
-  /* 隣の個体と重ねて連結して見せ、つなぎ目に青いくびれを置く */
+  /* パネルをこの個体の真下に置く基準 */
   .item {
     position: relative;
-  }
-
-  .item + .item {
-    margin-left: -3px;
-  }
-
-  .item + .item .cell::before {
-    content: "";
-    position: absolute;
-    top: 4px;
-    bottom: 4px;
-    left: -5px;
-    width: 4px;
-    border-radius: 2px;
-    background: var(--color-accent-blue);
   }
 
   .arrow {
@@ -330,21 +314,6 @@
 
     .lang {
       justify-self: end;
-    }
-  }
-
-  /* 1段に収まらない幅では折り返すので、連結をやめて個体ごとに間を空ける */
-  @media (max-width: 1279px) {
-    .chain {
-      gap: 8px 6px;
-    }
-
-    .item + .item {
-      margin-left: 0;
-    }
-
-    .item + .item .cell::before {
-      display: none;
     }
   }
 
