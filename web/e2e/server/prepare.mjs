@@ -1,5 +1,5 @@
 // E2E用のビルド。WIKI_BASE=/keio/のdistをe2e/.site/keio/に退避してから、baseなしのdistを作る。
-// どちらもPRERENDER_ALL=1で、published: falseのE2E用ページも書き出す。
+// どちらもPRERENDER_ALL=1で、published: falseのE2E用ページも書き出す。画像などがdistに要るので、アップロードの対応表は使わない。
 import { execFileSync } from "node:child_process";
 import { cp, mkdir, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
@@ -11,7 +11,12 @@ function build(env) {
   execFileSync("npm", ["run", "build"], {
     cwd: root,
     stdio: "inherit",
-    env: { ...process.env, PRERENDER_ALL: "1", ...env },
+    env: {
+      ...process.env,
+      PRERENDER_ALL: "1",
+      WIKI_UPLOAD_MANIFEST: "",
+      ...env,
+    },
   });
 }
 

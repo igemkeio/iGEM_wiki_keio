@@ -3,6 +3,9 @@ import { build, preview } from "vite";
 
 import { prerender } from "./prerender.mjs";
 
+// 開発ではビルド後の差し替えを流さないので、アップロードの対応表は明示がなければ使わない。
+process.env.WIKI_UPLOAD_MANIFEST ??= "";
+
 let running = false;
 let pending = false;
 
