@@ -58,6 +58,15 @@
   /* 細胞の絵の、膜から伸びる柄 */
   --color-dbtl-stalk: #3b414b;
 
+  /* Human Practicesの上の帯の高さ */
+  --size-hp-bar: 52px;
+
+  /* 3つの用途と4章の色。ページをまたいで共通 */
+  --color-use-bandage: #d3381c;
+  --color-use-wire: #e0961e;
+  --color-use-cascade: #1e50a2;
+  --color-chapter4: #1f1a6b;
+
   /* 固定ヘッダーの高さ(幅768px以上の分だけ)。大腸菌の行が折り返す幅ごとの実測値(切り上げ)で、2段目の分は hover: none のときだけ足す。高さが下がる側の切り替え幅は、スクロールバーで折り返しが遅れる分を見て、実測の幅より20px上に置く */
   --size-header-bar: 159px;
   --size-header-sub: 0px;

@@ -2,6 +2,7 @@ import { withBase } from "./base";
 import { ArticlePage } from "./components/ArticlePage";
 import { DbtlPage } from "./components/DbtlPage";
 import { HomePage } from "./components/HomePage";
+import { HpPage } from "./components/HpPage";
 import { PageShell } from "./components/PageShell";
 import type { WikiPage } from "./content";
 import { ISLANDS } from "./islands";
@@ -14,13 +15,16 @@ export interface Assets {
   js: string;
 }
 
-// ページの型の出し分け。homeはヒーロー、dbtlがあればDBTLの画面、それ以外は本文。
+// ページの型の出し分け。homeはヒーロー、dbtlとhpはそれぞれ専用の画面、それ以外は本文。
 function Body({ page, routes }: { page: WikiPage; routes: Route[] }) {
   if (page.slug === "home") {
     return <HomePage page={page} routes={routes} />;
   }
   if (page.dbtl) {
     return <DbtlPage page={page} dbtl={page.dbtl} />;
+  }
+  if (page.hp) {
+    return <HpPage page={page} hp={page.hp} />;
   }
   return <ArticlePage page={page} />;
 }

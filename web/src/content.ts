@@ -47,6 +47,36 @@ export interface Dbtl {
   outro: string;
 }
 
+// Human Practicesの構造。形はcontent/README.mdのhpの節が正で、中身の深い検査はしない。
+export interface HpInterview {
+  no: string;
+  title: string;
+  person: string;
+  affiliation: string;
+  purposeHtml: string;
+  takeHomeHtml: string;
+  detailHtml: string;
+  // 題にXXXを含むときだけ付く。
+  draft?: boolean;
+}
+
+export interface HpUse {
+  no: string;
+  title: string;
+  subtitle: string;
+  introHtml: string;
+  interviews: HpInterview[];
+  conclusionHtml: string;
+}
+
+export interface Hp {
+  intro: string;
+  chapter0: { title: string; html: string };
+  chapter1: { title: string; introHtml: string; interviews: HpInterview[] };
+  chapter2: { title: string; introHtml: string; uses: HpUse[] };
+  chapter4: { title: string; html: string };
+}
+
 export interface RawWikiPage {
   slug: string;
   locale: Locale;
@@ -60,6 +90,7 @@ export interface RawWikiPage {
   published?: boolean;
   source?: "notion" | "local";
   dbtl?: Dbtl | null;
+  hp?: Hp | null;
 }
 
 export type WikiPage = Required<RawWikiPage>;
@@ -94,5 +125,6 @@ export function readPage(raw: unknown, source?: string): WikiPage {
     published: page.published ?? true,
     source: page.source ?? "notion",
     dbtl: page.dbtl ?? null,
+    hp: page.hp ?? null,
   };
 }
