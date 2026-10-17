@@ -1,7 +1,15 @@
 // web/public/の画像、PDF、フォント、3Dモデルを、iGEMのstatic.igem.wikiへアップロードする。手元で人が流す。CIでは流さない。
 // 認証情報は環境変数IGEM_USERNAMEとIGEM_PASSWORD。アップロード後に一覧を引いてURLをweb/upload-manifest.jsonに記録し、記録済みと、既にiGEM側にあるファイルは飛ばす。
 import { readdir, readFile, stat, writeFile } from "node:fs/promises";
-import { basename, dirname, join, relative, resolve, sep } from "node:path";
+import {
+  basename,
+  dirname,
+  extname,
+  join,
+  relative,
+  resolve,
+  sep,
+} from "node:path";
 
 const API = "https://api.igem.org/v1";
 const DIRECTORIES = [
@@ -11,6 +19,17 @@ const DIRECTORIES = [
   "images",
   "models",
 ];
+// iGEMは送られたMIMEで受け付けを決める(SVGがapplication/xmlと判定されて422になった)ので、拡張子から明示する。
+const MIME_TYPES = {
+  ".svg": "image/svg+xml",
+  ".webp": "image/webp",
+  ".png": "image/png",
+  ".pdf": "application/pdf",
+  ".woff2": "font/woff2",
+  ".glb": "model/gltf-binary",
+  ".avif": "image/avif",
+  ".jpg": "image/jpeg",
+};
 // iGEMは10MiBを超えるファイルを途中で切って受け付け、中身が壊れる。超えるファイルは上げない。
 const UPLOAD_LIMIT_BYTES = 10 * 1024 * 1024;
 const root = resolve(import.meta.dirname, "..");
@@ -219,7 +238,12 @@ async function listRemote(repo, directory) {
 // 成功は201で本文は空。URLは返らないので、呼び出し側が後から一覧で引く。
 async function upload(repo, file) {
   const form = new FormData();
-  form.append("file", new Blob([await readFile(file.abs)]), file.name);
+  const type = MIME_TYPES[extname(file.name).toLowerCase()] ?? "";
+  form.append(
+    "file",
+    new Blob([await readFile(file.abs)], { type }),
+    file.name
+  );
   await request(
     filesUrl(repo.teamId, repo.uuid, file.directory),
     { method: "POST", headers: { cookie: repo.cookie }, body: form },
