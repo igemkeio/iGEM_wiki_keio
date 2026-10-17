@@ -11,6 +11,8 @@ import {
   sep,
 } from "node:path";
 
+import { matchUploadedNames } from "./lib/upload-match.mjs";
+
 const API = "https://api.igem.org/v1";
 const DIRECTORIES = [
   "notion-images",
@@ -300,20 +302,34 @@ async function main() {
   }
   await writeManifest(manifest);
 
-  // アップロードの応答にURLが無いので、上げたディレクトリの一覧を1回ずつ引いて、元のパスと実際のURLを対応させる。
+  // アップロードの応答にURLが無いので、上げたディレクトリの一覧を1回ずつ引き直し、元のパスと実際のURLを対応させる。
+  // iGEMが名前を作り変えることがあるので、同じ名前が無いときは、上げる前の一覧との差分(新しく現れた名前)から引き当てる。
   for (const directory of uploadedDirectories) {
+    const before = [...(remote.get(directory)?.keys() ?? [])];
+    let after;
     try {
-      remote.set(directory, await listRemote(repo, directory));
+      after = await listRemote(repo, directory);
     } catch (error) {
       failed.push(`${directory}: ${error.message}`);
+      continue;
     }
-  }
-  for (const file of pending) {
-    const url = remote.get(file.directory)?.get(file.name);
-    if (typeof url === "string") {
-      manifest[file.path] = { url };
-    } else {
-      failed.push(`${file.path}: アップロード後の一覧にURLが見つかりません`);
+    remote.set(directory, after);
+    const inDirectory = pending.filter((file) => file.directory === directory);
+    const { matched } = matchUploadedNames(
+      inDirectory.map((file) => file.name),
+      before,
+      [...after.keys()]
+    );
+    for (const file of inDirectory) {
+      const name = matched.get(file.name);
+      if (typeof after.get(name) !== "string") {
+        failed.push(`${file.path}: アップロード後の一覧にURLが見つかりません`);
+        continue;
+      }
+      manifest[file.path] = { url: after.get(name) };
+      if (name !== file.name) {
+        console.log(`名前が変わりました: ${file.path} → ${name}`);
+      }
     }
   }
   await writeManifest(manifest);
