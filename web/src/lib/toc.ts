@@ -27,7 +27,7 @@ function decodeEntities(text: string): string {
   );
 }
 
-function toText(inner: string): string {
+export function toText(inner: string): string {
   return decodeEntities(
     inner
       .replaceAll(/<span class="katex-mathml">[\s\S]*?<\/span>/gu, "")
