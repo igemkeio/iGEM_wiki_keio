@@ -166,3 +166,41 @@ describe("パレット切り替え", () => {
     expect(found(parse(render(en)))).toHaveLength(0);
   });
 });
+
+const h3 = (n: number) =>
+  `<h3 id="h${n}">Step ${n}. A — あ</h3><p>本文${n}</p>`;
+const description = (locale: "en" | "ja", html: string) =>
+  readPage({ slug: "description", locale, title: "D", html });
+
+describe("Descriptionの出し分け", () => {
+  const sections = [
+    '<h2 id="s1">Introduction: 秩序</h2><p>本文</p>',
+    '<h2 id="s2">Engineering — 細胞</h2><p>本文</p>',
+    `<h2 id="s3">Our System: One Direction</h2><p>本文</p>${h3(1)}${h3(2)}${h3(3)}`,
+    `<h2 id="s4">Applications — 応用</h2><p>本文</p>${h3(4)}${h3(5)}${h3(6)}`,
+    '<h2 id="s5">Conclusion:</h2><p>本文</p>',
+  ].join("");
+  const body = [
+    '<h2 id="project-description">Project Description</h2>',
+    '<aside class="note"><h2 id="message">Message</h2><p>一</p></aside>',
+    sections,
+  ].join("");
+
+  it("jaは専用の部品で出す", () => {
+    const doc = parse(render(description("ja", body)));
+    expect(doc.querySelector("h1")?.textContent).toBe("ONE DIRECTION");
+    expect(doc.querySelector("#s3")?.textContent).toBe(
+      "Our System: One Direction"
+    );
+  });
+
+  it("enはArticlePageのまま", () => {
+    const doc = parse(render(description("en", body)));
+    expect(doc.querySelector("h1")?.textContent).toBe("D");
+  });
+
+  it("jaでも節の形が想定と違えばArticlePageで出す", () => {
+    const doc = parse(render(description("ja", "<h2>x</h2><p>y</p>")));
+    expect(doc.querySelector("h1")?.textContent).toBe("D");
+  });
+});

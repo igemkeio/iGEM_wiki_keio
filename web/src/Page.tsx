@@ -1,5 +1,6 @@
 import { withBase } from "./base";
 import { ArticlePage } from "./components/ArticlePage";
+import { DescriptionPage } from "./components/DescriptionPage";
 import { HomePage } from "./components/HomePage";
 import { PageShell } from "./components/PageShell";
 import type { WikiPage } from "./content";
@@ -11,6 +12,16 @@ export interface Assets {
   css: string[];
   // 島を使うページに読み込むブラウザ側のJS。
   js: string;
+}
+
+function Body({ page, routes }: { page: WikiPage; routes: Route[] }) {
+  if (page.slug === "home") {
+    return <HomePage page={page} routes={routes} />;
+  }
+  if (page.slug === "description" && page.locale === "ja") {
+    return <DescriptionPage page={page} />;
+  }
+  return <ArticlePage page={page} />;
 }
 
 export function Page({
@@ -41,11 +52,7 @@ export function Page({
       </head>
       <body>
         <PageShell page={page} routes={routes}>
-          {page.slug === "home" ? (
-            <HomePage page={page} routes={routes} />
-          ) : (
-            <ArticlePage page={page} />
-          )}
+          <Body page={page} routes={routes} />
         </PageShell>
         <script src={withBase("/footer-sponsors.js")} defer />
         {page.islands.some((name) => name in ISLANDS) && (
