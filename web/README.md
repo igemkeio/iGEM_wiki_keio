@@ -69,12 +69,15 @@ iGEMのwikiは成果物が5MBまで。画像、PDF、フォント、3Dモデル�
 | `WIKI_NOTION_BASE` | `https://static.igem.wiki/teams/6488/wiki` | 原稿の`/notion-images/...`と`/notion-files/...`の先頭をこの値に替える(`/notion-images`と`/notion-files`は付かないので、値はその親)。`dist/`から`notion-images/`と`notion-files/`を外す |
 | `WIKI_FONT_BASE` | `https://static.igem.wiki/teams/6488/wiki/fonts` | `@font-face`のURLの先頭を替える。`dist/`から`fonts/`を外す |
 | `WIKI_IMAGE_BASE` | `https://static.igem.wiki/teams/6488/wiki/images` | 画像のURLの先頭を替える。`dist/`から`images/`を外す |
+| `WIKI_UPLOAD_MANIFEST` | `./upload-manifest.json` | アップロードの対応表のパス。未指定なら`web/upload-manifest.json`があるときだけ使い、空文字なら使わない。使うときは上の3つの`WIKI_*_BASE`を黙って無視し、対応表のURLに差し替える(次の節) |
 | `WIKI_CHECK_SIZE` | `1` | `npm run check`が`dist/`の合計を5MBと比べる。本番の配信用のビルドで必ず付ける(下記) |
 
 - 原稿JSON(`content/`)は`/notion-images/...`のまま変えない。ビルドのとき、`src/lib/applyBase.ts`が原稿のhtmlのURLを`WIKI_NOTION_BASE`に替える。
 - `public/footer-sponsors.js`と`public/models/`は、どの環境変数を指定しても`dist/`に残る。3Dモデルのsrcとデコーダーの場所は`__WIKI_IMAGE_BASE__`を通らないので、モデルを外に出すのは別Issueで扱う。
 - 配信URLは`https://static.igem.wiki/teams/<id>/wiki/<ディレクトリ>/<ファイル名>`の形で、チームのidのあとに`/wiki`が挟まる。
-- 本番ビルドの例: `WIKI_BASE=/keio-japan/ WIKI_CHECK_SIZE=1 WIKI_NOTION_BASE=https://static.igem.wiki/teams/6488/wiki WIKI_FONT_BASE=https://static.igem.wiki/teams/6488/wiki/fonts WIKI_IMAGE_BASE=https://static.igem.wiki/teams/6488/wiki/images npm run build && npm run check`
+- 対応表を使うビルドでは、`WIKI_NOTION_BASE`、`WIKI_FONT_BASE`、`WIKI_IMAGE_BASE`より`WIKI_UPLOAD_MANIFEST`が優先される。3つを指定しても効かず、`dist/`のURLは対応表から決まる。従来の指定を効かせるときは`WIKI_UPLOAD_MANIFEST=`(空文字)を付ける。
+- 対応表を使う本番ビルドの例: `WIKI_BASE=/keio-japan/ WIKI_CHECK_SIZE=1 WIKI_UPLOAD_MANIFEST=./upload-manifest.json npm run build && WIKI_BASE=/keio-japan/ WIKI_CHECK_SIZE=1 WIKI_UPLOAD_MANIFEST=./upload-manifest.json npm run check`
+- 対応表を使わない本番ビルドの例: `WIKI_BASE=/keio-japan/ WIKI_CHECK_SIZE=1 WIKI_UPLOAD_MANIFEST= WIKI_NOTION_BASE=https://static.igem.wiki/teams/6488/wiki WIKI_FONT_BASE=https://static.igem.wiki/teams/6488/wiki/fonts WIKI_IMAGE_BASE=https://static.igem.wiki/teams/6488/wiki/images npm run build && npm run check`
 - GitLabでは、CI/CD変数`IGEM_TEAM_ID`にチームのidを入れると、`.gitlab-ci.yml`が上の3つと`WIKI_CHECK_SIZE=1`を渡す。`IGEM_TEAM_ID`が未設定ならジョブはそれを伝えて、ビルドの前に終了コード1で止まる。
 - KaTeXのフォントはwoff2だけを`dist/assets/`に出す。
 
@@ -95,7 +98,7 @@ iGEMのwikiは成果物が5MBまで。画像、PDF、フォント、3Dモデル�
 3. 認証情報が無いと、何を設定すればよいかを出して終了コード1で止まる(ネットワークには出ない)。
 4. スクリプトは`api.igem.org`にサインインし、`team_id`を取り(所属チームが複数あるときは一覧を出して止まるので、`IGEM_TEAM_ID`で上げ先を指定する)、wikiのリポジトリのuuidを取ってから、`notion-images`、`notion-files`、`fonts`、`images`、`models`の順にファイルを上げる。`public/`からの親ディレクトリをそのまま`directory`に使うので、`images/sponsors/`のような入れ子もそのままの位置に入る。
 5. アップロードの応答にURLは入らない。上げ終えたあとに各ディレクトリの一覧を1回ずつ引き、`web/upload-manifest.json`に`public/`からの相対パスをキーとしてURLを記録する。記録済みのファイルと、iGEM側の一覧に既にあるファイルは飛ばす(一覧にあって飛ばしたファイルもURLを記録する)。途中で止まっても再実行できる。
-6. 失敗したファイルは最後に一覧で出し、終了コード1にする。直して再実行する。
+6. 失敗したファイルは最後に一覧で出し、終了コード1にする。直して再実行する。引き当てに失敗したファイルは対応表に記録されず、再実行するとiGEM側に同じ内容のファイルが重複して増え、新しく現れた名前の候補がさらに曖昧になる。失敗が出たら、再実行の前にiGEM側の状態を確かめる。
    - 10MiBを超えるファイルは、上げずに一覧で報告して終了コード1にする。iGEMは10MiBで途中から切って受け付け、中身が壊れる。小さくしてから流す。
    - ファイルは拡張子から決めたMIMEを付けて送る(`.svg`、`.webp`、`.png`、`.pdf`、`.woff2`、`.glb`、`.avif`、`.jpg`)。MIMEを付けないとSVGがapplication/xmlと判定されて422で拒否される。
 7. 同じ名前が一覧に無いファイル(iGEMが名前を作り変えたもの)は、上げる前の一覧との差分(新しく現れた名前)から引き当てて`名前が変わりました: <元> → <新>`と出す。規則は、拡張子だけ違う同じ基底名、基底名の先頭のASCII英数字とハイフンを小文字にした部分(末尾のハイフンは除く)で前方一致する名前の順で、候補が1つに定まらないときと、複数のファイルが同じ候補を指すときは`アップロード後の一覧にURLが見つかりません`で失敗にする。`upload-manifest.json`は、ビルドが前節のとおりに引く。
