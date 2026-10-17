@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   splitAfterParagraph,
+  splitCardList,
   splitDescription,
   splitHeading,
 } from "./descriptionSections";
@@ -80,5 +81,27 @@ describe(splitDescription, () => {
 
   it("noteが無ければnull", () => {
     expect(splitDescription("<h2>x</h2>")).toBeNull();
+  });
+});
+
+const ol = (n: number) =>
+  `<ol>${"<li><strong>見出し。</strong> 説明。</li>".repeat(n)}</ol>`;
+
+describe(splitCardList, () => {
+  it("liをstrongの見出しと説明に割り、前後のhtmlを返す", () => {
+    expect(splitCardList(`<p>前</p>${ol(3)}<p>後</p>`, 3)).toStrictEqual({
+      before: "<p>前</p>",
+      after: "<p>後</p>",
+      items: Array.from({ length: 3 }, () => ({
+        heading: "見出し。",
+        text: "説明。",
+      })),
+    });
+  });
+
+  it("件数が違う、strongが無い、olが無いならnull", () => {
+    expect(splitCardList(ol(2), 3)).toBeNull();
+    expect(splitCardList("<ol><li>a</li><li>b</li></ol>", 2)).toBeNull();
+    expect(splitCardList("<p>x</p>", 3)).toBeNull();
   });
 });

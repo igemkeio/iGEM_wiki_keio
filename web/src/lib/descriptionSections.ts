@@ -170,3 +170,40 @@ export function splitDescription(html: string): DescriptionParts | null {
   });
   return { eyebrow, message, sections, refs, rest };
 }
+
+export interface ListCard {
+  // liの先頭のstrongの文。
+  heading: string;
+  // strongの後ろの文。
+  text: string;
+}
+
+export interface CardList {
+  before: string;
+  after: string;
+  items: ListCard[];
+}
+
+// 最初のolを取り出し、liをstrongの見出しと残りの説明に割る。liがn件でなければnull。
+export function splitCardList(html: string, count: number): CardList | null {
+  const ol = /<ol\b[^>]*>([\s\S]*?)<\/ol>/u.exec(html);
+  if (!ol) {
+    return null;
+  }
+  const items = [...ol[1].matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gu)].map(
+    (li) => {
+      const strong = /^\s*<strong>([\s\S]*?)<\/strong>([\s\S]*)$/u.exec(li[1]);
+      return strong
+        ? { heading: toText(strong[1]), text: toText(strong[2]) }
+        : null;
+    }
+  );
+  if (items.length !== count || items.some((item) => !item)) {
+    return null;
+  }
+  return {
+    before: html.slice(0, ol.index),
+    after: html.slice(ol.index + ol[0].length),
+    items: items as ListCard[],
+  };
+}
