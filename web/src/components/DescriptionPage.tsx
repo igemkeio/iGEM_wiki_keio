@@ -1,6 +1,7 @@
 import type { WikiPage } from "../content";
 import { applyBase } from "../lib/applyBase";
 import {
+  dropDraft,
   splitAfterParagraph,
   splitCardList,
   splitDescription,
@@ -8,7 +9,6 @@ import {
 } from "../lib/descriptionSections";
 import type { DescriptionSection } from "../lib/descriptionSections";
 import { notionBase } from "../lib/notionBase";
-import { buildToc } from "../lib/toc";
 import { ArticlePage } from "./ArticlePage";
 import {
   AdhesionFigure,
@@ -16,7 +16,6 @@ import {
   DescriptionDefs,
   IntroFigure,
 } from "./DescriptionFigures";
-import { Toc } from "./Toc";
 
 import styles from "./DescriptionPage.module.css";
 
@@ -182,7 +181,9 @@ function Zoom({
 
 // 日本語版のDescription。原稿htmlを節に切り分け、分解図の枠に流し込む。形が想定と違えばArticlePageで出す。
 export function DescriptionPage({ page }: { page: WikiPage }) {
-  const parts = splitDescription(page.html);
+  // 原稿の下書きは画面に出さない。
+  const shown: WikiPage = { ...page, html: dropDraft(page.html) };
+  const parts = splitDescription(shown.html);
   const [intro, engineering, system, apps, conclusion] = parts?.sections ?? [];
   if (
     !parts ||
@@ -190,7 +191,7 @@ export function DescriptionPage({ page }: { page: WikiPage }) {
     system.subsections.length !== 3 ||
     apps.subsections.length !== 3
   ) {
-    return <ArticlePage page={page} />;
+    return <ArticlePage page={shown} />;
   }
   const cardList = splitCardList(system.body, cards.length);
   const bandApps = apps.subsections.map((sub) =>
@@ -201,7 +202,7 @@ export function DescriptionPage({ page }: { page: WikiPage }) {
     bandApps.some((app) => !app) ||
     new Set(bandApps).size !== applications.length
   ) {
-    return <ArticlePage page={page} />;
+    return <ArticlePage page={shown} />;
   }
 
   const imgAt = intro.body.indexOf("<img");
@@ -225,175 +226,164 @@ export function DescriptionPage({ page }: { page: WikiPage }) {
   );
 
   return (
-    <>
-      <Toc items={buildToc(page.html)} locale={page.locale} />
-      <main className={styles.main}>
-        <DescriptionDefs />
+    <main className={styles.main}>
+      <DescriptionDefs />
 
-        <div className={styles.hero}>
-          <span id="project-description" className={styles.eyebrow}>
-            {parts.eyebrow}
-          </span>
-          <h1 className={styles.visuallyHidden}>{page.title}</h1>
-          <p className={styles.display}>ONE DIRECTION</p>
-          <figure>
-            <section
-              className={styles.scrollx}
-              aria-label="細胞3つの連結図"
-              // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- キーボードで横にスクロールできるようにする
-              tabIndex={0}
-            >
-              <ChainFigure />
-            </section>
-            <p className={styles.hintx}>横にスクロールできる</p>
-          </figure>
-          <div className={styles.msgline}>
-            <span className={styles.eyebrow}>Message</span>
-            {columns.map((col, i) => (
-              // oxlint-disable-next-line react/no-array-index-key -- 並びの固定した静的な列
-              <div key={i}>
-                {col.map((p, j) => (
-                  <p
-                    // oxlint-disable-next-line react/no-array-index-key -- 同文の段落があり得る
-                    key={j}
-                    className={p.emphasis ? styles.hi : undefined}
-                    dangerouslySetInnerHTML={{ __html: p.html }}
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
+      <div className={styles.hero}>
+        <span id="project-description" className={styles.eyebrow}>
+          {parts.eyebrow}
+        </span>
+        <h1 className={styles.visuallyHidden}>{page.title}</h1>
+        <p className={styles.display}>ONE DIRECTION</p>
+        <figure>
+          <section
+            className={styles.scrollx}
+            aria-label="細胞3つの連結図"
+            // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- キーボードで横にスクロールできるようにする
+            tabIndex={0}
+          >
+            <ChainFigure />
+          </section>
+          <p className={styles.hintx}>横にスクロールできる</p>
+        </figure>
+        <div className={styles.msgline}>
+          <span className={styles.eyebrow}>Message</span>
+          {columns.map((col, i) => (
+            // oxlint-disable-next-line react/no-array-index-key -- 並びの固定した静的な列
+            <div key={i}>
+              {col.map((p, j) => (
+                <p
+                  // oxlint-disable-next-line react/no-array-index-key -- 同文の段落があり得る
+                  key={j}
+                  className={p.emphasis ? styles.hi : undefined}
+                  dangerouslySetInnerHTML={{ __html: p.html }}
+                />
+              ))}
+            </div>
+          ))}
         </div>
+      </div>
 
-        <section>
-          <Sbar no={1} section={intro} />
-          <Prose html={introHead} className={styles.bodyTop} />
-          <figure className={styles.plate}>
-            <IntroFigure />
-            <figcaption className={styles.caption}>
-              図1　同じ部品でも、向きがそろうかどうかで系の働きは変わる。
-            </figcaption>
-          </figure>
-          <Prose html={introTail} />
-        </section>
+      <section>
+        <Sbar no={1} section={intro} />
+        <Prose html={introHead} className={styles.bodyTop} />
+        <figure className={styles.plate}>
+          <IntroFigure />
+          <figcaption className={styles.caption}>
+            図1　同じ部品でも、向きがそろうかどうかで系の働きは変わる。
+          </figcaption>
+        </figure>
+        <Prose html={introTail} />
+      </section>
 
-        <section>
-          <Sbar no={2} section={engineering} />
-          <Prose html={engHead} className={styles.bodyTop} />
-          <figure className={styles.plate}>
-            <AdhesionFigure />
-            <figcaption className={styles.caption}>
-              図2　既存の接着技術が決められること（左）と、残っている自由度（右）。
-            </figcaption>
-          </figure>
-          <Prose html={engTail} />
-        </section>
+      <section>
+        <Sbar no={2} section={engineering} />
+        <Prose html={engHead} className={styles.bodyTop} />
+        <figure className={styles.plate}>
+          <AdhesionFigure />
+          <figcaption className={styles.caption}>
+            図2　既存の接着技術が決められること（左）と、残っている自由度（右）。
+          </figcaption>
+        </figure>
+        <Prose html={engTail} />
+      </section>
 
-        <section>
-          <Sbar no={3} section={system} />
-          <Prose html={cardList.before} className={styles.bodyTop} />
-          <div className={styles.plates}>
-            {cards.map((card, i) => (
-              <article key={card.no} className={styles.plate3}>
-                <div className={styles.zoom}>
-                  <Zoom
-                    viewBox={card.viewBox}
-                    label={card.label}
-                    symbol={card.symbol}
-                  />
+      <section>
+        <Sbar no={3} section={system} />
+        <Prose html={cardList.before} className={styles.bodyTop} />
+        <div className={styles.plates}>
+          {cards.map((card, i) => (
+            <article key={card.no} className={styles.plate3}>
+              <div className={styles.zoom}>
+                <Zoom
+                  viewBox={card.viewBox}
+                  label={card.label}
+                  symbol={card.symbol}
+                />
+              </div>
+              <div className={styles.tx}>
+                <span className={styles.cardNo}>{card.no}</span>
+                <span className={styles.en3}>{card.en}</span>
+                <h3>{cardList.items[i].heading}</h3>
+                <p>{cardList.items[i].text}</p>
+                <p className={styles.parts}>{card.parts}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+        <Prose html={cardList.after} className={styles.afterPlates} />
+        {system.subsections.map((step, i) => {
+          const { title, sub } = splitHeading(step.heading);
+          return (
+            <div key={step.id} className={styles.stepblock}>
+              <div className={styles.stephead}>
+                <div className={styles.mini}>
+                  <Zoom {...stepThumbs[i]} />
                 </div>
-                <div className={styles.tx}>
-                  <span className={styles.cardNo}>{card.no}</span>
-                  <span className={styles.en3}>{card.en}</span>
-                  <h3>{cardList.items[i].heading}</h3>
-                  <p>{cardList.items[i].text}</p>
-                  <p className={styles.parts}>{card.parts}</p>
+                <div>
+                  <b>
+                    {stepMarks[i]} {title.replace(/^(Step \d)\.\s*/u, "$1 — ")}
+                  </b>
+                  <h3 id={step.id}>{sub ?? title}</h3>
                 </div>
-              </article>
-            ))}
-          </div>
-          <Prose html={cardList.after} className={styles.afterPlates} />
-          {system.subsections.map((step, i) => {
-            const { title, sub } = splitHeading(step.heading);
+              </div>
+              <Prose html={step.body} />
+            </div>
+          );
+        })}
+      </section>
+
+      <section>
+        <Sbar no={4} section={apps} />
+        <Prose html={apps.body} className={styles.bodyTop} />
+        <div className={styles.bands}>
+          {apps.subsections.map((sub, i) => {
+            const { title, sub: name } = splitHeading(sub.heading);
+            const app = bandApps[i] as Application;
             return (
-              <div key={step.id} className={styles.stepblock}>
-                <div className={styles.stephead}>
-                  <div className={styles.mini}>
-                    <Zoom {...stepThumbs[i]} />
+              <div key={sub.id} className={`${styles.band} ${app.className}`}>
+                <div className={styles.bandIn}>
+                  <div className={styles.ico}>
+                    <svg viewBox="0 0 56 56" aria-hidden="true">
+                      {app.icon}
+                    </svg>
                   </div>
                   <div>
-                    <b>
-                      {stepMarks[i]}{" "}
-                      {title.replace(/^(Step \d)\.\s*/u, "$1 — ")}
-                    </b>
-                    <h3 id={step.id}>{sub ?? title}</h3>
+                    <span className={styles.bn}>
+                      {title} — {app.field}
+                    </span>
+                    <h3 id={sub.id}>{name ?? title}</h3>
+                    <p className={styles.one}>{app.one}</p>
                   </div>
+                  <div
+                    className={styles.desc}
+                    dangerouslySetInnerHTML={{
+                      __html: fix(bandBodies[i][0]),
+                    }}
+                  />
                 </div>
-                <Prose html={step.body} />
               </div>
             );
           })}
+        </div>
+        <Prose html={appsTail} className={styles.afterPlates} />
+      </section>
+
+      <section>
+        <Sbar no={5} section={conclusion} />
+        <Prose html={conclusion.body} className={styles.bodyTop} />
+      </section>
+
+      {parts.refs.length > 0 && (
+        <section className={styles.refs}>
+          <h3 id="参考文献">参考文献</h3>
+          <ol>
+            {parts.refs.map((ref) => (
+              <li key={ref} dangerouslySetInnerHTML={{ __html: ref }} />
+            ))}
+          </ol>
         </section>
-
-        <section>
-          <Sbar no={4} section={apps} />
-          <Prose html={apps.body} className={styles.bodyTop} />
-          <div className={styles.bands}>
-            {apps.subsections.map((sub, i) => {
-              const { title, sub: name } = splitHeading(sub.heading);
-              const app = bandApps[i] as Application;
-              return (
-                <div key={sub.id} className={`${styles.band} ${app.className}`}>
-                  <div className={styles.bandIn}>
-                    <div className={styles.ico}>
-                      <svg viewBox="0 0 56 56" aria-hidden="true">
-                        {app.icon}
-                      </svg>
-                    </div>
-                    <div>
-                      <span className={styles.bn}>
-                        {title} — {app.field}
-                      </span>
-                      <h3 id={sub.id}>{name ?? title}</h3>
-                      <p className={styles.one}>{app.one}</p>
-                    </div>
-                    <div
-                      className={styles.desc}
-                      dangerouslySetInnerHTML={{
-                        __html: fix(bandBodies[i][0]),
-                      }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <Prose html={appsTail} className={styles.afterPlates} />
-        </section>
-
-        <section>
-          <Sbar no={5} section={conclusion} />
-          <Prose html={conclusion.body} className={styles.bodyTop} />
-        </section>
-
-        {parts.refs.length > 0 && (
-          <section className={styles.refs}>
-            <h3 id="参考文献">参考文献</h3>
-            <ol>
-              {parts.refs.map((ref) => (
-                <li key={ref} dangerouslySetInnerHTML={{ __html: ref }} />
-              ))}
-            </ol>
-          </section>
-        )}
-
-        {parts.rest !== "" && (
-          <div
-            className={`${styles.rest} prose`}
-            dangerouslySetInnerHTML={{ __html: fix(parts.rest) }}
-          />
-        )}
-      </main>
-    </>
+      )}
+    </main>
   );
 }

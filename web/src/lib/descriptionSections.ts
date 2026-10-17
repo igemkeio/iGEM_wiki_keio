@@ -32,8 +32,6 @@ export interface DescriptionParts {
   sections: DescriptionSection[];
   // 参考文献の各項目のhtml。先頭の[n]は外す。
   refs: string[];
-  // 下書きの見出し以降のhtml。無ければ空。
-  rest: string;
 }
 
 const noteAside =
@@ -124,6 +122,14 @@ export function splitAfterParagraph(
   return null;
 }
 
+// 見出しに「下書き」を含む最初のh2から後ろを落とす。原稿の下書きが消えたら外せる。
+export function dropDraft(html: string): string {
+  const draft = headings(html).find(
+    (h) => h.level === 2 && h.text.includes("下書き")
+  );
+  return draft ? html.slice(0, draft.start) : html;
+}
+
 // Descriptionの原稿htmlを、画面を組む単位に切り分ける。形が想定と違えばnull。
 export function splitDescription(html: string): DescriptionParts | null {
   const note = noteAside.exec(html);
@@ -142,17 +148,17 @@ export function splitDescription(html: string): DescriptionParts | null {
 
   const afterNote = html.slice(note.index + note[0].length);
   const h2s = headings(afterNote).filter((h) => h.level === 2);
-  const draftAt = h2s.findIndex((h) => h.id.startsWith("下書き"));
-  const main = draftAt === -1 ? h2s : h2s.slice(0, draftAt);
-  const rest = draftAt === -1 ? "" : afterNote.slice(h2s[draftAt].start);
-  const mainEnd = draftAt === -1 ? afterNote.length : h2s[draftAt].start;
+  const main = h2s;
   if (main.length === 0) {
     return null;
   }
 
   let refs: string[] = [];
   const sections = main.map((h, i) => {
-    const inner = afterNote.slice(h.end, main[i + 1]?.start ?? mainEnd);
+    const inner = afterNote.slice(
+      h.end,
+      main[i + 1]?.start ?? afterNote.length
+    );
     const { body, subsections } = splitByH3(inner);
     const refAt = subsections.findIndex((s) => s.id === "参考文献");
     if (refAt === -1) {
@@ -168,7 +174,7 @@ export function splitDescription(html: string): DescriptionParts | null {
       subsections: subsections.filter((_, j) => j !== refAt),
     };
   });
-  return { eyebrow, message, sections, refs, rest };
+  return { eyebrow, message, sections, refs };
 }
 
 export interface ListCard {

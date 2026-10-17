@@ -374,19 +374,10 @@
   }
 
   /* Applications。色帯 */
-  /* PageShellのpaddingと、目次(幅1100px以上)とflexのgap 40pxの分を食い出して、frameの端まで広げる */
+  /* PageShellのpaddingの分を食い出して、frameの端まで広げる */
   .bands {
-    /* 左に食い出した分で、固定の目次がこの上に重ならないようにする */
-    position: relative;
-    z-index: 1;
     margin-top: 30px;
     margin-inline: calc(-1 * var(--space-frame-x));
-  }
-
-  @media (min-width: 1100px) {
-    .bands {
-      margin-left: calc(-1 * (var(--space-frame-x) + var(--size-toc) + 40px));
-    }
   }
 
   @media (max-width: 767px) {
@@ -475,10 +466,6 @@
 
   .refs li {
     margin-bottom: 6px;
-  }
-
-  .rest {
-    margin-top: 90px;
   }
 
   /* 細胞3つの連結図は横に長い。狭い幅では横スクロールで原寸を保つ */

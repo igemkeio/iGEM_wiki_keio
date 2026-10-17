@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  dropDraft,
   splitAfterParagraph,
   splitCardList,
   splitDescription,
@@ -50,15 +51,14 @@ describe(splitAfterParagraph, () => {
 });
 
 describe(splitDescription, () => {
-  const parts = splitDescription(html);
+  const parts = splitDescription(dropDraft(html));
 
-  it("見出し、メッセージ、下書きを分ける", () => {
+  it("見出しとメッセージを分ける", () => {
     expect(parts?.eyebrow).toBe("Project Description");
     expect(parts?.message).toStrictEqual([
       { html: "一", emphasis: false },
       { html: "二", emphasis: true },
     ]);
-    expect(parts?.rest).toBe('<h2 id="下書き1">下書き1</h2><p>draft</p>');
   });
 
   it("節をh2で割り、h3を節の下に入れる", () => {
@@ -71,12 +71,6 @@ describe(splitDescription, () => {
 
   it("参考文献を節から外して[n]を落とす", () => {
     expect(parts?.refs).toStrictEqual(["Foo, 2020.", "Bar, 2021."]);
-  });
-
-  it("下書きが無ければrestは空", () => {
-    expect(
-      splitDescription(html.split("\n").slice(0, 6).join("\n"))?.rest
-    ).toBe("");
   });
 
   it("noteが無ければnull", () => {
@@ -103,5 +97,25 @@ describe(splitCardList, () => {
     expect(splitCardList(ol(2), 3)).toBeNull();
     expect(splitCardList("<ol><li>a</li><li>b</li></ol>", 2)).toBeNull();
     expect(splitCardList("<p>x</p>", 3)).toBeNull();
+  });
+});
+
+describe(dropDraft, () => {
+  it("下書きを含む最初のh2から後ろを落とす", () => {
+    expect(
+      dropDraft(
+        '<h2 id="a">本編</h2><p>x</p><h2 id="b">以下、下書き</h2><p>y</p><h2 id="c">本編風</h2>'
+      )
+    ).toBe('<h2 id="a">本編</h2><p>x</p>');
+  });
+
+  it("下書きが無ければそのまま返す", () => {
+    expect(dropDraft("<h2>a</h2><p>x</p>")).toBe("<h2>a</h2><p>x</p>");
+  });
+
+  it("h3の下書きは落とさない", () => {
+    expect(dropDraft("<h3>下書き</h3><p>x</p>")).toBe(
+      "<h3>下書き</h3><p>x</p>"
+    );
   });
 });
