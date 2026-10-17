@@ -10,6 +10,15 @@
     position: absolute;
   }
 
+  .visuallyHidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
   .eyebrow {
     color: var(--color-muted);
     font-family: var(--font-heading);
@@ -26,7 +35,7 @@
     background: var(--color-surface);
   }
 
-  .hero h1 {
+  .display {
     margin-top: 10px;
     font-family: var(--font-heading);
     font-size: clamp(34px, 6vw, 72px);
@@ -151,7 +160,7 @@
     font-family: var(--font-body);
   }
 
-  figcaption {
+  .caption {
     margin-top: 8px;
     color: var(--color-muted);
     font-size: 12.5px;
@@ -365,8 +374,25 @@
   }
 
   /* Applications。色帯 */
+  /* PageShellのpaddingと、目次(幅1100px以上)とflexのgap 40pxの分を食い出して、frameの端まで広げる */
   .bands {
+    /* 左に食い出した分で、固定の目次がこの上に重ならないようにする */
+    position: relative;
+    z-index: 1;
     margin-top: 30px;
+    margin-inline: calc(-1 * var(--space-frame-x));
+  }
+
+  @media (min-width: 1100px) {
+    .bands {
+      margin-left: calc(-1 * (var(--space-frame-x) + var(--size-toc) + 40px));
+    }
+  }
+
+  @media (max-width: 767px) {
+    .bands {
+      margin-inline: -24px;
+    }
   }
 
   .band {

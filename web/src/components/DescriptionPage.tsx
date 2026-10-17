@@ -2,6 +2,7 @@ import type { WikiPage } from "../content";
 import { applyBase } from "../lib/applyBase";
 import {
   splitAfterParagraph,
+  splitCardList,
   splitDescription,
   splitHeading,
 } from "../lib/descriptionSections";
@@ -22,8 +23,6 @@ import styles from "./DescriptionPage.module.css";
 interface Card {
   no: string;
   en: string;
-  heading: string;
-  text: string;
   parts: string;
   viewBox: string;
   label: string;
@@ -34,28 +33,22 @@ const cards: Card[] = [
   {
     no: "①",
     en: "Split the poles",
-    heading: "細胞の向きを定義すること。",
-    text: "2つの細胞極を異なる機能を持つ領域として区別する。",
     parts: "PopZ / DivIVA",
     viewBox: "190 180 500 300",
-    label: "両極の拡大。左にPopZ、右にDivIVA",
+    label: "細胞の拡大。左極にPopZ、右極にDivIVAが局在する",
     symbol: "desc-cross",
   },
   {
     no: "②",
     en: "Choose the partner",
-    heading: "それぞれの極に接着機能を与えること。",
-    text: "細胞極の位置情報を利用し、対応する接着分子を細胞表面に配置する。",
     parts: "Intimin–Ag ⇄ Intimin–Nb",
     viewBox: "120 180 500 300",
-    label: "左極の拡大。コイルドコイルを経て外膜にAgが提示される",
+    label: "細胞の左側の拡大。PopZの局在と、外膜にAgが提示される様子",
     symbol: "desc-cross",
   },
   {
     no: "③",
     en: "Link at the pole",
-    heading: "定義した方向に従って細胞をつなげること。",
-    text: "極ごとに異なる接着特異性を利用し、細胞の相対的な向きを制御する。",
     parts: "CoilE × CoilR",
     viewBox: "160 20 500 300",
     label: "接合部の拡大。AgとNbがかみ合う",
@@ -68,6 +61,8 @@ const stepThumbs = cards.map(({ viewBox, symbol }) => ({ viewBox, symbol }));
 const stepMarks = ["①", "②", "③"];
 
 interface Application {
+  // 原稿のh3のid(前方一致)。
+  idPrefix: string;
   field: string;
   one: string;
   className: string;
@@ -76,6 +71,7 @@ interface Application {
 
 const applications: Application[] = [
   {
+    idPrefix: "bacterial-wires",
     field: "エネルギー",
     one: "信号を一方向に伝える、生きた配線。",
     className: styles.bandWire,
@@ -92,6 +88,7 @@ const applications: Application[] = [
     ),
   },
   {
+    idPrefix: "smart-bandages",
     field: "材料",
     one: "必要なものを、決まった向きに届ける。",
     className: styles.bandBandage,
@@ -113,6 +110,7 @@ const applications: Application[] = [
     ),
   },
   {
+    idPrefix: "cascade-enzyme-pathways",
     field: "製造",
     one: "反応の順番を、細胞の並びで決める。",
     className: styles.bandCascade,
@@ -194,28 +192,37 @@ export function DescriptionPage({ page }: { page: WikiPage }) {
   ) {
     return <ArticlePage page={page} />;
   }
+  const cardList = splitCardList(system.body, cards.length);
+  const bandApps = apps.subsections.map((sub) =>
+    applications.find((app) => sub.id.startsWith(app.idPrefix))
+  );
+  if (
+    !cardList ||
+    bandApps.some((app) => !app) ||
+    new Set(bandApps).size !== applications.length
+  ) {
+    return <ArticlePage page={page} />;
+  }
 
   const imgAt = intro.body.indexOf("<img");
   const introHead = imgAt === -1 ? intro.body : intro.body.slice(0, imgAt);
   const introTail = imgAt === -1 ? "" : intro.body.slice(imgAt);
 
+  // 図2は、既存技術の説明(4段落)の直後、課題を述べる「すなわち」の段落の前に置く。
   const [engHead, engTail] = splitAfterParagraph(engineering.body, 4) ?? [
     engineering.body,
     "",
   ];
-
-  const olMatch = /<ol\b[\s\S]*?<\/ol>/u.exec(system.body);
-  const sysHead = olMatch ? system.body.slice(0, olMatch.index) : system.body;
-  const sysTail = olMatch
-    ? system.body.slice(olMatch.index + olMatch[0].length)
-    : "";
 
   const bandBodies = apps.subsections.map(
     (s) => splitAfterParagraph(s.body, 1) ?? [s.body, ""]
   );
   const appsTail = bandBodies.map(([, rest]) => rest).join("");
 
-  const columns = [0, 2, 4].map((i) => parts.message.slice(i, i + 2));
+  const columns = Array.from(
+    { length: Math.ceil(parts.message.length / 2) },
+    (_, i) => parts.message.slice(i * 2, i * 2 + 2)
+  );
 
   return (
     <>
@@ -223,22 +230,32 @@ export function DescriptionPage({ page }: { page: WikiPage }) {
       <main className={styles.main}>
         <DescriptionDefs />
 
-        <header className={styles.hero}>
-          <span className={styles.eyebrow}>{parts.eyebrow}</span>
-          <h1>ONE DIRECTION</h1>
+        <div className={styles.hero}>
+          <span id="project-description" className={styles.eyebrow}>
+            {parts.eyebrow}
+          </span>
+          <h1 className={styles.visuallyHidden}>{page.title}</h1>
+          <p className={styles.display}>ONE DIRECTION</p>
           <figure>
-            <div className={styles.scrollx}>
+            <section
+              className={styles.scrollx}
+              aria-label="細胞3つの連結図"
+              // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- キーボードで横にスクロールできるようにする
+              tabIndex={0}
+            >
               <ChainFigure />
-            </div>
+            </section>
             <p className={styles.hintx}>横にスクロールできる</p>
           </figure>
           <div className={styles.msgline}>
             <span className={styles.eyebrow}>Message</span>
-            {columns.map((col) => (
-              <div key={col[0]?.html}>
-                {col.map((p) => (
+            {columns.map((col, i) => (
+              // oxlint-disable-next-line react/no-array-index-key -- 並びの固定した静的な列
+              <div key={i}>
+                {col.map((p, j) => (
                   <p
-                    key={p.html}
+                    // oxlint-disable-next-line react/no-array-index-key -- 同文の段落があり得る
+                    key={j}
                     className={p.emphasis ? styles.hi : undefined}
                     dangerouslySetInnerHTML={{ __html: p.html }}
                   />
@@ -246,14 +263,14 @@ export function DescriptionPage({ page }: { page: WikiPage }) {
               </div>
             ))}
           </div>
-        </header>
+        </div>
 
         <section>
           <Sbar no={1} section={intro} />
           <Prose html={introHead} className={styles.bodyTop} />
           <figure className={styles.plate}>
             <IntroFigure />
-            <figcaption>
+            <figcaption className={styles.caption}>
               図1　同じ部品でも、向きがそろうかどうかで系の働きは変わる。
             </figcaption>
           </figure>
@@ -265,7 +282,7 @@ export function DescriptionPage({ page }: { page: WikiPage }) {
           <Prose html={engHead} className={styles.bodyTop} />
           <figure className={styles.plate}>
             <AdhesionFigure />
-            <figcaption>
+            <figcaption className={styles.caption}>
               図2　既存の接着技術が決められること（左）と、残っている自由度（右）。
             </figcaption>
           </figure>
@@ -274,9 +291,9 @@ export function DescriptionPage({ page }: { page: WikiPage }) {
 
         <section>
           <Sbar no={3} section={system} />
-          <Prose html={sysHead} className={styles.bodyTop} />
+          <Prose html={cardList.before} className={styles.bodyTop} />
           <div className={styles.plates}>
-            {cards.map((card) => (
+            {cards.map((card, i) => (
               <article key={card.no} className={styles.plate3}>
                 <div className={styles.zoom}>
                   <Zoom
@@ -288,14 +305,14 @@ export function DescriptionPage({ page }: { page: WikiPage }) {
                 <div className={styles.tx}>
                   <span className={styles.cardNo}>{card.no}</span>
                   <span className={styles.en3}>{card.en}</span>
-                  <h3>{card.heading}</h3>
-                  <p>{card.text}</p>
+                  <h3>{cardList.items[i].heading}</h3>
+                  <p>{cardList.items[i].text}</p>
                   <p className={styles.parts}>{card.parts}</p>
                 </div>
               </article>
             ))}
           </div>
-          <Prose html={sysTail} className={styles.afterPlates} />
+          <Prose html={cardList.after} className={styles.afterPlates} />
           {system.subsections.map((step, i) => {
             const { title, sub } = splitHeading(step.heading);
             return (
@@ -324,7 +341,7 @@ export function DescriptionPage({ page }: { page: WikiPage }) {
           <div className={styles.bands}>
             {apps.subsections.map((sub, i) => {
               const { title, sub: name } = splitHeading(sub.heading);
-              const app = applications[i];
+              const app = bandApps[i] as Application;
               return (
                 <div key={sub.id} className={`${styles.band} ${app.className}`}>
                   <div className={styles.bandIn}>
