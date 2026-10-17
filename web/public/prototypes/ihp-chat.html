@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IHPチャット プロトタイプ</title>
+<style>
+  @font-face { font-family: "Montserrat"; font-weight: 100 900; font-display: swap; src: url("../fonts/montserrat.woff2") format("woff2"); }
+  @font-face { font-family: "Noto Sans JP"; font-weight: 400; font-display: swap; src: url("../fonts/noto-sans-jp-400.woff2") format("woff2"); }
+  @font-face { font-family: "Noto Sans JP"; font-weight: 700; font-display: swap; src: url("../fonts/noto-sans-jp-700.woff2") format("woff2"); }
+
+  :root {
+    --color-ink: #0d0f12;
+    --color-muted: #5d646e;
+    --color-line: rgba(13, 15, 18, 0.24);
+    --color-rule: rgba(13, 15, 18, 0.12);
+    --color-page: #dfe4ea;
+    --color-surface: #ffffff;
+    --color-accent-orange: #ffb347;
+    --color-accent-blue: #2962ff;
+    --font-heading: "Montserrat", "Noto Sans JP", sans-serif;
+    --font-body: "Noto Sans JP", sans-serif;
+    --radius-card: 24px;
+    --bubble-them: #ffffff;
+    --bubble-us: #2962ff;
+    --bubble-us-ink: #ffffff;
+    --chat-bg: #eef1f4;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  * { margin: 0; }
+  body {
+    background: var(--color-page);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.8;
+    padding: 48px 16px;
+  }
+  .frame { max-width: 1200px; margin: 0 auto; }
+  .page-title { font-family: var(--font-heading); font-size: clamp(36px, 6vw, 64px); font-weight: 500; line-height: 1; letter-spacing: .01em; }
+  .page-lead { margin-top: 16px; max-width: 576px; color: var(--color-muted); }
+
+  .ihp {
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    height: min(760px, calc(100vh - 96px));
+    min-height: 520px;
+    background: var(--color-surface);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    box-shadow: 0 1px 0 var(--color-rule);
+  }
+
+  /* 左: 対話相手の一覧 */
+  .people { border-right: 1px solid var(--color-rule); overflow-y: auto; padding: 12px; }
+  .people-head { padding: 8px 8px 12px; font-family: var(--font-heading); font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--color-muted); }
+  .person {
+    display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center;
+    width: 100%; padding: 10px; border: 0; border-radius: 16px;
+    background: none; text-align: left; font: inherit; color: inherit; cursor: pointer;
+  }
+  .person + .person { margin-top: 2px; }
+  .person:hover { background: var(--chat-bg); }
+  .person[aria-selected="true"] { background: var(--color-ink); color: #fff; }
+  .person[aria-selected="true"] .person-meta { color: rgba(255,255,255,.7); }
+  .person-name { font-weight: 700; font-size: 14px; line-height: 1.4; }
+  .person-meta { font-size: 12px; line-height: 1.5; color: var(--color-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .person:focus-visible { outline: 2px solid var(--color-accent-blue); outline-offset: 2px; }
+
+  .avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: var(--font-heading); font-weight: 600; font-size: 15px;
+    color: var(--color-ink); background: var(--avatar, var(--color-accent-orange));
+    flex: none;
+  }
+  .avatar.sm { width: 32px; height: 32px; font-size: 12px; }
+
+  /* 右: チャット */
+  .chat { display: grid; grid-template-rows: auto 1fr auto; min-width: 0; min-height: 0; background: var(--chat-bg); }
+  .chat-head { display: flex; align-items: center; gap: 14px; padding: 16px 24px; background: var(--color-surface); border-bottom: 1px solid var(--color-rule); }
+  .chat-head-text { min-width: 0; }
+  .chat-head h2 { font-size: 17px; line-height: 1.4; }
+  .chat-head p { font-size: 12px; line-height: 1.5; color: var(--color-muted); }
+  .chat-tags { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .tag { font-size: 11px; line-height: 1; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--color-line); white-space: nowrap; }
+
+  .log { overflow-y: auto; padding: 24px; scroll-behavior: smooth; display: flex; flex-direction: column; gap: 10px; }
+
+  .day { align-self: center; font-size: 12px; color: var(--color-muted); background: rgba(13,15,18,.06); padding: 2px 12px; border-radius: 999px; margin: 4px 0 8px; }
+  .topic { align-self: stretch; display: flex; align-items: center; gap: 12px; margin: 16px 0 4px; font-family: var(--font-heading); font-size: 12px; font-weight: 600; letter-spacing: .08em; color: var(--color-muted); }
+  .topic::before, .topic::after { content: ""; flex: 1; height: 1px; background: var(--color-line); }
+
+  .msg { display: flex; gap: 10px; align-items: flex-end; max-width: min(620px, 85%); }
+  .msg.them { align-self: flex-start; }
+  .msg.us { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-body { display: flex; flex-direction: column; min-width: 0; }
+  .msg.us .msg-body { align-items: flex-end; }
+  .who { font-size: 11px; line-height: 1.4; color: var(--color-muted); margin: 0 12px 4px; }
+  .bubble { padding: 10px 16px; border-radius: 20px; font-size: 15px; line-height: 1.75; overflow-wrap: anywhere; }
+  .them .bubble { background: var(--bubble-them); border-bottom-left-radius: 6px; }
+  .us .bubble { background: var(--bubble-us); color: var(--bubble-us-ink); border-bottom-right-radius: 6px; }
+  /* 連続する発言はアバターと名前を省いて詰める */
+  .msg.cont { margin-top: -6px; }
+  .msg.cont .avatar { visibility: hidden; }
+
+  .photo { width: min(360px, 100%); aspect-ratio: 4 / 3; border-radius: 20px; overflow: hidden; background: repeating-linear-gradient(45deg, #d5dbe2 0 12px, #cbd2da 12px 24px); display: grid; place-items: end start; }
+  .photo span { margin: 10px; font-size: 12px; background: rgba(255,255,255,.85); padding: 2px 10px; border-radius: 999px; }
+
+  /* 学びとプロジェクトへの反映は会話から切り出したカード */
+  .note { align-self: center; width: min(560px, 100%); margin: 12px 0; padding: 14px 18px 14px 16px; background: var(--color-surface); border-radius: 16px; border-left: 4px solid var(--note); font-size: 14px; line-height: 1.75; }
+  .note-label { display: block; font-family: var(--font-heading); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--note); margin-bottom: 2px; }
+  .note.insight { --note: #d98a14; }
+  .note.action { --note: var(--color-accent-blue); }
+
+  .typing { display: inline-flex; gap: 4px; padding: 14px 16px; background: var(--bubble-them); border-radius: 20px; border-bottom-left-radius: 6px; }
+  .typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--color-muted); opacity: .4; animation: blink 1s infinite; }
+  .typing i:nth-child(2) { animation-delay: .15s; }
+  .typing i:nth-child(3) { animation-delay: .3s; }
+  @keyframes blink { 30% { opacity: 1; transform: translateY(-2px); } }
+
+  .enter { animation: rise .28s ease-out both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+
+  .chat-foot { display: flex; align-items: center; gap: 12px; padding: 12px 24px; background: var(--color-surface); border-top: 1px solid var(--color-rule); }
+  .progress { flex: 1; height: 4px; background: var(--color-rule); border-radius: 999px; overflow: hidden; }
+  .progress i { display: block; height: 100%; width: 0; background: var(--color-ink); transition: width .2s; }
+  .btn { font: inherit; font-size: 13px; font-weight: 700; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--color-ink); background: var(--color-surface); color: var(--color-ink); cursor: pointer; white-space: nowrap; }
+  .btn.primary { background: var(--color-ink); color: #fff; }
+  .btn:disabled { opacity: .35; cursor: default; }
+  .btn:focus-visible { outline: 2px solid var(--color-accent-blue); outline-offset: 2px; }
+
+  @media (max-width: 767px) {
+    body { padding: 32px 0 0; }
+    .page-title, .page-lead { padding: 0 16px; }
+    .ihp { grid-template-columns: 1fr; grid-template-rows: auto 1fr; border-radius: 0; height: calc(100dvh - 0px); margin-top: 24px; }
+    .people { display: flex; gap: 4px; overflow-x: auto; overflow-y: hidden; border-right: 0; border-bottom: 1px solid var(--color-rule); padding: 8px; scrollbar-width: none; }
+    .people-head { display: none; }
+    .person { grid-template-columns: 1fr; justify-items: center; width: 84px; flex: none; padding: 8px 4px; gap: 4px; }
+    .person + .person { margin-top: 0; }
+    .person-name { font-size: 11px; text-align: center; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .person-meta { display: none; }
+    .chat-head { padding: 12px 16px; }
+    .chat-tags { display: none; }
+    .log { padding: 16px; }
+    .msg { max-width: 92%; }
+    .chat-foot { padding: 10px 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .enter, .typing i { animation: none; }
+    .log { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+  <h1 class="page-title">Human Practices</h1>
+  <p class="page-lead">対話相手ごとに、聞いた内容をチャット形式で読む。左の一覧から相手を選ぶと会話が順に流れる。文面はすべて仮。</p>
+
+  <section class="ihp" aria-label="インタビュー">
+    <nav class="people" aria-label="対話相手">
+      <div class="people-head">Conversations</div>
+      <div role="tablist" aria-orientation="vertical" id="people" style="display: contents"></div>
+    </nav>
+
+    <div class="chat" role="tabpanel" id="chat" aria-labelledby="">
+      <header class="chat-head" id="chat-head"></header>
+      <div class="log" id="log" aria-live="polite"></div>
+      <footer class="chat-foot">
+        <div class="progress" aria-hidden="true"><i id="progress"></i></div>
+        <button class="btn" id="replay" type="button">最初から</button>
+        <button class="btn primary" id="skip" type="button">すべて表示</button>
+      </footer>
+    </div>
+  </section>
+</div>
+
+<script>
+  // 中身は仮。本番では Notion の原稿からこの形に変換する想定
+  const TEAM = { name: "iGEM Keio", initials: "K", color: "#2962ff" };
+
+  const threads = [
+    {
+      id: "professor-a",
+      name: "A先生",
+      affiliation: "〇〇大学 農学研究院 准教授",
+      initials: "A",
+      color: "#ffb347",
+      date: "2026年7月12日",
+      format: "オンライン",
+      tags: ["専門家", "材料"],
+      summary: "セルロース合成の仕組みと、配向制御の可能性について",
+      messages: [
+        { type: "topic", text: "合成の仕組み" },
+        { from: "us", text: "本日はありがとうございます。まず、酢酸菌と大腸菌でセルロースのでき方はどう違うのでしょうか。" },
+        { from: "them", text: "ダミーの回答です。ここに専門家の説明が入ります。" },
+        { from: "them", text: "連続した発言はこのようにまとまって表示されます。少し長めの文章が入ったときに、吹き出しの幅や行間がどう見えるかを確認するための文です。" },
+        { type: "photo", caption: "研究室で見せていただいたサンプル" },
+        { from: "us", text: "細胞の並び方を揃えれば、繊維の向きも揃えられるのでしょうか。" },
+        { from: "them", text: "ダミーの回答です。可能性と課題の両方が語られる想定。" },
+        { type: "insight", text: "学んだこと: 細胞の配向だけでなく、合成酵素の配置も向きに効く。" },
+        { type: "topic", text: "社会での使い道" },
+        { from: "us", text: "応用先として、どんな分野が考えられますか。" },
+        { from: "them", text: "ダミーの回答です。" },
+        { type: "action", text: "プロジェクトへの反映: 評価実験に繊維の配向度の測定を追加した。" },
+      ],
+    },
+    {
+      id: "company-b",
+      name: "B株式会社 Cさん",
+      affiliation: "B株式会社 研究開発部",
+      initials: "B",
+      color: "#9ad0a5",
+      date: "2026年8月3日",
+      format: "対面",
+      tags: ["企業", "実用化"],
+      summary: "製造現場から見たコストと規制",
+      messages: [
+        { from: "us", text: "現場の視点から、私たちの技術はどう見えますか。" },
+        { from: "them", text: "ダミーの回答です。" },
+        { from: "us", text: "コスト面で一番効くのはどこでしょう。" },
+        { from: "them", text: "ダミーの回答です。" },
+        { from: "them", text: "補足のダミーです。" },
+        { type: "insight", text: "学んだこと: 量産では培養時間がコストを決める。" },
+        { type: "action", text: "プロジェクトへの反映: 培養条件の最適化をモデリングの対象に加えた。" },
+      ],
+    },
+    {
+      id: "high-school",
+      name: "D高校の生徒さん",
+      affiliation: "教育イベントでの対話",
+      initials: "D",
+      color: "#c7b6f2",
+      date: "2026年8月20日",
+      format: "ワークショップ",
+      tags: ["教育", "市民"],
+      summary: "遺伝子組換えへの率直な疑問",
+      messages: [
+        { from: "them", text: "大腸菌って危なくないんですか?" },
+        { from: "us", text: "いい質問です。実験で使っているのは安全性の確認された株で……(ダミー)" },
+        { from: "them", text: "ダミーの返答です。" },
+        { type: "insight", text: "学んだこと: 安全性の説明は株の名前より、何をしたら安全と言えるかから始めると伝わる。" },
+      ],
+    },
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  const peopleEl = $("people");
+  const logEl = $("log");
+  const headEl = $("chat-head");
+  const progressEl = $("progress");
+  const skipBtn = $("skip");
+  const replayBtn = $("replay");
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  let current = null;
+  let shown = 0;
+  let timer = 0;
+
+  function avatar(p, small) {
+    const el = document.createElement("span");
+    el.className = small ? "avatar sm" : "avatar";
+    el.textContent = p.initials;
+    el.style.setProperty("--avatar", p.color);
+    el.setAttribute("aria-hidden", "true");
+    return el;
+  }
+
+  function renderPeople() {
+    for (const t of threads) {
+      const b = document.createElement("button");
+      b.className = "person";
+      b.type = "button";
+      b.role = "tab";
+      b.id = `tab-${t.id}`;
+      b.setAttribute("aria-controls", "chat");
+      b.append(avatar(t));
+      const text = document.createElement("span");
+      text.innerHTML = `<span class="person-name"></span><span class="person-meta"></span>`;
+      text.children[0].textContent = t.name;
+      text.children[1].textContent = `${t.date} · ${t.summary}`;
+      b.append(text);
+      b.addEventListener("click", () => open(t.id));
+      peopleEl.append(b);
+    }
+    peopleEl.addEventListener("keydown", (e) => {
+      const keys = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 };
+      if (!(e.key in keys)) return;
+      e.preventDefault();
+      const i = threads.findIndex((t) => t.id === current.id);
+      const next = threads[(i + keys[e.key] + threads.length) % threads.length];
+      open(next.id);
+      $(`tab-${next.id}`).focus();
+    });
+  }
+
+  function renderHead(t) {
+    headEl.replaceChildren(avatar(t));
+    const text = document.createElement("div");
+    text.className = "chat-head-text";
+    text.innerHTML = `<h2></h2><p></p>`;
+    text.children[0].textContent = t.name;
+    text.children[1].textContent = `${t.affiliation} · ${t.date} · ${t.format}`;
+    const tags = document.createElement("div");
+    tags.className = "chat-tags";
+    for (const tag of t.tags) {
+      const s = document.createElement("span");
+      s.className = "tag";
+      s.textContent = tag;
+      tags.append(s);
+    }
+    headEl.append(text, tags);
+  }
+
+  function buildMessage(t, m, prev) {
+    if (m.type === "topic") {
+      const el = document.createElement("div");
+      el.className = "topic";
+      el.textContent = m.text;
+      return el;
+    }
+    if (m.type === "insight" || m.type === "action") {
+      const el = document.createElement("aside");
+      el.className = `note ${m.type}`;
+      const label = m.type === "insight" ? "What we learned" : "Integration";
+      el.innerHTML = `<span class="note-label">${label}</span><span></span>`;
+      el.lastChild.textContent = m.text.replace(/^[^:]+:\s*/, "");
+      return el;
+    }
+    const from = m.from ?? "them";
+    const speaker = from === "us" ? TEAM : t;
+    const cont = prev && (prev.from ?? (prev.type === "photo" ? "them" : null)) === from && !prev.type?.match(/topic|insight|action/);
+    const el = document.createElement("div");
+    el.className = `msg ${from}${cont ? " cont" : ""}`;
+    el.append(avatar(speaker, true));
+    const body = document.createElement("div");
+    body.className = "msg-body";
+    if (!cont) {
+      const who = document.createElement("span");
+      who.className = "who";
+      who.textContent = speaker.name;
+      body.append(who);
+    }
+    if (m.type === "photo") {
+      const ph = document.createElement("figure");
+      ph.className = "photo";
+      ph.innerHTML = `<span></span>`;
+      ph.firstChild.textContent = m.caption;
+      body.append(ph);
+    } else {
+      const bubble = document.createElement("p");
+      bubble.className = "bubble";
+      bubble.textContent = m.text;
+      body.append(bubble);
+    }
+    el.append(body);
+    return el;
+  }
+
+  function append(index, animate) {
+    const msgs = current.messages;
+    const el = buildMessage(current, msgs[index], msgs[index - 1]);
+    if (animate) el.classList.add("enter");
+    logEl.append(el);
+  }
+
+  function updateProgress() {
+    const total = current.messages.length;
+    progressEl.style.width = `${(shown / total) * 100}%`;
+    skipBtn.disabled = shown >= total;
+  }
+
+  function scrollToEnd() {
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  // 相手の発言の前だけ入力中の表示を挟む。待ち時間は文字数に比例させ、上限で頭打ちにする
+  function step() {
+    const msgs = current.messages;
+    if (shown >= msgs.length) return;
+    const m = msgs[shown];
+    const isThem = (m.from ?? (m.type === "photo" ? "them" : null)) === "them";
+    const delay = isThem ? Math.min(400 + (m.text?.length ?? 20) * 25, 1800) : 700;
+    let typing = null;
+    if (isThem) {
+      typing = document.createElement("div");
+      typing.className = "msg them enter";
+      typing.innerHTML = `<span class="avatar sm" aria-hidden="true" style="visibility:hidden"></span><span class="typing" aria-label="入力中"><i></i><i></i><i></i></span>`;
+      logEl.append(typing);
+      scrollToEnd();
+    }
+    timer = setTimeout(() => {
+      typing?.remove();
+      append(shown, true);
+      shown += 1;
+      updateProgress();
+      scrollToEnd();
+      timer = setTimeout(step, 350);
+    }, delay);
+  }
+
+  function showAll() {
+    clearTimeout(timer);
+    logEl.querySelector(".typing")?.parentElement.remove();
+    while (shown < current.messages.length) {
+      append(shown, false);
+      shown += 1;
+    }
+    updateProgress();
+    scrollToEnd();
+  }
+
+  function play() {
+    clearTimeout(timer);
+    shown = 0;
+    logEl.replaceChildren();
+    const day = document.createElement("div");
+    day.className = "day";
+    day.textContent = `${current.date} · ${current.format}`;
+    logEl.append(day);
+    updateProgress();
+    if (reduceMotion) showAll();
+    else step();
+  }
+
+  function open(id) {
+    current = threads.find((t) => t.id === id);
+    for (const b of peopleEl.children) {
+      const on = b.id === `tab-${id}`;
+      b.setAttribute("aria-selected", String(on));
+      b.tabIndex = on ? 0 : -1;
+    }
+    $("chat").setAttribute("aria-labelledby", `tab-${id}`);
+    renderHead(current);
+    play();
+  }
+
+  skipBtn.addEventListener("click", showAll);
+  replayBtn.addEventListener("click", play);
+
+  renderPeople();
+  open(threads[0].id);
+</script>
+</body>
+</html>
