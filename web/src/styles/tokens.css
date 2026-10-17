@@ -50,6 +50,14 @@
 
   --space-frame-x: 56px;
 
+  /* DBTLの4フェーズの色 */
+  --color-dbtl-design: #1e50a2;
+  --color-dbtl-build: #d3381c;
+  --color-dbtl-test: #e0961e;
+  --color-dbtl-learn: #1f1a6b;
+  /* 細胞の絵の、膜から伸びる柄 */
+  --color-dbtl-stalk: #3b414b;
+
   /* Human Practicesの上の帯の高さ */
   --size-hp-bar: 52px;
 

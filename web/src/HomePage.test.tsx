@@ -19,6 +19,7 @@ const home: WikiPage = {
   models: [],
   published: true,
   source: "notion",
+  dbtl: null,
   hp: null,
 };
 

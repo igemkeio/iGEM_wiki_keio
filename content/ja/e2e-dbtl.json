@@ -1,0 +1,318 @@
+{
+  "slug": "e2e-dbtl",
+  "locale": "ja",
+  "title": "E2E DBTL",
+  "subtitle": "E2E",
+  "lead": "DBTLの画面のE2E用のページ。",
+  "html": "<h2 id=\"engineering\">Engineering</h2>\n<p>このページの読み方。</p>",
+  "order": 902,
+  "islands": [],
+  "published": false,
+  "source": "local",
+  "dbtl": {
+    "intro": "<h2 id=\"engineering\">Engineering</h2>\n<p>このページの読み方。</p>",
+    "parts": [
+      {
+        "label": "第 I 部",
+        "title": "道具をつくる",
+        "introHtml": "<p>基盤サイクルの導入。</p>",
+        "cycles": [
+          {
+            "no": 1,
+            "layer": "base",
+            "title": "クローニング",
+            "tagline": "鋳型を取り除く",
+            "whyHtml": "<p>サイクル1の導入。</p>",
+            "hypothesis": "サイクル1の仮説。",
+            "criteria": "サイクル1の成功基準。",
+            "iterations": [
+              {
+                "no": 1,
+                "title": "サイクル1の反復1",
+                "design": "反復1のDesign。",
+                "build": "反復1のBuild。",
+                "test": "反復1のTest。",
+                "learn": "反復1のLearn。",
+                "notesHtml": ""
+              },
+              {
+                "no": 2,
+                "title": "サイクル1の反復2",
+                "design": "反復2のDesign。",
+                "build": "反復2のBuild。",
+                "test": "反復2のTest。",
+                "learn": "反復2のLearn。",
+                "notesHtml": ""
+              },
+              {
+                "no": 3,
+                "title": "サイクル1の反復3",
+                "design": "反復3のDesign。",
+                "build": "反復3のBuild。",
+                "test": "反復3のTest。",
+                "learn": "反復3のLearn。",
+                "notesHtml": ""
+              },
+              {
+                "no": 4,
+                "title": "サイクル1の反復4",
+                "design": "反復4のDesign。",
+                "build": "反復4のBuild。",
+                "test": "反復4のTest。",
+                "learn": "反復4のLearn。",
+                "notesHtml": ""
+              }
+            ],
+            "outcomesHtml": "<ul><li>サイクル1で確立したこと。</li></ul>",
+            "handoffHtml": "<em>サイクル1から次へ。</em>"
+          },
+          {
+            "no": 2,
+            "layer": "base",
+            "title": "観察系",
+            "tagline": "見えなければ主張できない",
+            "whyHtml": "<p>サイクル2の導入。</p>",
+            "hypothesis": "サイクル2の仮説。",
+            "criteria": "サイクル2の成功基準。",
+            "iterations": [
+              {
+                "no": 1,
+                "title": "サイクル2の反復1",
+                "design": "反復1のDesign。",
+                "build": "反復1のBuild。",
+                "test": "反復1のTest。",
+                "learn": "反復1のLearn。",
+                "notesHtml": "<p>図1 観察の例。<strong>太字</strong>と<a href=\"https://static.igem.wiki/\">リンク</a>を含む。</p>"
+              },
+              {
+                "no": 2,
+                "title": "サイクル2の反復2",
+                "design": "反復2のDesign。",
+                "build": "反復2のBuild。",
+                "test": "反復2のTest。",
+                "learn": "反復2のLearn。",
+                "notesHtml": ""
+              },
+              {
+                "no": 3,
+                "title": "サイクル2の反復3",
+                "design": "反復3のDesign。",
+                "build": "反復3のBuild。",
+                "test": "反復3のTest。",
+                "learn": "反復3のLearn。",
+                "notesHtml": ""
+              },
+              {
+                "no": 4,
+                "title": "サイクル2の反復4",
+                "design": "反復4のDesign。",
+                "build": "反復4のBuild。",
+                "test": "反復4のTest。",
+                "learn": "反復4のLearn。",
+                "notesHtml": ""
+              }
+            ],
+            "outcomesHtml": "<ul><li>サイクル2で確立したこと。</li></ul>",
+            "handoffHtml": "<em>サイクル2から次へ。</em>"
+          },
+          {
+            "no": 3,
+            "layer": "base",
+            "title": "画像解析",
+            "tagline": "目でなく数で判定する",
+            "whyHtml": "<p>サイクル3の導入。</p>",
+            "hypothesis": "サイクル3の仮説。",
+            "criteria": "サイクル3の成功基準。",
+            "iterations": [
+              {
+                "no": 1,
+                "title": "サイクル3の反復1",
+                "design": "反復1のDesign。",
+                "build": "反復1のBuild。",
+                "test": "反復1のTest。",
+                "learn": "反復1のLearn。",
+                "notesHtml": ""
+              },
+              {
+                "no": 2,
+                "title": "サイクル3の反復2",
+                "design": "反復2のDesign。",
+                "build": "反復2のBuild。",
+                "test": "反復2のTest。",
+                "learn": "反復2のLearn。",
+                "notesHtml": ""
+              },
+              {
+                "no": 3,
+                "title": "サイクル3の反復3",
+                "design": "反復3のDesign。",
+                "build": "反復3のBuild。",
+                "test": "反復3のTest。",
+                "learn": "反復3のLearn。",
+                "notesHtml": ""
+              },
+              {
+                "no": 4,
+                "title": "サイクル3の反復4",
+                "design": "反復4のDesign。",
+                "build": "反復4のBuild。",
+                "test": "反復4のTest。",
+                "learn": "反復4のLearn。",
+                "notesHtml": ""
+              }
+            ],
+            "outcomesHtml": "<ul><li>サイクル3で確立したこと。</li></ul>",
+            "handoffHtml": "<em>サイクル3から次へ。</em>"
+          }
+        ]
+      },
+      {
+        "label": "第 II 部",
+        "title": "道具で設計を試す",
+        "introHtml": "<p>設計サイクルの導入。</p>",
+        "cycles": [
+          {
+            "no": 4,
+            "layer": "design",
+            "title": "第二の極",
+            "tagline": "極を2つに分ける",
+            "whyHtml": "<p>サイクル4の導入。</p>",
+            "hypothesis": "サイクル4の仮説。",
+            "criteria": "サイクル4の成功基準。",
+            "iterations": [
+              {
+                "no": 1,
+                "title": "サイクル4の反復1",
+                "design": "反復1のDesign。",
+                "build": "反復1のBuild。",
+                "test": "反復1のTest。",
+                "learn": "反復1のLearn。",
+                "notesHtml": ""
+              },
+              {
+                "no": 2,
+                "title": "サイクル4の反復2",
+                "design": "反復2のDesign。",
+                "build": "反復2のBuild。",
+                "test": "反復2のTest。",
+                "learn": "反復2のLearn。",
+                "notesHtml": ""
+              },
+              {
+                "no": 3,
+                "title": "サイクル4の反復3",
+                "design": "反復3のDesign。",
+                "build": "反復3のBuild。",
+                "test": "反復3のTest。",
+                "learn": "反復3のLearn。",
+                "notesHtml": ""
+              },
+              {
+                "no": 4,
+                "title": "サイクル4の反復4",
+                "design": "反復4のDesign。",
+                "build": "反復4のBuild。",
+                "test": "反復4のTest。",
+                "learn": "反復4のLearn。",
+                "notesHtml": ""
+              },
+              {
+                "no": 5,
+                "title": "サイクル4の反復5",
+                "design": "反復5のDesign。",
+                "build": "反復5のBuild。",
+                "test": "反復5のTest。",
+                "learn": "反復5のLearn。",
+                "notesHtml": ""
+              }
+            ],
+            "outcomesHtml": "<ul><li>サイクル4で確立したこと。</li></ul>",
+            "handoffHtml": "<em>サイクル4から次へ。</em>"
+          },
+          {
+            "no": 5,
+            "layer": "design",
+            "title": "接着モジュール",
+            "tagline": "相手を選んで接着する",
+            "whyHtml": "<p>サイクル5の導入。</p>",
+            "hypothesis": "サイクル5の仮説。",
+            "criteria": "サイクル5の成功基準。",
+            "iterations": [
+              {
+                "no": 1,
+                "title": "サイクル5の反復1",
+                "design": "反復1のDesign。",
+                "build": "反復1のBuild。",
+                "test": "反復1のTest。",
+                "learn": "反復1のLearn。",
+                "notesHtml": ""
+              },
+              {
+                "no": 2,
+                "title": "サイクル5の反復2",
+                "design": "反復2のDesign。",
+                "build": "反復2のBuild。",
+                "test": "反復2のTest。",
+                "learn": "反復2のLearn。",
+                "notesHtml": ""
+              },
+              {
+                "no": 3,
+                "title": "サイクル5の反復3",
+                "design": "反復3のDesign。",
+                "build": "反復3のBuild。",
+                "test": "反復3のTest。",
+                "learn": "反復3のLearn。",
+                "notesHtml": ""
+              },
+              {
+                "no": 4,
+                "title": "サイクル5の反復4",
+                "design": "反復4のDesign。",
+                "build": "反復4のBuild。",
+                "test": "反復4のTest。",
+                "learn": "反復4のLearn。",
+                "notesHtml": ""
+              },
+              {
+                "no": 5,
+                "title": "サイクル5の反復5",
+                "design": "反復5のDesign。",
+                "build": "反復5のBuild。",
+                "test": "反復5のTest。",
+                "learn": "反復5のLearn。",
+                "notesHtml": ""
+              }
+            ],
+            "outcomesHtml": "<ul><li>サイクル5で確立したこと。</li></ul>",
+            "handoffHtml": "<em>サイクル5から次へ。</em>",
+            "leadHtml": "<p><strong>✓ エンジニアリングの達成</strong>　設計したパーツが期待どおり機能した。</p>"
+          },
+          {
+            "no": 6,
+            "layer": "design",
+            "title": "極での架橋",
+            "tagline": "極でつなぐ",
+            "whyHtml": "<p>サイクル6の導入。</p>",
+            "hypothesis": "サイクル6の仮説。",
+            "criteria": "サイクル6の成功基準。",
+            "iterations": [
+              {
+                "no": 1,
+                "title": "サイクル6の反復1",
+                "design": "反復1のDesign。",
+                "build": "反復1のBuild。",
+                "test": "反復1のTest。",
+                "learn": "反復1のLearn。",
+                "notesHtml": ""
+              }
+            ],
+            "outcomesHtml": "<ul><li>サイクル6で確立したこと。</li></ul>",
+            "handoffHtml": "<em>サイクル6から次へ。</em>"
+          }
+        ]
+      }
+    ],
+    "outro": "<h2 id=\"outlook\">展望</h2>\n<p>繰り返しの先に。</p>"
+  }
+}

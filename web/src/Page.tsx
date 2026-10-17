@@ -1,5 +1,6 @@
 import { withBase } from "./base";
 import { ArticlePage } from "./components/ArticlePage";
+import { DbtlPage } from "./components/DbtlPage";
 import { HomePage } from "./components/HomePage";
 import { HpPage } from "./components/HpPage";
 import { PageShell } from "./components/PageShell";
@@ -14,10 +15,13 @@ export interface Assets {
   js: string;
 }
 
-// ページの型の出し分け。homeはヒーロー、hpがあればHuman Practicesの画面、それ以外は本文。
+// ページの型の出し分け。homeはヒーロー、dbtlとhpはそれぞれ専用の画面、それ以外は本文。
 function Body({ page, routes }: { page: WikiPage; routes: Route[] }) {
   if (page.slug === "home") {
     return <HomePage page={page} routes={routes} />;
+  }
+  if (page.dbtl) {
+    return <DbtlPage page={page} dbtl={page.dbtl} />;
   }
   if (page.hp) {
     return <HpPage page={page} hp={page.hp} />;
@@ -56,7 +60,8 @@ export function Page({
           <Body page={page} routes={routes} />
         </PageShell>
         <script src={withBase("/footer-sponsors.js")} defer />
-        {page.islands.some((name) => name in ISLANDS) && (
+        {(page.islands.some((name) => name in ISLANDS) ||
+          page.dbtl !== null) && (
           <script type="module" src={withBase(`/${assets.js}`)} />
         )}
       </body>

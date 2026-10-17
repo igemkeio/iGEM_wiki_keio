@@ -204,6 +204,7 @@ GIT_CONFIG_GLOBAL=/dev/null npx lefthook install
 - 島の名前と部品の対応は`src/client/islands.tsx`、差し込み位置とpropsは`src/islands.ts`の`ISLANDS`にある。島は`member-list`、`model-viewer`、`attribution-form`。
 - 原稿JSONの`islands`に挙げた島だけが、そのページに読み込まれる。Notion同期が出すページは、`scripts/lib/page.mjs`の`ISLANDS_BY_SLUG`で決まる。
 - 足し方は`AGENTS.md`のコードの約束にある。
+- `dbtl-stage`だけは`src/islands.ts`の`ISLANDS`に入れず、`src/client/islands.tsx`のloadersと`Page.tsx`の`page.dbtl`の判定で動かす。原稿の`islands`から引く表に載せると、`dbtl`を持たないenのengineeringにも空の器が出てしまうため。
 
 ### フッター
 

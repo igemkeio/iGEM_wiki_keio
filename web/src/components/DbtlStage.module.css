@@ -1,0 +1,265 @@
+@layer components {
+  .top {
+    position: relative;
+    grid-area: top;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 16px;
+    align-items: baseline;
+    padding-right: 96px;
+  }
+
+  .eyebrow {
+    width: 100%;
+    color: var(--color-muted);
+    font-family: var(--font-heading);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .cycleTitle {
+    font-size: clamp(18px, 2.2vw, 26px);
+    font-weight: 700;
+  }
+
+  .tagline {
+    color: var(--color-muted);
+    font-size: 14px;
+  }
+
+  .jump {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    gap: 4px;
+  }
+
+  .jump button {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--color-line);
+    border-radius: 50%;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .jump button:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .side {
+    grid-area: side;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    min-height: 0;
+  }
+
+  .ringBox {
+    flex: none;
+    width: min(100%, 23vh);
+  }
+
+  .meta {
+    display: grid;
+    gap: 4px;
+    width: min(100%, 23vh);
+    text-align: center;
+  }
+
+  .phase {
+    color: var(--color-muted);
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+  }
+
+  .iterTitle {
+    color: var(--color-muted);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .tools {
+    flex: 1;
+    align-content: start;
+    display: grid;
+    gap: 4px;
+    width: 100%;
+    min-height: 0;
+    padding-top: 10px;
+    border-top: 1px solid var(--color-line);
+    overflow-y: auto;
+  }
+
+  .tools h3 {
+    color: var(--color-muted);
+    font-family: var(--font-heading);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+  }
+
+  .tool {
+    display: grid;
+    grid-template-columns: 20px auto 1fr;
+    gap: 8px;
+    align-items: baseline;
+    font-size: 12px;
+    line-height: 1.6;
+    opacity: 0.4;
+  }
+
+  .tool.got {
+    opacity: 1;
+  }
+
+  .tool b {
+    color: var(--color-muted);
+    font-weight: 400;
+  }
+
+  .toolName {
+    font-weight: 700;
+  }
+
+  .tool.got .toolName {
+    border-bottom: 2px solid var(--color-ink);
+  }
+
+  .toolCycle {
+    color: var(--color-muted);
+    font-size: 12px;
+  }
+
+  .foot {
+    grid-area: foot;
+    display: grid;
+    gap: 2px;
+    padding-top: 6px;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .figure {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .bases {
+    display: grid;
+    gap: 1px;
+  }
+
+  .baseLink {
+    display: flex;
+    gap: 5px;
+    align-items: baseline;
+    color: var(--color-muted);
+    font-size: 11px;
+    text-decoration: none;
+    white-space: nowrap;
+    opacity: 0.45;
+  }
+
+  .baseLink:hover,
+  .baseLink:focus-visible {
+    opacity: 0.8;
+  }
+
+  .baseLink.done {
+    opacity: 0.8;
+  }
+
+  .baseLink.current {
+    color: var(--color-ink);
+    font-weight: 700;
+    opacity: 1;
+  }
+
+  .mark {
+    font-size: 10px;
+  }
+
+  .preview {
+    min-height: 1.6em;
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 1.6;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .preview b {
+    margin-right: 8px;
+    font-family: var(--font-heading);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+  }
+
+  @media (max-width: 1099px) {
+    .top {
+      padding-right: 88px;
+    }
+
+    .eyebrow {
+      font-size: 10px;
+    }
+
+    .cycleTitle {
+      font-size: 18px;
+    }
+
+    .side {
+      flex-direction: row;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .ringBox {
+      width: 108px;
+    }
+
+    .meta {
+      flex: 1;
+      width: auto;
+      text-align: left;
+    }
+
+    .phase {
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .iterTitle {
+      font-size: 12px;
+    }
+
+    .tools {
+      display: none;
+    }
+
+    .figure {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+
+    .bases {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+  }
+}
