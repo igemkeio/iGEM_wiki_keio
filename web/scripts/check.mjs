@@ -20,7 +20,11 @@ import {
 } from "./lib/check/manifest.mjs";
 import { findUnmappedPages } from "./lib/check/nav.mjs";
 import { comparePages, toPage } from "./lib/check/pages.mjs";
-import { checkTotalSize, shouldCheckSize } from "./lib/check/size.mjs";
+import {
+  checkTotalSize,
+  findOversizedFiles,
+  shouldCheckSize,
+} from "./lib/check/size.mjs";
 import { checkExternalUrl, checkInternalLink } from "./lib/check/urls.mjs";
 
 const root = resolve(import.meta.dirname, "..");
@@ -29,17 +33,39 @@ const contentDir = join(root, "..", "content");
 const navConfigFile = join(root, "src", "data", "nav-categories.json");
 const base = process.env.WIKI_BASE ?? "/";
 
-async function walk(dir) {
+async function walk(dir, from = dist) {
   const out = [];
   for (const entry of await readdir(dir, { withFileTypes: true })) {
     const path = join(dir, entry.name);
     if (entry.isDirectory()) {
-      out.push(...(await walk(path)));
+      out.push(...(await walk(path, from)));
     } else {
-      out.push(relative(dist, path).split(sep).join("/"));
+      out.push(relative(from, path).split(sep).join("/"));
     }
   }
   return out;
+}
+
+async function fileSize(path) {
+  const info = await stat(path);
+  return info.size;
+}
+
+// web/public/の10MiBを超えるファイル。iGEMへのアップロードで切られて壊れるので警告する。
+async function publicOversized() {
+  const publicDir = join(root, "public");
+  try {
+    const paths = await walk(publicDir, publicDir);
+    const sized = await Promise.all(
+      paths.map(async (path) => ({
+        path: `public/${path}`,
+        size: await fileSize(join(publicDir, path)),
+      }))
+    );
+    return findOversizedFiles(sized);
+  } catch {
+    return [];
+  }
 }
 
 // dist/の直下にある、web/public/由来の名前。HTMLの検査から外す。
@@ -86,11 +112,6 @@ async function readContent() {
   return { pages, errors };
 }
 
-async function fileSize(path) {
-  const info = await stat(path);
-  return info.size;
-}
-
 async function main() {
   try {
     await readdir(dist);
@@ -110,6 +131,11 @@ async function main() {
   const navConfig = JSON.parse(await readFile(navConfigFile, "utf-8"));
   for (const w of findUnmappedPages(pages, navConfig)) {
     console.warn(`警告: ${w.file}: ${w.reason}`);
+  }
+
+  // 10MiBを超えるファイルは警告だけで、終了コードには影響しない。
+  for (const line of await publicOversized()) {
+    console.warn(`警告: ${line}`);
   }
 
   const manifestMode = usesUploadManifest(

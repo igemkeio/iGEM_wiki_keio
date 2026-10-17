@@ -22,3 +22,17 @@ export function checkTotalSize(files, limit = SIZE_LIMIT_BYTES, topN = 10) {
     `distの合計が${formatMB(total)}で、上限${formatMB(limit)}を超えています。大きい順の上位${top.length}件:\n${lines.join("\n")}`,
   ];
 }
+
+// iGEMのファイルのアップロードの上限(10MiB)。超えたファイルは途中で切られて壊れる。
+export const UPLOAD_LIMIT_BYTES = 10 * 1024 * 1024;
+
+// files: { path, size }の配列。上限を超えたファイルの警告の文言を、大きい順に返す。
+export function findOversizedFiles(files, limit = UPLOAD_LIMIT_BYTES) {
+  return files
+    .filter((f) => f.size > limit)
+    .toSorted((a, b) => b.size - a.size)
+    .map(
+      (f) =>
+        `${f.path}は${formatMB(f.size)}で、iGEMへのアップロードの上限${formatMB(limit)}を超えています(上げても切られて壊れます)`
+    );
+}

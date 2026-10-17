@@ -96,6 +96,7 @@ iGEMのwikiは成果物が5MBまで。画像、PDF、フォント、3Dモデル�
 4. スクリプトは`api.igem.org`にサインインし、`team_id`を取り(所属チームが複数あるときは一覧を出して止まるので、`IGEM_TEAM_ID`で上げ先を指定する)、wikiのリポジトリのuuidを取ってから、`notion-images`、`notion-files`、`fonts`、`images`、`models`の順にファイルを上げる。`public/`からの親ディレクトリをそのまま`directory`に使うので、`images/sponsors/`のような入れ子もそのままの位置に入る。
 5. アップロードの応答にURLは入らない。上げ終えたあとに各ディレクトリの一覧を1回ずつ引き、`web/upload-manifest.json`に`public/`からの相対パスをキーとしてURLを記録する。記録済みのファイルと、iGEM側の一覧に既にあるファイルは飛ばす(一覧にあって飛ばしたファイルもURLを記録する)。途中で止まっても再実行できる。
 6. 失敗したファイルは最後に一覧で出し、終了コード1にする。直して再実行する。
+   - 10MiBを超えるファイルは、上げずに一覧で報告して終了コード1にする。iGEMは10MiBで途中から切って受け付け、中身が壊れる。小さくしてから流す。
 7. `upload-manifest.json`を確認し、`https://static.igem.wiki/teams/<id>/wiki/<ディレクトリ>/<ファイル名>`の形でない行(ファイル名が変わったもの)がないかを見る。あれば、その行のURLに合わせて原稿かビルドの値を直す。
 8. `team_id`が分かったら、`IGEM_TEAM_ID`をGitLabのCI/CD変数に入れる。
 
@@ -132,7 +133,7 @@ APIで使うエンドポイントは次のとおり。文書が公開されて�
 - `islands`が空のページに`<script>`がない。ただし`data-palette-switcher`属性を持ち、`src`を持たないインラインのscriptと、フッター用の`footer-sponsors.js`を`src`に持つscriptは許す。
 - 容量: `WIKI_CHECK_SIZE=1`のとき、`dist/`の全ファイルの合計が5MB(5×1024×1024バイト)を超えたら違反にし、大きい順の上位10件を出す。指定が無いビルド(開発、Vercelのプレビュー)は暫定の置き場を含むので見ない。`PRERENDER_ALL=1`で作った`dist/`(E2E用)は`WIKI_CHECK_SIZE=1`でも見ない。配信元の環境変数が足りないと`dist/`が大きいまま落ちるので、`WIKI_NOTION_BASE`の設定漏れのように、合計が5MBを超える漏れはここで止まる(`WIKI_FONT_BASE`や`WIKI_IMAGE_BASE`だけの漏れは合計が収まるので通る)。
 - 対応表: 対応表を使うビルド(上の節)では、`dist/`のHTML、`assets/`のCSSとJSに`/notion-images/`、`/notion-files/`、`/fonts/`、`/images/`で始まるパスが残っていたら違反にする(対応表に無くて差し替わらなかったもの)。
-- 警告(違反に数えず、終了コードも変えない): `src/data/nav-categories.json`の分類に載っていない公開ページを`警告: <ファイル>: ...`の形で出す。
+- 警告(違反に数えず、終了コードも変えない): `src/data/nav-categories.json`の分類に載っていない公開ページを`警告: <ファイル>: ...`の形で出す。`web/public/`に10MiBを超えるファイルがあるときも出す(iGEMは10MiBを超えると途中で切って受け付けるので、上げる前に小さくする)。
 
 検査するのは`dist/`のHTMLと、`dist/assets/`配下のCSSだけ。`web/public/`由来のファイル(`fonts/`、`images/`、`models/`、`notion-images/`、`notion-files/`)は読まない。これらは本番では`static.igem.wiki`に置く(前節)。HTMLの解析は正規表現で行い、依存は増やさない。検査の関数は`scripts/lib/check/`にあり、`npm run test:check`でテストする。
 

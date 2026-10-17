@@ -1,6 +1,6 @@
 // web/public/の画像、PDF、フォント、3Dモデルを、iGEMのstatic.igem.wikiへアップロードする。手元で人が流す。CIでは流さない。
 // 認証情報は環境変数IGEM_USERNAMEとIGEM_PASSWORD。アップロード後に一覧を引いてURLをweb/upload-manifest.jsonに記録し、記録済みと、既にiGEM側にあるファイルは飛ばす。
-import { readdir, readFile, writeFile } from "node:fs/promises";
+import { readdir, readFile, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 
 const API = "https://api.igem.org/v1";
@@ -11,6 +11,8 @@ const DIRECTORIES = [
   "images",
   "models",
 ];
+// iGEMは10MiBを超えるファイルを途中で切って受け付け、中身が壊れる。超えるファイルは上げない。
+const UPLOAD_LIMIT_BYTES = 10 * 1024 * 1024;
 const root = resolve(import.meta.dirname, "..");
 const publicDir = join(root, "public");
 const manifestFile = join(root, "upload-manifest.json");
@@ -63,11 +65,13 @@ async function listLocalFiles() {
     }
     for (const abs of paths.toSorted()) {
       const path = relative(publicDir, abs).split(sep).join("/");
+      const info = await stat(abs);
       files.push({
         abs,
         path,
         directory: dirname(path),
         name: basename(path),
+        size: info.size,
       });
     }
   }
@@ -242,6 +246,7 @@ async function main() {
   }
 
   const failed = [];
+  const oversized = [];
   const uploadedDirectories = new Set();
   const pending = [];
   let skipped = 0;
@@ -254,6 +259,10 @@ async function main() {
     if (existing) {
       skipped += 1;
       manifest[file.path] = { url: existing };
+      continue;
+    }
+    if (file.size > UPLOAD_LIMIT_BYTES) {
+      oversized.push(file);
       continue;
     }
     try {
@@ -286,8 +295,19 @@ async function main() {
   await writeManifest(manifest);
 
   console.log(
-    `igem-upload: 対象${files.length}件、アップロード${pending.length}件、スキップ${skipped}件、失敗${failed.length}件`
+    `igem-upload: 対象${files.length}件、アップロード${pending.length}件、スキップ${skipped}件、失敗${failed.length}件、上限超え${oversized.length}件`
   );
+  if (oversized.length > 0) {
+    console.error(
+      "10MiBを超えるため上げなかったファイル(小さくしてから流してください):"
+    );
+    for (const file of oversized) {
+      console.error(
+        `  ${file.path} (${(file.size / 1024 / 1024).toFixed(2)}MiB)`
+      );
+    }
+    process.exitCode = 1;
+  }
   if (failed.length > 0) {
     console.error("失敗したファイル:");
     for (const line of failed) {
