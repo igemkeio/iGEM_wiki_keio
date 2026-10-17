@@ -7,3 +7,6 @@ content/images-todo.json
 # Blenderの出力
 3d/out/
 __pycache__/
+
+# アップロードの記録(手元だけ)
+web/upload-manifest.json
