@@ -1,7 +1,7 @@
 // web/public/の画像、PDF、フォント、3Dモデルを、iGEMのstatic.igem.wikiへアップロードする。手元で人が流す。CIでは流さない。
-// 認証情報は環境変数IGEM_USERNAMEとIGEM_PASSWORD。返ってきたURLをweb/upload-manifest.jsonに記録し、記録済みと、既にiGEM側にあるファイルは飛ばす。
+// 認証情報は環境変数IGEM_USERNAMEとIGEM_PASSWORD。アップロード後に一覧を引いてURLをweb/upload-manifest.jsonに記録し、記録済みと、既にiGEM側にあるファイルは飛ばす。
 import { readdir, readFile, writeFile } from "node:fs/promises";
-import { join, relative, resolve, sep } from "node:path";
+import { basename, dirname, join, relative, resolve, sep } from "node:path";
 
 const API = "https://api.igem.org/v1";
 const DIRECTORIES = [
@@ -51,7 +51,7 @@ async function walk(dir) {
   return out;
 }
 
-// アップロード対象。pathはpublic/からの相対パス(例: notion-images/a.webp)、directoryはAPIに渡すディレクトリ名、nameはファイル名。
+// アップロード対象。pathはpublic/からの相対パス(例: images/sponsors/a.svg)、directoryはAPIに渡す親ディレクトリ、nameはファイル名。
 async function listLocalFiles() {
   const files = [];
   for (const directory of DIRECTORIES) {
@@ -66,8 +66,8 @@ async function listLocalFiles() {
       files.push({
         abs,
         path,
-        directory,
-        name: path.slice(directory.length + 1),
+        directory: dirname(path),
+        name: basename(path),
       });
     }
   }
@@ -83,6 +83,10 @@ async function readManifest() {
     }
     fail(`upload-manifest.jsonを読めません(${error.message})`);
   }
+}
+
+async function writeManifest(manifest) {
+  await writeFile(manifestFile, `${JSON.stringify(manifest, null, 2)}\n`);
 }
 
 async function request(url, init, label) {
@@ -115,20 +119,18 @@ async function signIn({ identifier, password }) {
   return cookie;
 }
 
-// 応答の形はAPIの文書が無いので、配列(またはdata、itemsの中の配列)を想定して、team_idらしいキーを浅く探す。
-function toArray(data, label) {
-  const items = Array.isArray(data) ? data : (data?.data ?? data?.items);
-  if (!Array.isArray(items)) {
-    throw new TypeError(
-      `${label}の応答が想定の形(配列)ではありません: ${JSON.stringify(data).slice(0, 200)}`
-    );
+async function fetchAccountUuid(cookie) {
+  const res = await request(
+    `${API}/auth/me`,
+    { headers: { cookie } },
+    "アカウントの取得"
+  );
+  const account = await res.json();
+  const uuid = account?.uuid;
+  if (typeof uuid !== "string") {
+    throw new TypeError("アカウントの応答にuuidがありません");
   }
-  return items;
-}
-
-function teamIdOf(item) {
-  const id = item?.team_id ?? item?.teamId ?? item?.team?.id;
-  return id === undefined || id === null ? null : String(id);
+  return uuid;
 }
 
 // IGEM_TEAM_IDがあればそれを使う。無ければ所属チームを取り、1つだけのときにそれを使う。複数あれば一覧を出して止める。
@@ -136,16 +138,24 @@ async function fetchTeamId(cookie) {
   if (process.env.IGEM_TEAM_ID) {
     return process.env.IGEM_TEAM_ID;
   }
+  const accountUuid = await fetchAccountUuid(cookie);
   const res = await request(
-    `${API}/teams/memberships/mine?onlyAcceptedTeams=true`,
+    `${API}/accounts/${accountUuid}/rosters`,
     { headers: { cookie } },
     "チームの取得"
   );
+  const rosters = await res.json();
+  if (!Array.isArray(rosters)) {
+    throw new TypeError(
+      `チームの取得の応答が想定の形(配列)ではありません: ${JSON.stringify(rosters).slice(0, 200)}`
+    );
+  }
   const ids = [
     ...new Set(
-      toArray(await res.json(), "チームの取得")
-        .map(teamIdOf)
-        .filter((id) => id !== null)
+      rosters
+        .map((item) => item?.team?.id)
+        .filter((id) => id !== undefined && id !== null)
+        .map(String)
     ),
   ];
   if (ids.length === 0) {
@@ -159,46 +169,58 @@ async function fetchTeamId(cookie) {
   return ids[0];
 }
 
-// 応答からURLまたはファイル名らしい値を取り出す。文字列、またはurl、name、pathなどを持つ要素を許す。
-function entryUrl(entry) {
-  if (typeof entry === "string") {
-    return entry;
+// wikiのリポジトリのuuid。ファイルの一覧とアップロードのURLに要る。
+async function fetchRepoUuid(cookie, teamId) {
+  const res = await request(
+    `${API}/teams/${teamId}/wiki`,
+    { headers: { cookie } },
+    "wikiのリポジトリの取得"
+  );
+  const wiki = await res.json();
+  const uuid = wiki?.uuid;
+  if (typeof uuid !== "string") {
+    throw new TypeError("wikiのリポジトリの応答にuuidがありません");
   }
-  return entry?.url ?? entry?.href ?? entry?.path ?? entry?.name;
+  return uuid;
 }
 
-async function listRemote(cookie, teamId, directory) {
+function filesUrl(teamId, repoUuid, directory) {
+  const url = new URL(`${API}/teams/${teamId}/repositories/${repoUuid}/files`);
+  if (directory) {
+    url.searchParams.set("directory", directory);
+  }
+  return url;
+}
+
+// ディレクトリ直下のファイル名とURLの対応。存在しないディレクトリは空で返る。
+async function listRemote(repo, directory) {
   const res = await request(
-    `${API}/websites/teams/${teamId}?directory=${encodeURIComponent(directory)}`,
-    { headers: { cookie } },
+    filesUrl(repo.teamId, repo.uuid, directory),
+    { headers: { cookie: repo.cookie } },
     `${directory}の一覧取得`
   );
   const data = await res.json();
-  const items = Array.isArray(data) ? data : (data?.data ?? data?.files);
-  if (!Array.isArray(items)) {
+  if (!Array.isArray(data?.files)) {
     throw new TypeError(
-      `${directory}の一覧の応答が想定の形(配列)ではありません: ${JSON.stringify(data).slice(0, 200)}`
+      `${directory}の一覧の応答にfilesの配列がありません: ${JSON.stringify(data).slice(0, 200)}`
     );
   }
-  return items.map(entryUrl).filter(Boolean);
+  return new Map(
+    data.files
+      .filter((entry) => typeof entry?.name === "string")
+      .map((entry) => [entry.name, entry.url])
+  );
 }
 
-async function upload(cookie, teamId, file) {
+// 成功は201で本文は空。URLは返らないので、呼び出し側が後から一覧で引く。
+async function upload(repo, file) {
   const form = new FormData();
   form.append("file", new Blob([await readFile(file.abs)]), file.name);
-  const res = await request(
-    `${API}/websites/teams/${teamId}?directory=${encodeURIComponent(file.directory)}`,
-    { method: "POST", headers: { cookie }, body: form },
+  await request(
+    filesUrl(repo.teamId, repo.uuid, file.directory),
+    { method: "POST", headers: { cookie: repo.cookie }, body: form },
     `${file.path}のアップロード`
   );
-  const data = await res.json().catch(() => ({}));
-  const url = entryUrl(data?.data ?? data);
-  if (typeof url !== "string" || !url.startsWith("http")) {
-    throw new Error(
-      `${file.path}: 応答から最終URLを読み取れませんでした(${JSON.stringify(data).slice(0, 200)})`
-    );
-  }
-  return url;
 }
 
 async function main() {
@@ -208,49 +230,63 @@ async function main() {
 
   const cookie = await signIn(credentials);
   const teamId = await fetchTeamId(cookie);
+  const uuid = await fetchRepoUuid(cookie, teamId);
+  const repo = { cookie, teamId, uuid };
   console.log(`team_id: ${teamId}`);
+  console.log(`repository: ${uuid}`);
 
+  const directories = [...new Set(files.map((file) => file.directory))];
   const remote = new Map();
-  for (const directory of DIRECTORIES) {
-    remote.set(directory, await listRemote(cookie, teamId, directory));
+  for (const directory of directories) {
+    remote.set(directory, await listRemote(repo, directory));
   }
-  // 一覧の要素がURLならファイル名の末尾で、名前だけなら完全一致で、既に上がっているかを見る。
-  const findRemote = (file) =>
-    (remote.get(file.directory) ?? []).find(
-      (item) => item === file.name || item.endsWith(`/${file.name}`)
-    );
 
   const failed = [];
-  let uploaded = 0;
+  const uploadedDirectories = new Set();
+  const pending = [];
   let skipped = 0;
   for (const file of files) {
     if (manifest[file.path]) {
       skipped += 1;
       continue;
     }
-    const existing = findRemote(file);
+    const existing = remote.get(file.directory)?.get(file.name);
     if (existing) {
       skipped += 1;
-      // 一覧の要素がURLのときだけ、manifestに対応を残す。
-      if (existing.startsWith("http")) {
-        manifest[file.path] = { url: existing };
-        await writeFile(manifestFile, `${JSON.stringify(manifest, null, 2)}\n`);
-      }
+      manifest[file.path] = { url: existing };
       continue;
     }
     try {
-      const url = await upload(cookie, teamId, file);
-      manifest[file.path] = { url };
-      uploaded += 1;
-      console.log(`上げました: ${file.path} -> ${url}`);
-      await writeFile(manifestFile, `${JSON.stringify(manifest, null, 2)}\n`);
+      await upload(repo, file);
+      uploadedDirectories.add(file.directory);
+      pending.push(file);
+      console.log(`上げました: ${file.path}`);
     } catch (error) {
       failed.push(`${file.path}: ${error.message}`);
     }
   }
+  await writeManifest(manifest);
+
+  // アップロードの応答にURLが無いので、上げたディレクトリの一覧を1回ずつ引いて、元のパスと実際のURLを対応させる。
+  for (const directory of uploadedDirectories) {
+    try {
+      remote.set(directory, await listRemote(repo, directory));
+    } catch (error) {
+      failed.push(`${directory}: ${error.message}`);
+    }
+  }
+  for (const file of pending) {
+    const url = remote.get(file.directory)?.get(file.name);
+    if (typeof url === "string") {
+      manifest[file.path] = { url };
+    } else {
+      failed.push(`${file.path}: アップロード後の一覧にURLが見つかりません`);
+    }
+  }
+  await writeManifest(manifest);
 
   console.log(
-    `igem-upload: 対象${files.length}件、アップロード${uploaded}件、スキップ${skipped}件、失敗${failed.length}件`
+    `igem-upload: 対象${files.length}件、アップロード${pending.length}件、スキップ${skipped}件、失敗${failed.length}件`
   );
   if (failed.length > 0) {
     console.error("失敗したファイル:");
