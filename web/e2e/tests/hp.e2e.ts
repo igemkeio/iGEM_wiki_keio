@@ -5,23 +5,23 @@ const PATH = "ja/e2e-hp/";
 test.describe("Human Practicesの画面", () => {
   test("帯のリンクで用途の面に飛べる", async ({ page }) => {
     await page.goto(PATH);
-    await page
-      .locator('nav[aria-label="Human Practices"] a[href="#hp-2-2"]')
-      .click();
+    const bar = page.locator('nav[aria-label="Human Practices"]');
+    const section = page.locator("#hp-2-2");
+    await expect(bar).toBeVisible();
+    await expect(section).toBeAttached();
+    await bar.locator('a[href="#hp-2-2"]').click();
     await expect(page).toHaveURL(/#hp-2-2$/u);
     // 飛び先のセクションの上端が、固定ヘッダーと貼り付く帯の下に来る
+    await expect(section).toBeInViewport();
     await expect
-      .poll(() =>
-        page.evaluate(() => {
-          const top =
-            document.querySelector("#hp-2-2")?.getBoundingClientRect().top ?? 0;
-          const bar =
-            document
-              .querySelector('nav[aria-label="Human Practices"]')
-              ?.getBoundingClientRect().bottom ?? 0;
-          return top - bar;
-        })
-      )
+      .poll(async () => {
+        const box = await section.boundingBox();
+        const top = box?.y ?? Number.NaN;
+        const bottom = await bar.evaluate(
+          (el) => el.getBoundingClientRect().bottom
+        );
+        return top - bottom;
+      })
       .toBeGreaterThanOrEqual(0);
   });
 
