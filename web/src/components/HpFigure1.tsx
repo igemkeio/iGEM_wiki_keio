@@ -4,6 +4,10 @@ import styles from "./HpFigure.module.css";
 export function HpFigure1() {
   return (
     <figure className={styles.figure} id="hp-fig1">
+      <figcaption className={styles.caption}>
+        <h2>図1　誰に聞き、どこが変わったか</h2>
+        <p>冒頭に置く。これから読む3本の柱と、各柱で変わったことの地図。</p>
+      </figcaption>
       <div className={`${styles.sheet} ${styles.wide}`}>
         <svg
           className={styles.fig}

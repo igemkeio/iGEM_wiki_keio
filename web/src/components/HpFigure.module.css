@@ -3,6 +3,26 @@
     padding: 24px var(--hp-pad) 8px;
   }
 
+  .caption {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+
+  .caption h2 {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.6;
+  }
+
+  .caption p {
+    color: var(--color-muted);
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+
   .sheet {
     padding: 10px;
     border: 1px solid var(--color-line);

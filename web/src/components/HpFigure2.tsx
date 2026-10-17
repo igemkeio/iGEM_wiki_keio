@@ -4,6 +4,12 @@ import styles from "./HpFigure.module.css";
 export function HpFigure2() {
   return (
     <figure className={styles.figure} id="hp-fig2">
+      <figcaption className={styles.caption}>
+        <h2>図2　聞く・作る・決める</h2>
+        <p>
+          末尾に置く。読んできた面談と設計変更が、いつ並んで起きたのかを最後に確認する。
+        </p>
+      </figcaption>
       <div className={`${styles.sheet} ${styles.scroller}`}>
         <svg
           className={styles.fig}
@@ -506,7 +512,9 @@ export function HpFigure2() {
           </text>
         </svg>
       </div>
-      <p className={styles.hint}>← 横にスクロールする →</p>
+      <p className={styles.hint}>
+        ← 横にスクロールする →　面談は右端の2026年9〜10月に集中している
+      </p>
     </figure>
   );
 }
