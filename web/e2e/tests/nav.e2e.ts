@@ -465,8 +465,8 @@ for (const locale of locales) {
     });
   }
 
-  // 目次のある長い記事
-  const longPath = `${start}description/`;
+  // 目次のある長い記事。日本語のdescriptionは専用の画面で目次を出さない
+  const longPath = `${start}${locale === "en" ? "description" : "design"}/`;
   const toc = (page: Page) =>
     page.getByRole("navigation", {
       name: locale === "en" ? "On this page" : "目次",

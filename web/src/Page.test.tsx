@@ -209,3 +209,42 @@ describe("パレット切り替え", () => {
     expect(found(parse(render(en)))).toHaveLength(0);
   });
 });
+
+const h3 = (id: string) => `<h3 id="${id}">Step A — あ</h3><p>本文${id}</p>`;
+const ol = `<ol>${"<li><strong>見出し。</strong> 説明。</li>".repeat(3)}</ol>`;
+const description = (locale: "en" | "ja", html: string) =>
+  readPage({ slug: "description", locale, title: "D", html });
+
+describe("Descriptionの出し分け", () => {
+  const sections = [
+    '<h2 id="s1">Introduction: 秩序</h2><p>本文</p>',
+    '<h2 id="s2">Engineering — 細胞</h2><p>本文</p>',
+    `<h2 id="s3">Our System: One Direction</h2><p>本文</p>${ol}${h3("h1")}${h3("h2")}${h3("h3")}`,
+    `<h2 id="s4">Applications — 応用</h2><p>本文</p>${h3("bacterial-wires")}${h3("smart-bandages")}${h3("cascade-enzyme-pathways")}`,
+    '<h2 id="s5">Conclusion:</h2><p>本文</p>',
+  ].join("");
+  const body = [
+    '<h2 id="project-description">Project Description</h2>',
+    '<aside class="note"><h2 id="message">Message</h2><p>一</p></aside>',
+    sections,
+  ].join("");
+
+  it("jaは専用の部品で出す", () => {
+    const doc = parse(render(description("ja", body)));
+    expect(doc.querySelector("h1")?.textContent).toBe("D");
+    expect(doc.body.textContent).toContain("ONE DIRECTION");
+    expect(doc.querySelector("#s3")?.textContent).toBe(
+      "Our System: One Direction"
+    );
+  });
+
+  it("enはArticlePageのまま", () => {
+    const doc = parse(render(description("en", body)));
+    expect(doc.querySelector("h1")?.textContent).toBe("D");
+  });
+
+  it("jaでも節の形が想定と違えばArticlePageで出す", () => {
+    const doc = parse(render(description("ja", "<h2>x</h2><p>y</p>")));
+    expect(doc.querySelector("h1")?.textContent).toBe("D");
+  });
+});
