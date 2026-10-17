@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev.mjs",
-    "build": "vite build && node scripts/prerender.mjs",
+    "build": "vite build && node scripts/prerender.mjs && node scripts/apply-manifest.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit && tsc -p e2e",
     "check": "node scripts/check.mjs",

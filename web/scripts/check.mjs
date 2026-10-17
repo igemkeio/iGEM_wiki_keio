@@ -1,5 +1,6 @@
 // vite buildとprerenderの後に実行し、dist/のHTMLとdist/assets/のCSSを検査する。
 // 検査の関数はscripts/lib/check/にあり、ここはファイルの読み取り、集計、出力、終了コードを受け持つ。
+import { existsSync } from "node:fs";
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join, relative, resolve, sep } from "node:path";
 
@@ -13,6 +14,10 @@ import {
   isExternalCheckTarget,
   isInternalCheckTarget,
 } from "./lib/check/html.mjs";
+import {
+  checkLeftoverPaths,
+  usesUploadManifest,
+} from "./lib/check/manifest.mjs";
 import { findUnmappedPages } from "./lib/check/nav.mjs";
 import { comparePages, toPage } from "./lib/check/pages.mjs";
 import { checkTotalSize, shouldCheckSize } from "./lib/check/size.mjs";
@@ -107,6 +112,13 @@ async function main() {
     console.warn(`警告: ${w.file}: ${w.reason}`);
   }
 
+  const manifestMode = usesUploadManifest(
+    process.env,
+    join(root, "upload-manifest.json"),
+    existsSync
+  );
+  const leftovers = (text) =>
+    manifestMode ? checkLeftoverPaths(text, base) : [];
   const violations = [];
   const report = (file, reasons) => {
     for (const reason of reasons) {
@@ -152,6 +164,7 @@ async function main() {
   for (const file of htmlFiles) {
     const html = await readFile(join(dist, file), "utf-8");
     const name = `dist/${file}`;
+    report(name, leftovers(html));
     report(name, checkStructure(html));
     report(name, checkLang(html));
     const page = pageByDist.get(file);
@@ -169,8 +182,17 @@ async function main() {
     }
   }
 
+  const jsFiles = manifestMode
+    ? [...files].filter((f) => f.endsWith(".js") && !isPublic(f))
+    : [];
+  for (const file of jsFiles) {
+    const js = await readFile(join(dist, file), "utf-8");
+    report(`dist/${file}`, checkLeftoverPaths(js, base));
+  }
+
   for (const file of cssFiles) {
     const css = await readFile(join(dist, file), "utf-8");
+    report(`dist/${file}`, leftovers(css));
     for (const url of extractCssUrls(css)) {
       checkUrl(`dist/${file}`, url, { external: true, internal: true });
     }

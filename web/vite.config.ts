@@ -1,4 +1,4 @@
-import { readdirSync, rmSync } from "node:fs";
+import { existsSync, readdirSync, rmSync } from "node:fs";
 import { resolve } from "node:path";
 
 import react from "@vitejs/plugin-react";
@@ -28,25 +28,37 @@ function watchContent(): Plugin {
   };
 }
 
+// アップロードの対応表を使うか。WIKI_UPLOAD_MANIFESTが未指定なら既定のweb/upload-manifest.jsonがあるときだけ使い、空文字なら使わない。
+// 使うときは、URLの差し替えをビルド後のscripts/apply-manifest.mjsが行う。
+const useUploadManifest =
+  process.env.WIKI_UPLOAD_MANIFEST === undefined
+    ? existsSync(resolve(import.meta.dirname, "upload-manifest.json"))
+    : process.env.WIKI_UPLOAD_MANIFEST !== "";
+
 // 目印を本番の配信元に置き換える。global.cssの@font-faceにある__WIKI_FONT_BASE__は環境変数WIKI_FONT_BASE(未指定ならbaseを付けた/fonts)に、
 // ソース中の__WIKI_IMAGE_BASE__は環境変数WIKI_IMAGE_BASE(未指定ならbaseを付けた/images)にする。末尾のスラッシュは落とす。
 // __WIKI_NOTION_BASE__は環境変数WIKI_NOTION_BASE(notion-imagesとnotion-filesの親のURL)に置き換え、未指定なら空にする(空のときはsrc/lib/applyBase.tsがbaseを付ける)。
+// 対応表を使うときは環境変数のWIKI_*_BASEを見ず、root相対(/fonts、/images、空)に固定する。
 function assetBase(base: string): Plugin {
   const prefix = base.replace(/\/$/u, "");
   const markers = [
     {
       marker: "__WIKI_FONT_BASE__",
-      dir: process.env.WIKI_FONT_BASE || `${prefix}/fonts`,
+      dir: useUploadManifest
+        ? "/fonts"
+        : process.env.WIKI_FONT_BASE || `${prefix}/fonts`,
       ext: /\.css$/u,
     },
     {
       marker: "__WIKI_IMAGE_BASE__",
-      dir: process.env.WIKI_IMAGE_BASE || `${prefix}/images`,
+      dir: useUploadManifest
+        ? "/images"
+        : process.env.WIKI_IMAGE_BASE || `${prefix}/images`,
       ext: /\.[jt]sx?$/u,
     },
     {
       marker: "__WIKI_NOTION_BASE__",
-      dir: process.env.WIKI_NOTION_BASE || "",
+      dir: useUploadManifest ? "" : process.env.WIKI_NOTION_BASE || "",
       ext: /\.[jt]sx?$/u,
     },
   ];

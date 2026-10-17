@@ -122,7 +122,7 @@ APIで使うエンドポイントは次のとおり。文書が公開されて�
 
 ### 出力の検査
 
-`npm run check`は`dist/`を走査し、違反を`ファイル: 理由`の1行ずつ出す。1件でもあれば終了コード1。`WIKI_BASE`を読むので、`WIKI_BASE=/keio/ npm run build`で作った`dist/`は`WIKI_BASE=/keio/ npm run check`で検査する。
+`npm run check`は`dist/`を走査し、違反を`ファイル: 理由`の1行ずつ出す。1件でもあれば終了コード1。`WIKI_BASE`と`WIKI_UPLOAD_MANIFEST`を読むので、`WIKI_BASE=/keio/ npm run build`で作った`dist/`は`WIKI_BASE=/keio/ npm run check`で検査する(ビルドと同じ`WIKI_UPLOAD_MANIFEST`で流す)。
 
 - ページの対応: `content/`の`published`なJSONから決まるパスの集合と、`dist/**/index.html`の集合が一致する。対応のない`index.html`と、`index.html`のない原稿を、それぞれ違反として出す。`content/`が読めないときと、JSONが壊れているときは、ファイル名付きで終了コード1にする。
 - 外部URL: `<a>`と`<area>`の`href`を除くすべてのタグの`src`、`href`、`data`、`poster`、`srcset`、`imagesrcset`(候補ごと)、SVGの`xlink:href`、`<meta>`の`content`と、`style`属性、`<style>`、CSSの`url(...)`と`@import`は、ブラウザと同じ規則でURLを解釈して外部ホストを指す場合に、ホストが`static.igem.wiki`、`video.igem.org`、`igem.org`と`igem.wiki`(サブドメインを含む)のどれかであること。`<a href>`の外部リンクは対象外。
@@ -131,6 +131,7 @@ APIで使うエンドポイントは次のとおり。文書が公開されて�
 - `<html lang>`が`en`か`ja`。
 - `islands`が空のページに`<script>`がない。ただし`data-palette-switcher`属性を持ち、`src`を持たないインラインのscriptと、フッター用の`footer-sponsors.js`を`src`に持つscriptは許す。
 - 容量: `WIKI_CHECK_SIZE=1`のとき、`dist/`の全ファイルの合計が5MB(5×1024×1024バイト)を超えたら違反にし、大きい順の上位10件を出す。指定が無いビルド(開発、Vercelのプレビュー)は暫定の置き場を含むので見ない。`PRERENDER_ALL=1`で作った`dist/`(E2E用)は`WIKI_CHECK_SIZE=1`でも見ない。配信元の環境変数が足りないと`dist/`が大きいまま落ちるので、`WIKI_NOTION_BASE`の設定漏れのように、合計が5MBを超える漏れはここで止まる(`WIKI_FONT_BASE`や`WIKI_IMAGE_BASE`だけの漏れは合計が収まるので通る)。
+- 対応表: 対応表を使うビルド(上の節)では、`dist/`のHTML、`assets/`のCSSとJSに`/notion-images/`、`/notion-files/`、`/fonts/`、`/images/`で始まるパスが残っていたら違反にする(対応表に無くて差し替わらなかったもの)。
 - 警告(違反に数えず、終了コードも変えない): `src/data/nav-categories.json`の分類に載っていない公開ページを`警告: <ファイル>: ...`の形で出す。
 
 検査するのは`dist/`のHTMLと、`dist/assets/`配下のCSSだけ。`web/public/`由来のファイル(`fonts/`、`images/`、`models/`、`notion-images/`、`notion-files/`)は読まない。これらは本番では`static.igem.wiki`に置く(前節)。HTMLの解析は正規表現で行い、依存は増やさない。検査の関数は`scripts/lib/check/`にあり、`npm run test:check`でテストする。
