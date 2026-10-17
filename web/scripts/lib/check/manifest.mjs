@@ -33,3 +33,10 @@ export function checkLeftoverPaths(text, base = "/") {
       `対応表に無いパスがdistに残っています(アップロードして対応表を作り直してください): ${path}`
   );
 }
+
+// dist/の相対パスの一覧から、差し替えの検査で読むJSを選ぶ。dist/直下の差し替え対象のディレクトリは配信しないので外す。
+export function selectJsFiles(files) {
+  return files.filter(
+    (file) => file.endsWith(".js") && !DIRECTORIES.includes(file.split("/")[0])
+  );
+}

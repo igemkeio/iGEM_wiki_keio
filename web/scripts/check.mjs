@@ -16,6 +16,7 @@ import {
 } from "./lib/check/html.mjs";
 import {
   checkLeftoverPaths,
+  selectJsFiles,
   usesUploadManifest,
 } from "./lib/check/manifest.mjs";
 import { findUnmappedPages } from "./lib/check/nav.mjs";
@@ -208,9 +209,7 @@ async function main() {
     }
   }
 
-  const jsFiles = manifestMode
-    ? [...files].filter((f) => f.endsWith(".js") && !isPublic(f))
-    : [];
+  const jsFiles = manifestMode ? selectJsFiles([...files]) : [];
   for (const file of jsFiles) {
     const js = await readFile(join(dist, file), "utf-8");
     report(`dist/${file}`, checkLeftoverPaths(js, base));

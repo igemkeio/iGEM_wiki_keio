@@ -4,6 +4,7 @@ import { test } from "node:test";
 import {
   checkLeftoverPaths,
   findLeftoverPaths,
+  selectJsFiles,
   usesUploadManifest,
 } from "./manifest.mjs";
 
@@ -60,4 +61,18 @@ test("checkLeftoverPathsは残ったパスごとに違反を返す", () => {
   assert.equal(out.length, 1);
   assert.match(out[0], /\/images\/a\.png/u);
   assert.deepEqual(checkLeftoverPaths("<p>ok</p>"), []);
+});
+
+test("selectJsFilesはdist直下のJSも読み、差し替え対象のディレクトリの中だけ外す", () => {
+  assert.deepEqual(
+    selectJsFiles([
+      "footer-sponsors.js",
+      "assets/index-a.js",
+      "assets/index.css",
+      "index.html",
+      "images/x.js",
+      "notion-files/y.js",
+    ]),
+    ["footer-sponsors.js", "assets/index-a.js"]
+  );
 });
