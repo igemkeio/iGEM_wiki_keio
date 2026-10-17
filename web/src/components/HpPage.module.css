@@ -1,0 +1,671 @@
+@layer components {
+  .root {
+    --hp-gutter: clamp(16px, 4vw, var(--space-frame-x));
+    /* 背景は画面の幅いっぱいに敷き、中身はヘッダーと同じ幅1200pxのフレームに揃える */
+    --hp-pad: max(
+      var(--hp-gutter),
+      calc((100% - var(--size-frame)) / 2 + var(--space-frame-x))
+    );
+    --hp-bar: 52px;
+
+    /* フレームの余白を打ち消して、画面の幅いっぱいに広げる */
+    flex: 1;
+    min-width: 0;
+    margin-inline: calc(50% - 50vw);
+    font-size: 15px;
+    line-height: 1.95;
+  }
+
+  /* 画面いっぱいの背景がはみ出して横スクロールが出ないようにする */
+  :global(html):has(.root) {
+    overflow-x: clip;
+    scroll-padding-top: calc(var(--size-header-fixed) + var(--hp-bar) + 64px);
+  }
+
+  :where(.root) :is(h1, h2, h3, h4, p) {
+    margin: 0;
+  }
+
+  /* 上の帯。ヘッダーの下に貼り付く */
+  .bar {
+    position: sticky;
+    top: var(--size-header-fixed);
+    z-index: 8;
+    display: flex;
+    align-items: center;
+    gap: 0 22px;
+    height: var(--hp-bar);
+    padding: 0 var(--hp-pad);
+    border-bottom: 1px solid var(--color-line);
+    background: rgba(223, 228, 234, 0.92);
+    backdrop-filter: blur(8px);
+    overflow-x: auto;
+  }
+
+  .bt {
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  .bar a {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 1.4;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .bar a:hover {
+    color: var(--color-ink);
+  }
+
+  .bar a i {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--c, var(--color-muted));
+  }
+
+  .sp {
+    margin-left: auto;
+  }
+
+  .hero {
+    padding: 56px var(--hp-pad) 10px;
+  }
+
+  .eyebrow {
+    color: var(--color-muted);
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    font-family: var(--font-heading);
+    font-size: clamp(32px, 5.5vw, 64px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+  }
+
+  .ja {
+    margin: 10px 0 12px;
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .lead {
+    max-width: 62ch;
+    margin-top: 12px;
+    color: #2c3038;
+    font-size: 15.5px;
+    line-height: 2.05;
+  }
+
+  .introWrap {
+    max-width: 800px;
+    margin-top: 20px;
+    color: #2c3038;
+    font-size: 13.5px;
+  }
+
+  .introWrap summary {
+    cursor: pointer;
+    color: var(--color-muted);
+    font-size: 12.5px;
+  }
+
+  .intro {
+    padding-bottom: 8px;
+  }
+
+  .band {
+    padding: 44px var(--hp-pad);
+  }
+
+  .grey {
+    margin-top: 30px;
+    border-block: 1px solid var(--color-line);
+    background: #e9ecf1;
+  }
+
+  .noBottom {
+    padding-bottom: 0;
+  }
+
+  .chead {
+    max-width: 1200px;
+    margin-bottom: 22px;
+  }
+
+  .chapter {
+    color: var(--color-muted);
+    font-family: var(--font-heading);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+  }
+
+  .chead h2 {
+    margin: 4px 0 8px;
+    font-size: clamp(20px, 2.6vw, 28px);
+    font-weight: 700;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .cintro,
+  .uintro,
+  .text,
+  .dText,
+  .detail,
+  .ment,
+  .intro {
+    & > p,
+    & > ul,
+    & > ol {
+      max-width: none;
+    }
+
+    & > p + p,
+    & > ul,
+    & > ol {
+      margin-top: 8px;
+    }
+
+    & > p:first-child {
+      margin-top: 0;
+    }
+
+    & :global(.note) {
+      max-width: none;
+      margin-top: 10px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+  }
+
+  .cintro,
+  .uintro {
+    max-width: 64ch;
+    color: #2c3038;
+    font-size: 14.5px;
+  }
+
+  .uintro {
+    margin-bottom: 24px;
+  }
+
+  /* 面談の1行。左に人物、右に目的とTake home */
+  .row {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+    gap: 0 36px;
+    align-items: start;
+    max-width: 1200px;
+    padding: 22px 0;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .no {
+    color: var(--c, var(--color-muted));
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+
+  .person {
+    display: block;
+    margin-top: 2px;
+    font-size: 16px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .aff {
+    display: block;
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .meta {
+    margin-top: 6px;
+    color: var(--color-muted);
+    font-family: var(--font-heading);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+
+  /* 聞き方。対面は塗りの点、メールは輪、予定は破線の枠 */
+  .mode {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 6px;
+    padding: 0 8px;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    color: var(--color-muted);
+    font-size: 10.5px;
+    line-height: 1.7;
+  }
+
+  .mode::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-muted);
+  }
+
+  .mail::before {
+    border: 2px solid var(--color-muted);
+    background: transparent;
+  }
+
+  .planned {
+    border-style: dashed;
+  }
+
+  .planned::before {
+    border-radius: 0;
+    background: transparent;
+    border: 1.5px dashed var(--color-muted);
+  }
+
+  .rowTitle {
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+  }
+
+  .pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .lab {
+    display: block;
+    margin-bottom: 2px;
+    color: var(--color-muted);
+    font-family: var(--font-heading);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+
+  .take {
+    padding: 12px 14px;
+    border-left: 3px solid var(--c, var(--color-muted));
+    border-radius: 10px;
+    background: var(--color-surface);
+  }
+
+  .take .lab {
+    color: var(--c, var(--color-muted));
+  }
+
+  .text {
+    font-size: 13.5px;
+    line-height: 1.9;
+    overflow-wrap: anywhere;
+  }
+
+  .detailWrap {
+    margin-top: 12px;
+    font-size: 13px;
+  }
+
+  .detailWrap summary,
+  .detail summary {
+    cursor: pointer;
+    color: var(--color-muted);
+    font-size: 12.5px;
+  }
+
+  .detail {
+    margin-top: 12px;
+    font-size: 13px;
+    line-height: 1.9;
+    overflow-wrap: anywhere;
+
+    & h3 {
+      margin: 16px 0 4px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+  }
+
+  /* 仮の節。斜線のハッチの枠 */
+  .badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: repeating-linear-gradient(
+      -45deg,
+      rgba(13, 15, 18, 0.07) 0 6px,
+      rgba(13, 15, 18, 0.13) 6px 12px
+    );
+    color: var(--color-muted);
+    font-family: var(--font-heading);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    line-height: 1.6;
+    vertical-align: 2px;
+  }
+
+  .tentative {
+    padding: 8px 12px 12px;
+    border: 1px dashed rgba(13, 15, 18, 0.3);
+    border-radius: 8px;
+    background: repeating-linear-gradient(
+      -45deg,
+      rgba(13, 15, 18, 0.035) 0 8px,
+      rgba(13, 15, 18, 0.075) 8px 16px
+    );
+    color: #3a4048;
+  }
+
+  .tentative .take {
+    background: rgba(255, 255, 255, 0.55);
+  }
+
+  .notice {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--color-muted);
+    font-size: 13px;
+    line-height: 1.7;
+
+    & b {
+      font-family: var(--font-heading);
+      letter-spacing: 0.08em;
+    }
+  }
+
+  /* 用途ごとの色の面 */
+  .use {
+    padding: 0 0 46px;
+  }
+
+  .uhead {
+    position: sticky;
+    top: calc(var(--size-header-fixed) + var(--hp-bar));
+    z-index: 7;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 16px;
+    padding: 14px var(--hp-pad);
+    background: var(--c);
+    color: #fff;
+  }
+
+  .uhead h3 {
+    font-size: clamp(18px, 2.4vw, 26px);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  .n {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    opacity: 0.85;
+  }
+
+  .count {
+    margin-left: auto;
+    font-size: 12px;
+    opacity: 0.85;
+  }
+
+  .ubody {
+    padding: 28px var(--hp-pad) 0;
+    background: color-mix(in srgb, var(--c) 5%, var(--color-page));
+  }
+
+  .pivot {
+    display: grid;
+    grid-template-columns: 1fr 56px 1fr;
+    align-items: stretch;
+    max-width: 1200px;
+    margin-bottom: 10px;
+  }
+
+  .p {
+    padding: 20px 24px;
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+    background: var(--color-surface);
+  }
+
+  .after {
+    border: 2px solid var(--c);
+    background: color-mix(in srgb, var(--c) 10%, #fff);
+  }
+
+  .p span {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--color-muted);
+    font-family: var(--font-heading);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+  }
+
+  .after span {
+    color: var(--c);
+  }
+
+  .p p {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.75;
+  }
+
+  .arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--c);
+    font-size: 24px;
+  }
+
+  .when {
+    max-width: 1200px;
+    margin-bottom: 26px;
+    color: var(--color-muted);
+    font-size: 11.5px;
+  }
+
+  .evid {
+    margin-bottom: 2px;
+    color: var(--color-muted);
+    font-family: var(--font-heading);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+  }
+
+  .conclusion {
+    max-width: 1200px;
+    margin-top: 22px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: var(--c);
+    color: #fff;
+    font-size: 14.5px;
+  }
+
+  .conclusion > b {
+    display: block;
+    margin-bottom: 4px;
+    font-family: var(--font-heading);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    opacity: 0.8;
+  }
+
+  .conclusion .notice {
+    margin: 0;
+    padding: 8px 12px;
+    border: 1px dashed rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    background: repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.07) 0 8px,
+      rgba(255, 255, 255, 0.16) 8px 16px
+    );
+    color: #fff;
+  }
+
+  .conclusion .notice b {
+    opacity: 1;
+  }
+
+  /* 4章は紺の全面 */
+  .dark {
+    padding: 44px var(--hp-pad);
+    background: var(--color-chapter4);
+    color: #fff;
+  }
+
+  .dark .chapter {
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .g4 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    max-width: 1200px;
+  }
+
+  .it {
+    padding: 18px 22px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+  }
+
+  .long {
+    grid-column: 1 / -1;
+  }
+
+  .long .dText {
+    max-width: 80ch;
+  }
+
+  .group {
+    grid-column: 1 / -1;
+    padding: 0 0 0 2px;
+    border: 0;
+  }
+
+  .itNo {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    opacity: 0.7;
+  }
+
+  .it h4 {
+    margin: 2px 0 4px;
+    font-size: 16px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .dText {
+    font-size: 13.5px;
+    line-height: 1.9;
+    opacity: 0.92;
+    overflow-wrap: anywhere;
+
+    & :global(.note) {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+    }
+
+    & :global(.note__label) {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    & a {
+      color: #fff;
+    }
+  }
+
+  .dark > .dText {
+    max-width: 1200px;
+    margin-bottom: 16px;
+  }
+
+  .dark .badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
+
+  .dark .notice {
+    padding: 8px 12px;
+    border: 1px dashed rgba(255, 255, 255, 0.45);
+    border-radius: 8px;
+    background: repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.06) 0 8px,
+      rgba(255, 255, 255, 0.14) 8px 16px
+    );
+    color: #fff;
+  }
+
+  .ment {
+    max-width: 1200px;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 860px) {
+    .row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .pair {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    .pivot {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .arrow {
+      height: 40px;
+      transform: rotate(90deg);
+    }
+
+    .g4 {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}

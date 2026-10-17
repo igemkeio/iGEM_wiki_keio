@@ -5,6 +5,7 @@ import { readPage } from "./content";
 import { Page } from "./Page";
 import { pagePath } from "./routes";
 import type { Route } from "./routes";
+import { hpFixture } from "./test/fixtures/hp";
 
 const assets = { css: ["assets/index-abc.css"], js: "assets/index-abc.js" };
 
@@ -38,6 +39,14 @@ const withUnknownIsland = readPage({
   title: "Model",
   html: "<h2>Section</h2>",
   islands: ["x"],
+});
+
+const withHp = readPage({
+  slug: "human-practices",
+  locale: "ja",
+  title: "ヒューマンプラクティス",
+  html: "<p>旧本文</p>",
+  hp: hpFixture,
 });
 
 // ナビに出す一覧はテストごとに固定し、content/ の実データに依存させない。
@@ -91,6 +100,18 @@ describe(Page, () => {
       expect(found).toHaveLength(1);
       expect(found[0]).toHaveAttribute("defer");
     }
+  });
+
+  it("hpがあればHuman Practicesの画面にし、htmlは出さない", () => {
+    const doc = parse(render(withHp));
+    expect(doc.querySelector("#hp-fig1")).not.toBeNull();
+    expect(doc.body.textContent).not.toContain("旧本文");
+    expect(scripts(doc)).toHaveLength(0);
+  });
+
+  it("hpが無ければ今までの本文を出す", () => {
+    const doc = parse(render(ja));
+    expect(doc.querySelector("#hp-fig1")).toBeNull();
   });
 
   it("対応表に無い島の名前だけならscriptも器も出さない", () => {

@@ -1,6 +1,7 @@
 import { withBase } from "./base";
 import { ArticlePage } from "./components/ArticlePage";
 import { HomePage } from "./components/HomePage";
+import { HpPage } from "./components/HpPage";
 import { PageShell } from "./components/PageShell";
 import type { WikiPage } from "./content";
 import { ISLANDS } from "./islands";
@@ -11,6 +12,17 @@ export interface Assets {
   css: string[];
   // 島を使うページに読み込むブラウザ側のJS。
   js: string;
+}
+
+// ページの型の出し分け。homeはヒーロー、hpがあればHuman Practicesの画面、それ以外は本文。
+function Body({ page, routes }: { page: WikiPage; routes: Route[] }) {
+  if (page.slug === "home") {
+    return <HomePage page={page} routes={routes} />;
+  }
+  if (page.hp) {
+    return <HpPage page={page} hp={page.hp} />;
+  }
+  return <ArticlePage page={page} />;
 }
 
 export function Page({
@@ -41,11 +53,7 @@ export function Page({
       </head>
       <body>
         <PageShell page={page} routes={routes}>
-          {page.slug === "home" ? (
-            <HomePage page={page} routes={routes} />
-          ) : (
-            <ArticlePage page={page} />
-          )}
+          <Body page={page} routes={routes} />
         </PageShell>
         <script src={withBase("/footer-sponsors.js")} defer />
         {page.islands.some((name) => name in ISLANDS) && (
