@@ -22,12 +22,21 @@ const squash = (text: string) => text.replaceAll(/\s+/gu, "");
 // 見出しや段落のタグを外して文字だけにする。
 const textOf = (html: string) => squash(toText(html));
 
-// 下書き以降は本編の文を再掲しているので、本編の照合には使わない。
+// 原稿の本編(下書きの手前)。下書きは本編の文を再掲しているので、本編の照合には使わない。
 const draftMarker = 'id="下書き1"';
 const mainOf = (html: string) => {
   const at = html.indexOf(draftMarker);
   expect(at).toBeGreaterThan(-1);
   return html.slice(0, at);
+};
+
+// 描画結果のmainの中身。ナビやフッターの文字を照合に混ぜない。
+const mainElement = (html: string) => {
+  const from = html.indexOf("<main");
+  const to = html.indexOf("</main>");
+  expect(from).toBeGreaterThan(-1);
+  expect(to).toBeGreaterThan(from);
+  return html.slice(from, to);
 };
 
 const render = (html: string) => {
@@ -57,8 +66,14 @@ describe("日本語版Description", () => {
     expect(html).toContain('<span id="project-description"');
   });
 
+  it("下書きと目次は出さない", () => {
+    expect(html).not.toContain("下書き");
+    expect(html).not.toContain('aria-label="目次"');
+    expect(html).not.toContain("<aside");
+  });
+
   it("原稿の本編のp、liの文が画面の本編から落ちていない", () => {
-    const shown = textOf(mainOf(html));
+    const shown = textOf(mainElement(html));
     // note__labelはMessageの枠の見出しで、画面には持ち込まない。
     const source = [
       ...mainOf(manuscript.html).matchAll(
