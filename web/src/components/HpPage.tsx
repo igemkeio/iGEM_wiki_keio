@@ -9,6 +9,7 @@ import {
   kindLabel,
   pivotOf,
   splitChapter4,
+  whoOf4,
   colorOfUse,
   whenOf,
 } from "../lib/hp";
@@ -199,6 +200,9 @@ function Chapter4Body({ chapter }: { chapter: Hp["chapter4"] }) {
                 {card.title}
                 {!card.group && empty && <Badge />}
               </h4>
+              {whoOf4(card.no) && (
+                <p className={styles.who4}>{whoOf4(card.no)}</p>
+              )}
               {!card.group && empty ? (
                 <p className={styles.notice}>
                   <b>原稿が未確定</b>　本文がまだ書かれていない。

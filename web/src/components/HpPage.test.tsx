@@ -70,6 +70,7 @@ describe(HpPage, () => {
     expect(c4?.querySelector("#hp-4-2-a")?.textContent).toContain(
       "強度の本文。"
     );
+    expect(c4?.querySelector("#hp-4-2-a")?.textContent).toContain("川上先生");
     expect(c4?.querySelector("#hp-4-2-b")?.textContent).toContain(
       "原稿が未確定"
     );
