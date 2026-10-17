@@ -106,7 +106,7 @@ iGEM Keioチームのwiki。`content/`の原稿JSONから、ViteとReactで静�
 
 ## Notion同期
 
-原稿の正はNotionにある。`content/**/*.json`は同期で上書きされるので、Notionのページは直接編集しない。リポジトリ側で置く確認用ページはJSONに`"source": "local"`を付ける。同期はGitHub Actionsが毎日と手動で走り、差分があれば`chore/notion-sync`ブランチにPRを作る。手順、プロパティ、Notionのブロックとの対応、必要なSecretsは`docs/notion-sync.md`にある。
+原稿の正は`content/**/*.json`に移した(2026-10-17)。freezeに向けて、原稿はリポジトリ側で直接直す。同期は毎日と手動で走り、差分があれば`chore/notion-sync`ブランチにPRを作る。このPRはNotionの側を見るためのもので、既定ではマージしない(丸ごと取り込むと手で直した分が消える)。取り込みたい変更があるときだけ、差分を確かめて必要な箇所を手で写す。リポジトリ側で置く確認用ページはJSONに`"source": "local"`を付ける。手順、プロパティ、Notionのブロックとの対応、必要なSecretsは`docs/notion-sync.md`にある。
 
 ## iGEMの規定
 
