@@ -1,0 +1,199 @@
+@layer components {
+  .figure {
+    padding: 24px var(--hp-pad) 8px;
+  }
+
+  .caption {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+
+  .caption h2 {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.6;
+  }
+
+  .caption p {
+    color: var(--color-muted);
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+
+  .sheet {
+    padding: 10px;
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+    background: var(--color-surface);
+  }
+
+  .fig {
+    display: block;
+    width: 100%;
+    height: auto;
+    font-family: var(--font-body);
+  }
+
+  .narrow {
+    display: none;
+  }
+
+  .scroller {
+    overflow-x: auto;
+  }
+
+  .hint {
+    display: none;
+    margin-top: 6px;
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .fig text {
+    fill: var(--color-ink);
+  }
+
+  .ftitle {
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .fnote {
+    font-size: 11px;
+    fill: var(--color-muted);
+  }
+
+  .sect {
+    font-size: 13px;
+    font-weight: 700;
+    fill: var(--color-muted);
+  }
+
+  .pname {
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .paff {
+    font-size: 11px;
+    fill: var(--color-muted);
+  }
+
+  .ptake,
+  .take {
+    font-size: 12.5px;
+    fill: var(--color-ink);
+  }
+
+  .ueyebrow {
+    font-family: var(--font-heading);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+  }
+
+  .uname {
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .clabel {
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .ctext {
+    font-size: 13px;
+  }
+
+  .l4head {
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .l4body {
+    font-size: 13px;
+  }
+
+  .mon {
+    font-family: var(--font-heading);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    fill: var(--color-muted);
+  }
+
+  .lane {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .dot {
+    font-size: 13px;
+  }
+
+  .lg {
+    font-size: 12.5px;
+    fill: var(--color-muted);
+  }
+
+  .yr {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    fill: var(--color-muted);
+  }
+
+  .band {
+    font-size: 12px;
+  }
+
+  .dec {
+    font-size: 13px;
+  }
+
+  .fig line.grid {
+    stroke: var(--color-line);
+    stroke-width: 1;
+  }
+
+  .fig line.lane {
+    stroke: var(--color-ink);
+    stroke-opacity: 0.5;
+    stroke-width: 1.5;
+  }
+
+  .fig line.open {
+    stroke: var(--color-ink);
+    stroke-opacity: 0.45;
+    stroke-width: 3;
+    stroke-dasharray: 4 4;
+  }
+
+  @media (max-width: 760px) {
+    .wide {
+      display: none;
+    }
+
+    .narrow {
+      display: block;
+    }
+
+    .hint {
+      display: block;
+    }
+
+    .scroller .fig {
+      min-width: 1340px;
+    }
+
+    .sheet {
+      padding: 6px;
+      border-radius: 10px;
+    }
+  }
+}

@@ -6,6 +6,7 @@ import { createRoot } from "react-dom/client";
 const loaders: Record<string, () => Promise<{ default: ComponentType<any> }>> =
   {
     "attribution-form": () => import("../components/AttributionForm"),
+    "dbtl-stage": () => import("../components/DbtlStage"),
     "member-list": () => import("../components/MemberList"),
     "model-viewer": () => import("../components/ModelViewer"),
   };
