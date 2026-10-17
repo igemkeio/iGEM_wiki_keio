@@ -1,0 +1,88 @@
+@layer components {
+  /* 絵は横幅を使う。高さは抑えて、箱が潰れないようにする */
+  .figure {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: min(150px, 20vh);
+  }
+
+  .part {
+    cursor: pointer;
+    opacity: 0.22;
+    transition: opacity 0.25s;
+  }
+
+  .part.on,
+  .part:hover,
+  .part:focus-visible {
+    opacity: 1;
+  }
+
+  .body {
+    fill: var(--color-surface);
+    stroke: var(--color-ink);
+    stroke-width: 3.4;
+  }
+
+  .popz {
+    fill: var(--color-dbtl-design);
+  }
+
+  .diviva {
+    fill: none;
+    stroke: var(--color-dbtl-build);
+    stroke-width: 12;
+  }
+
+  .stalk {
+    fill: none;
+    stroke: var(--color-dbtl-stalk);
+    stroke-width: 6;
+    stroke-linecap: round;
+  }
+
+  .coilE {
+    stroke: var(--color-dbtl-design);
+    stroke-width: 7;
+    stroke-linecap: round;
+  }
+
+  .coilR {
+    stroke: var(--color-dbtl-learn);
+    stroke-width: 7;
+    stroke-linecap: round;
+  }
+
+  .ag {
+    fill: var(--color-dbtl-test);
+    stroke: var(--color-ink);
+    stroke-width: 1.4;
+  }
+
+  .nb {
+    fill: none;
+    stroke: var(--color-dbtl-learn);
+    stroke-width: 8;
+    stroke-linecap: round;
+  }
+
+  .name {
+    fill: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    text-anchor: middle;
+  }
+
+  @media (max-width: 1099px) {
+    .figure {
+      max-height: min(104px, 14vh);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .part {
+      transition: none;
+    }
+  }
+}

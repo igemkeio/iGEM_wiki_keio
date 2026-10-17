@@ -1,5 +1,6 @@
 import { withBase } from "./base";
 import { ArticlePage } from "./components/ArticlePage";
+import { DbtlPage } from "./components/DbtlPage";
 import { HomePage } from "./components/HomePage";
 import { PageShell } from "./components/PageShell";
 import type { WikiPage } from "./content";
@@ -11,6 +12,17 @@ export interface Assets {
   css: string[];
   // 島を使うページに読み込むブラウザ側のJS。
   js: string;
+}
+
+// ページの型の出し分け。homeはヒーロー、dbtlがあればDBTLの画面、それ以外は本文。
+function Body({ page, routes }: { page: WikiPage; routes: Route[] }) {
+  if (page.slug === "home") {
+    return <HomePage page={page} routes={routes} />;
+  }
+  if (page.dbtl) {
+    return <DbtlPage page={page} dbtl={page.dbtl} />;
+  }
+  return <ArticlePage page={page} />;
 }
 
 export function Page({
@@ -41,14 +53,11 @@ export function Page({
       </head>
       <body>
         <PageShell page={page} routes={routes}>
-          {page.slug === "home" ? (
-            <HomePage page={page} routes={routes} />
-          ) : (
-            <ArticlePage page={page} />
-          )}
+          <Body page={page} routes={routes} />
         </PageShell>
         <script src={withBase("/footer-sponsors.js")} defer />
-        {page.islands.some((name) => name in ISLANDS) && (
+        {(page.islands.some((name) => name in ISLANDS) ||
+          page.dbtl !== null) && (
           <script type="module" src={withBase(`/${assets.js}`)} />
         )}
       </body>

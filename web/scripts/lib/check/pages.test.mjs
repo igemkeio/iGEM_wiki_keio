@@ -25,6 +25,7 @@ test("toPageはJSONのslugとlocaleを優先し、なければファイル名と
       slug: "model",
       dist: "model/index.html",
       islands: ["x"],
+      dbtl: false,
     }
   );
   assert.deepEqual(toPage("ja", "team.json", {}), {
@@ -32,7 +33,16 @@ test("toPageはJSONのslugとlocaleを優先し、なければファイル名と
     slug: "team",
     dist: "ja/team/index.html",
     islands: [],
+    dbtl: false,
   });
+});
+
+test("toPageはdbtlの有無を持つ", () => {
+  assert.equal(
+    toPage("ja", "engineering.json", { dbtl: { parts: [] } }).dbtl,
+    true
+  );
+  assert.equal(toPage("ja", "engineering.json", { dbtl: null }).dbtl, false);
 });
 
 test("comparePagesは一致すれば空", () => {

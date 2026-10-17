@@ -19,6 +19,7 @@ const home: WikiPage = {
   models: [],
   published: true,
   source: "notion",
+  dbtl: null,
 };
 
 const pageOf = (slug: string, locale: "en" | "ja" = "en"): WikiPage => ({
