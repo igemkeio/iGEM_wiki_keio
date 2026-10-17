@@ -1,4 +1,5 @@
 import type { HpInterview } from "../content";
+import chapter4Who from "../data/hp-chapter4.json";
 // Human Practicesの画面で使う、原稿の外にある値と、4章の分割。
 import interviewMeta from "../data/hp-interviews.json";
 import usePivots from "../data/hp-uses.json";
@@ -82,17 +83,12 @@ export function isPlaceholder(html: string): boolean {
   return /^[Xx×\s.…・]*$/u.test(textOf(html));
 }
 
-// 仮の枠にする面談: 題にXXXが残る、目的とTake homeが無い、まだ実施していない。
+// 仮の枠にする面談: 題にXXXが残る(draft)、まだ実施していない(planned)。
 export function isTentative(
   interview: HpInterview,
   when: InterviewWhen | null
 ): boolean {
-  return (
-    interview.draft === true ||
-    (isPlaceholder(interview.purposeHtml) &&
-      isPlaceholder(interview.takeHomeHtml)) ||
-    when?.kind === "planned"
-  );
+  return interview.draft === true || when?.kind === "planned";
 }
 
 export interface Chapter4Card {
@@ -135,4 +131,10 @@ export function splitChapter4(html: string): Chapter4 | null {
     };
   });
   return { leadHtml: html.slice(0, heads[0].index).trim(), cards };
+}
+
+// 4章のカードの番号から、相手と日付の付記を引く。無ければ空。
+export function whoOf4(no: string): string {
+  const table: Record<string, string> = chapter4Who;
+  return table[no] ?? "";
 }
