@@ -28,5 +28,11 @@
     "href": "https://www.anthropic.com/",
     "logo": "sponsors/anthropic.svg",
     "alt": "Anthropicのロゴ"
+  },
+  {
+    "name": "New England Biolabs",
+    "href": "https://www.neb.com/",
+    "logo": "sponsors/new-england-biolabs.svg",
+    "alt": "New England Biolabsのロゴ"
   }
 ]
