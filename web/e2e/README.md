@@ -26,7 +26,7 @@
 
 ## E2E用のページ
 
-`content/en/e2e-model.json`(3Dのページ。enだけにあり、言語切り替えがhomeに向く場合の確認にも使う)と`content/{en,ja}/e2e-plain.json`(島のないページ。両言語にあり、切り替えが同じslugに向く場合の確認に使う)。3つとも`published: false`。
+`content/en/e2e-model.json`(3Dのページ。enだけにあり、言語切り替えがhomeに向く場合の確認にも使う)と`content/{en,ja}/e2e-plain.json`(島のないページ。両言語にあり、切り替えが同じslugに向く場合の確認に使う)、`content/ja/e2e-hp.json`(Human Practicesの画面。小さな`hp`を持つ)。いずれも`published: false`。
 
 ビルドを`PRERENDER_ALL=1`で走らせると、`scripts/prerender.mjs`が`published: false`のページも書き出す。このとき書き出し数の突き合わせは、`content/`の全ページ数と行う。ナビにもE2E用のページが並ぶ。通常のビルドでは何も変わらない。
 
@@ -100,6 +100,7 @@ npx playwright show-report e2e/playwright-report
 | `Island`、`islands.ts`、`Page.tsx`の`<script>`の出し分け | `islands`、`model-viewer` |
 | `MemberList` | `islands` |
 | `Footer`、`public/footer-sponsors.js` | `footer`、`islands` |
+| `HpPage`、`HpFigure1`、`HpFigure2`、`lib/hp.ts` | `hp` |
 | `ModelViewer` | `model-viewer` |
 | `prose.css`、`ArticlePage`、`tokens.css`、`global.css`、`EcoliNav`、`Footer` | `prose`(`visual`はCIで確かめる) |
 | `HomePage` | 手元では流さない(`visual`はCIで確かめる) |

@@ -1,0 +1,100 @@
+{
+  "slug": "e2e-hp",
+  "locale": "ja",
+  "title": "E2E HP",
+  "subtitle": "E2E",
+  "lead": "Human Practicesの画面のE2E用のページ。",
+  "html": "<p>hpが読めたときは出ない本文。</p>",
+  "order": 903,
+  "islands": [],
+  "published": false,
+  "source": "local",
+  "hp": {
+    "intro": "<h2>概要</h2><p>導入の本文。</p>",
+    "chapter0": {
+      "title": "道のり",
+      "html": "<p>謝辞の本文。</p>"
+    },
+    "chapter1": {
+      "title": "方向性を考える",
+      "introHtml": "<p>1章の導入。</p>",
+      "interviews": [
+        {
+          "no": "1.1",
+          "title": "面談1.1の題",
+          "person": "人物1.1先生",
+          "affiliation": "所属大学",
+          "purposeHtml": "<p>目的1.1。</p>",
+          "takeHomeHtml": "<p>持ち帰り1.1。</p>",
+          "detailHtml": "<p>詳細1.1。</p>"
+        },
+        {
+          "no": "1.5",
+          "title": "XXX",
+          "person": "人物1.5先生",
+          "affiliation": "所属大学",
+          "purposeHtml": "<p>目的1.5。</p>",
+          "takeHomeHtml": "<p>持ち帰り1.5。</p>",
+          "detailHtml": "<p>詳細1.5。</p>",
+          "draft": true
+        }
+      ]
+    },
+    "chapter2": {
+      "title": "社会的な側面",
+      "introHtml": "<p>2章の導入。</p>",
+      "uses": [
+        {
+          "no": "2.1",
+          "title": "スマート包帯",
+          "subtitle": "創傷被覆",
+          "introHtml": "<p>用途の導入。</p>",
+          "interviews": [
+            {
+              "no": "2.1.A",
+              "title": "面談2.1.Aの題",
+              "person": "人物2.1.A先生",
+              "affiliation": "所属大学",
+              "purposeHtml": "<p>目的2.1.A。</p>",
+              "takeHomeHtml": "<p>持ち帰り2.1.A。</p>",
+              "detailHtml": "<p>詳細2.1.A。</p>"
+            },
+            {
+              "no": "2.1.D",
+              "title": "面談2.1.Dの題",
+              "person": "人物2.1.D先生",
+              "affiliation": "所属大学",
+              "purposeHtml": "<p>目的2.1.D。</p>",
+              "takeHomeHtml": "<p>持ち帰り2.1.D。</p>",
+              "detailHtml": "<p>詳細2.1.D。</p>"
+            }
+          ],
+          "conclusionHtml": "<p>結論の本文。</p>"
+        },
+        {
+          "no": "2.2",
+          "title": "バクテリアワイヤー",
+          "subtitle": "",
+          "introHtml": "<p>用途の導入。</p>",
+          "interviews": [
+            {
+              "no": "2.2.B",
+              "title": "XXX",
+              "person": "人物2.2.B先生",
+              "affiliation": "所属大学",
+              "purposeHtml": "",
+              "takeHomeHtml": "",
+              "detailHtml": "<p>詳細2.2.B。</p>",
+              "draft": true
+            }
+          ],
+          "conclusionHtml": "<p>XXX</p>"
+        }
+      ]
+    },
+    "chapter4": {
+      "title": "限界と今後",
+      "html": "<h2 id=\"a\">4.1　価値と限界</h2><p>4.1の本文。</p><h2 id=\"b\">4.2　課題</h2><p>4.2の導入。</p><h3 id=\"c\">4.2.A　強度</h3><p>強度の本文。</p><h3 id=\"d\">4.2.B　展開（片岡先生）</h3>"
+    }
+  }
+}
