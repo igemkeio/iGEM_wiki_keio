@@ -6,7 +6,6 @@
       var(--hp-gutter),
       calc((100% - var(--size-frame)) / 2 + var(--space-frame-x))
     );
-    --hp-bar: 52px;
 
     /* フレームの余白を打ち消して、画面の幅いっぱいに広げる */
     flex: 1;
@@ -19,7 +18,9 @@
   /* 画面いっぱいの背景がはみ出して横スクロールが出ないようにする */
   :global(html):has(.root) {
     overflow-x: clip;
-    scroll-padding-top: calc(var(--size-header-fixed) + var(--hp-bar) + 64px);
+    scroll-padding-top: calc(
+      var(--size-header-fixed) + var(--size-hp-bar) + 64px
+    );
   }
 
   :where(.root) :is(h1, h2, h3, h4, p) {
@@ -34,7 +35,7 @@
     display: flex;
     align-items: center;
     gap: 0 22px;
-    height: var(--hp-bar);
+    height: var(--size-hp-bar);
     padding: 0 var(--hp-pad);
     border-bottom: 1px solid var(--color-line);
     background: rgba(223, 228, 234, 0.92);
@@ -410,7 +411,7 @@
 
   .uhead {
     position: sticky;
-    top: calc(var(--size-header-fixed) + var(--hp-bar));
+    top: calc(var(--size-header-fixed) + var(--size-hp-bar));
     z-index: 7;
     display: flex;
     flex-wrap: wrap;
@@ -594,6 +595,12 @@
     font-size: 16px;
     line-height: 1.5;
     overflow-wrap: anywhere;
+  }
+
+  .who4 {
+    margin-bottom: 8px;
+    font-size: 11.5px;
+    opacity: 0.65;
   }
 
   .dText {

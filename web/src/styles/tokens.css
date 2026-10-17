@@ -50,6 +50,9 @@
 
   --space-frame-x: 56px;
 
+  /* Human Practicesの上の帯の高さ */
+  --size-hp-bar: 52px;
+
   /* 3つの用途と4章の色。ページをまたいで共通 */
   --color-use-bandage: #d3381c;
   --color-use-wire: #e0961e;

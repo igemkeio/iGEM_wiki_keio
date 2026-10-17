@@ -9,7 +9,20 @@ test.describe("Human Practicesの画面", () => {
       .locator('nav[aria-label="Human Practices"] a[href="#hp-2-2"]')
       .click();
     await expect(page).toHaveURL(/#hp-2-2$/u);
-    await expect(page.locator("#hp-2-2")).toBeInViewport();
+    // 飛び先のセクションの上端が、固定ヘッダーと貼り付く帯の下に来る
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const top =
+            document.querySelector("#hp-2-2")?.getBoundingClientRect().top ?? 0;
+          const bar =
+            document
+              .querySelector('nav[aria-label="Human Practices"]')
+              ?.getBoundingClientRect().bottom ?? 0;
+          return top - bar;
+        })
+      )
+      .toBeGreaterThanOrEqual(0);
   });
 
   test("左の目次を出さず、横スクロールも出ない", async ({ page }) => {
