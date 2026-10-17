@@ -18,9 +18,9 @@ pages:
         exit 1
       fi
       export WIKI_BASE=/$CI_PROJECT_NAME/
-      export WIKI_NOTION_BASE=https://static.igem.wiki/teams/$IGEM_TEAM_ID
-      export WIKI_FONT_BASE=https://static.igem.wiki/teams/$IGEM_TEAM_ID/fonts
-      export WIKI_IMAGE_BASE=https://static.igem.wiki/teams/$IGEM_TEAM_ID/images
+      export WIKI_NOTION_BASE=https://static.igem.wiki/teams/$IGEM_TEAM_ID/wiki
+      export WIKI_FONT_BASE=https://static.igem.wiki/teams/$IGEM_TEAM_ID/wiki/fonts
+      export WIKI_IMAGE_BASE=https://static.igem.wiki/teams/$IGEM_TEAM_ID/wiki/images
       export WIKI_CHECK_SIZE=1
       npm run build
       npm run check

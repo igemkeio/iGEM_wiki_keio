@@ -53,7 +53,7 @@ Viteは`^7`に固定する。Vite 8はRolldownへの置き換えで、今季は7
 - `gitleaks`ジョブは、固定バージョン(v8.30.1)の公式バイナリをチェックサムを確かめて実行し、秘密情報と署名付きURLの混入を止める。PRでは、そのPRで増えるコミット(`base..head`)だけを検査する。pushと`workflow_dispatch`では作業ツリーのファイルを検査する。出力は`--redact`で値を伏せる。誤検知のときは、リポジトリ直下の`.gitleaks.toml`で除外し、範囲はできるだけ狭くする。`.gitleaks.toml`を置くと既定のルールの代わりになるので、先頭に`[extend]`と`useDefault = true`を書いてから`allowlist`を足す。PRがこのファイルを変えると検査を緩められるので、レビューで見る。巨大ファイルの検査は対象外。
 - GitLabのキャッシュはnpmのキャッシュ`web/.npm/`(`npm ci --cache .npm --prefer-offline`)で、キーは`web/package-lock.json`のハッシュ。
 - GitLabでは`WIKI_BASE=/$CI_PROJECT_NAME/`としている。前提は、iGEMのwikiが`https://2026.igem.wiki/<team>/`で配信され、GitLabのプロジェクト名(URLの末尾)が`<team>`と一致していること。違っていたら`.gitlab-ci.yml`の`WIKI_BASE`の2か所(buildとcheck)を実際の配信パスに直す。
-- `.gitlab-ci.yml`は、GitLabのCI/CD変数`IGEM_TEAM_ID`から`WIKI_NOTION_BASE`、`WIKI_FONT_BASE`、`WIKI_IMAGE_BASE`を`https://static.igem.wiki/teams/<IGEM_TEAM_ID>`の形で組み立て、`WIKI_CHECK_SIZE=1`と合わせてbuildとcheckに渡す。`IGEM_TEAM_ID`が未設定ならビルドの前に止まる。
+- `.gitlab-ci.yml`は、GitLabのCI/CD変数`IGEM_TEAM_ID`から`WIKI_NOTION_BASE`、`WIKI_FONT_BASE`、`WIKI_IMAGE_BASE`を`https://static.igem.wiki/teams/<IGEM_TEAM_ID>/wiki`の形で組み立て、`WIKI_CHECK_SIZE=1`と合わせてbuildとcheckに渡す。`IGEM_TEAM_ID`が未設定ならビルドの前に止まる。
 - Vercelは、プロジェクト設定のRoot Directoryが`web`であることを前提にしている(`vercel.json`はリポジトリ直下に置いたまま読まれる)。コマンドは`web`の中で実行されるので`cd web`は付けず、`outputDirectory`は`dist`にしてある。Root Directoryをリポジトリ直下に変えるときは、`cd web`を付け、`outputDirectory`を`web/dist`にする。
 - VercelのプロジェクトのNode.js Versionは24.xを選ぶ。
 - GitLabのURLが決まったら確認すること: プロジェクト名と`WIKI_BASE`が一致していること、GitLabのPagesの設定(公開範囲とURL)、`pages`ジョブが既定ブランチで緑になること、公開されたページのCSSとリンクが404にならないこと。
@@ -66,14 +66,15 @@ iGEMのwikiは成果物が5MBまで。画像、PDF、フォント、3Dモデル�
 
 | 環境変数 | 値の例 | 効果 |
 | --- | --- | --- |
-| `WIKI_NOTION_BASE` | `https://static.igem.wiki/teams/<id>` | 原稿の`/notion-images/...`と`/notion-files/...`の先頭をこの値に替える(`/notion-images`と`/notion-files`は付かないので、値はその親)。`dist/`から`notion-images/`と`notion-files/`を外す |
-| `WIKI_FONT_BASE` | `https://static.igem.wiki/teams/<id>/fonts` | `@font-face`のURLの先頭を替える。`dist/`から`fonts/`を外す |
-| `WIKI_IMAGE_BASE` | `https://static.igem.wiki/teams/<id>/images` | 画像のURLの先頭を替える。`dist/`から`images/`を外す |
+| `WIKI_NOTION_BASE` | `https://static.igem.wiki/teams/6488/wiki` | 原稿の`/notion-images/...`と`/notion-files/...`の先頭をこの値に替える(`/notion-images`と`/notion-files`は付かないので、値はその親)。`dist/`から`notion-images/`と`notion-files/`を外す |
+| `WIKI_FONT_BASE` | `https://static.igem.wiki/teams/6488/wiki/fonts` | `@font-face`のURLの先頭を替える。`dist/`から`fonts/`を外す |
+| `WIKI_IMAGE_BASE` | `https://static.igem.wiki/teams/6488/wiki/images` | 画像のURLの先頭を替える。`dist/`から`images/`を外す |
 | `WIKI_CHECK_SIZE` | `1` | `npm run check`が`dist/`の合計を5MBと比べる。本番の配信用のビルドで必ず付ける(下記) |
 
 - 原稿JSON(`content/`)は`/notion-images/...`のまま変えない。ビルドのとき、`src/lib/applyBase.ts`が原稿のhtmlのURLを`WIKI_NOTION_BASE`に替える。
 - `public/footer-sponsors.js`と`public/models/`は、どの環境変数を指定しても`dist/`に残る。3Dモデルのsrcとデコーダーの場所は`__WIKI_IMAGE_BASE__`を通らないので、モデルを外に出すのは別Issueで扱う。
-- 本番ビルドの例: `WIKI_BASE=/keio-japan/ WIKI_CHECK_SIZE=1 WIKI_NOTION_BASE=https://static.igem.wiki/teams/<id> WIKI_FONT_BASE=https://static.igem.wiki/teams/<id>/fonts WIKI_IMAGE_BASE=https://static.igem.wiki/teams/<id>/images npm run build && npm run check`
+- 配信URLは`https://static.igem.wiki/teams/<id>/wiki/<ディレクトリ>/<ファイル名>`の形で、チームのidのあとに`/wiki`が挟まる。
+- 本番ビルドの例: `WIKI_BASE=/keio-japan/ WIKI_CHECK_SIZE=1 WIKI_NOTION_BASE=https://static.igem.wiki/teams/6488/wiki WIKI_FONT_BASE=https://static.igem.wiki/teams/6488/wiki/fonts WIKI_IMAGE_BASE=https://static.igem.wiki/teams/6488/wiki/images npm run build && npm run check`
 - GitLabでは、CI/CD変数`IGEM_TEAM_ID`にチームのidを入れると、`.gitlab-ci.yml`が上の3つと`WIKI_CHECK_SIZE=1`を渡す。`IGEM_TEAM_ID`が未設定ならジョブはそれを伝えて、ビルドの前に終了コード1で止まる。
 - KaTeXのフォントはwoff2だけを`dist/assets/`に出す。
 
@@ -92,13 +93,22 @@ iGEMのwikiは成果物が5MBまで。画像、PDF、フォント、3Dモデル�
    . ~/.config/secrets/igem.env && npm run igem:upload
    ```
 3. 認証情報が無いと、何を設定すればよいかを出して終了コード1で止まる(ネットワークには出ない)。
-4. スクリプトは`api.igem.org`にサインインし、`team_id`を取り(所属チームが複数あるときは一覧を出して止まるので、`IGEM_TEAM_ID`で上げ先を指定する)、`notion-images`、`notion-files`、`fonts`、`images`、`models`の順にファイルを上げる。ディレクトリ名をそのまま`directory`に使う。
-5. 返ってきたURLを`web/upload-manifest.json`に、`public/`からの相対パスをキーとして記録する。記録済みのファイルと、iGEM側の一覧に既にあるファイルは飛ばす(一覧にあって飛ばしたファイルも、URLが取れれば記録する)。途中で止まっても再実行できる。
+4. スクリプトは`api.igem.org`にサインインし、`team_id`を取り(所属チームが複数あるときは一覧を出して止まるので、`IGEM_TEAM_ID`で上げ先を指定する)、wikiのリポジトリのuuidを取ってから、`notion-images`、`notion-files`、`fonts`、`images`、`models`の順にファイルを上げる。`public/`からの親ディレクトリをそのまま`directory`に使うので、`images/sponsors/`のような入れ子もそのままの位置に入る。
+5. アップロードの応答にURLは入らない。上げ終えたあとに各ディレクトリの一覧を1回ずつ引き、`web/upload-manifest.json`に`public/`からの相対パスをキーとしてURLを記録する。記録済みのファイルと、iGEM側の一覧に既にあるファイルは飛ばす(一覧にあって飛ばしたファイルもURLを記録する)。途中で止まっても再実行できる。
 6. 失敗したファイルは最後に一覧で出し、終了コード1にする。直して再実行する。
-7. `upload-manifest.json`を確認し、`https://static.igem.wiki/teams/<id>/<ディレクトリ>/<ファイル名>`の形でない行(ファイル名が変わったもの)がないかを見る。あれば、その行のURLに合わせて原稿かビルドの値を直す。
+7. `upload-manifest.json`を確認し、`https://static.igem.wiki/teams/<id>/wiki/<ディレクトリ>/<ファイル名>`の形でない行(ファイル名が変わったもの)がないかを見る。あれば、その行のURLに合わせて原稿かビルドの値を直す。
 8. `team_id`が分かったら、`IGEM_TEAM_ID`をGitLabのCI/CD変数に入れる。
 
-APIの文書が公開されていないため、スクリプトは[コミュニティの実装](https://github.com/iGEM-HBUT-China/igem-uploads)の手順に沿って書いた。応答の形が想定と違うと、取り出せなかった旨のメッセージで失敗するので、そのときは応答の内容を見てスクリプトを直す。
+APIで使うエンドポイントは次のとおり。文書が公開されていないので、実際に叩いて確かめた形に合わせてある。応答の形が想定と違うと、取り出せなかった旨のメッセージで失敗するので、そのときは応答の内容を見てスクリプトを直す。
+
+| 用途 | リクエスト |
+| --- | --- |
+| サインイン | `POST /v1/auth/sign-in`(form: `identifier`、`password`)。201とセッションのCookieが返る |
+| アカウント | `GET /v1/auth/me`。`uuid`を使う |
+| 所属チーム | `GET /v1/accounts/<アカウントのuuid>/rosters`。`team.id`を使う |
+| wikiのリポジトリ | `GET /v1/teams/<teamId>/wiki`。`uuid`を使う |
+| 一覧 | `GET /v1/teams/<teamId>/repositories/<リポジトリのuuid>/files?directory=<ディレクトリ>`。`files`に`name`と`url`が入る |
+| アップロード | `POST /v1/teams/<teamId>/repositories/<リポジトリのuuid>/files?directory=<ディレクトリ>`。multipartの`file`。201で本文は空、ディレクトリは無ければ作られる |
 
 ### パレットの切り替え
 
@@ -251,11 +261,11 @@ MPAではページを移るとJSのメモリが消えるため、ページをま
 - Noto Sans JPに含める文字は、JIS第1水準の漢字、ひらがな、カタカナ、全角と半角の記号、ラテン文字(ASCIIとラテン1)、`content/**/*.json`に出てくる文字。原稿に新しい漢字が増えたら再生成する。
 - 再生成は`npm run fonts:subset`。元のフォントはgoogle/fontsのリポジトリ(`ofl/notosansjp`と`ofl/montserrat`の可変TTF)で、`fonts-src/`に無ければスクリプトがダウンロードする。`fonts-src/`はgit管理外。手元のTTFを使うときは`fonts-src/NotoSansJP.ttf`と`fonts-src/Montserrat.ttf`として置く。サブセット化には`subset-font`(devDependency)を使う。
 - `global.css`の`url()`の先頭は目印の`__WIKI_FONT_BASE__`で、`vite.config.ts`のプラグイン(`asset-base`)が環境変数`WIKI_FONT_BASE`に置き換える。未指定なら配信パスを付けた`/fonts`(`WIKI_BASE=/keio/`なら`/keio/fonts`)。末尾のスラッシュは落とす。
-- 本番では`WIKI_FONT_BASE=https://static.igem.wiki/teams/<id>/fonts npm run build`とし、`public/fonts/`の中身を同じ場所へ人がアップロードする。
+- 本番では`WIKI_FONT_BASE=https://static.igem.wiki/teams/6488/wiki/fonts npm run build`とし、`public/fonts/`の中身を同じ場所へ人がアップロードする。
 
 ### 画像
 
 - `public/images/`にロゴなどの画像を置く。Homeのロゴは`public/images/one-direction.png`。Figma上でもラスター画像なのでSVGは無い。リポジトリに置くのは暫定で、本番は`WIKI_IMAGE_BASE`で`static.igem.wiki`に向ける。
 - Homeのヒーローのイラストは`public/images/hero-ukiyoe.webp`(2623×1415)と`hero-ukiyoe-1600.webp`(1600×863)。生成AI(Weave経由のNano Banana 2)で作った画像で、幅1600px以下の画面には1600版を出す。リポジトリに置くのは暫定で、本番は`WIKI_IMAGE_BASE`の先に同じ名前で置く。Attributionsに生成AIによる画像であることを明記する。
 - ソースの画像URLの先頭は目印の`__WIKI_IMAGE_BASE__`で、`vite.config.ts`のプラグイン(フォントの目印と同じもの)が環境変数`WIKI_IMAGE_BASE`に置き換える。未指定なら配信パスを付けた`/images`。末尾のスラッシュは落とす。
-- 本番では`WIKI_IMAGE_BASE=https://static.igem.wiki/teams/<id>/images npm run build`とし、`public/images/`の中身を同じ場所へ人がアップロードする。
+- 本番では`WIKI_IMAGE_BASE=https://static.igem.wiki/teams/6488/wiki/images npm run build`とし、`public/images/`の中身を同じ場所へ人がアップロードする。
